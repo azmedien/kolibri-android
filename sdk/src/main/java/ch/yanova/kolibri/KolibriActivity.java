@@ -1,5 +1,7 @@
 package ch.yanova.kolibri;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,6 +22,8 @@ public abstract class KolibriActivity extends AppCompatActivity {
 
     private static final String NAVIGATION_URL = "";
     private static final String TAG = "KolibriActivity";
+
+    private static final String META_NAVIGATION = "kolibri_navigation_url";
 
     private NavigationListener navigationListener;
 
@@ -45,6 +49,17 @@ public abstract class KolibriActivity extends AppCompatActivity {
         } catch (IOException | JSONException ex) {
             Log.e(TAG, "loadLocalNavigation: ", ex);
         }
+    }
+
+    private String getNavigationUrl() {
+        try {
+            final ApplicationInfo ai = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+            final Bundle bundle = ai.metaData;
+
+            return bundle.getString(META_NAVIGATION);
+        } catch (Exception ignored) {}
+
+        return null;
     }
 
     private void loadNavigation() {

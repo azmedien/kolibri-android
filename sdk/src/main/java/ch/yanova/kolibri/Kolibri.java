@@ -11,7 +11,6 @@ import ch.yanova.kolibri.components.KolibriComponent;
  */
 
 public final class Kolibri {
-
     public static void bind(KolibriComponent component, String... uris) {
 
         if (component instanceof View) {
