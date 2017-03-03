@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -19,7 +20,8 @@ public class KolibriWebViewClient extends WebViewClient {
     public static final String TARGET_INTERNAL = "_internal";
     public static final String TARGET_EXTERNAL = "_external";
     public static final String TARGET_SELF = "_self";
-    public static final String AMP = "amp";
+    public static final String AMP_REGEX = "^(www\\.)?amp.*$";
+    public static final String TAG = "KolibriWebViewClient";
 
     protected boolean shouldHandleInternal() {
         return true;
@@ -47,7 +49,7 @@ public class KolibriWebViewClient extends WebViewClient {
         String host = link.getHost();
 
         if (target == null) {
-            target = host.startsWith(AMP) ? TARGET_SELF : TARGET_INTERNAL;
+            target = host.matches(AMP_REGEX) ? TARGET_SELF : TARGET_INTERNAL;
         }
 
         if (TARGET_INTERNAL.equals(target) && !shouldHandleInternal()) {

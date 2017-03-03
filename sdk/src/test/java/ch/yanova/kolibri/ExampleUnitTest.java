@@ -2,6 +2,7 @@ package ch.yanova.kolibri;
 
 import org.junit.Test;
 
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
