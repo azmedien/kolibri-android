@@ -80,11 +80,6 @@ public class MainActivity extends KolibriActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -93,7 +88,9 @@ public class MainActivity extends KolibriActivity
     public boolean onNavigationItemSelected(MenuItem item) {
 
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
-        manager.sendBroadcast(item.getIntent());
+        Intent intent = item.getIntent();
+        intent.putExtra("handle", true);
+        manager.sendBroadcast(intent);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -140,6 +137,8 @@ public class MainActivity extends KolibriActivity
 
         String label = item.getString("label");
         String componentUri = item.getString("component");
+        String url = item.getString("url");
+        componentUri += "?url=" + url;
         Kolibri.bind(webView, componentUri);
 
         Intent intent = new Intent(Intent.ACTION_VIEW);

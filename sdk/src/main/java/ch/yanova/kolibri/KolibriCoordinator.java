@@ -44,7 +44,11 @@ class KolibriCoordinator {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                view.handleIntent(intent);
+
+                if (intent.hasExtra("handle")) {
+                    intent.removeExtra("handle");
+                    view.handleIntent(intent);
+                }
             }
         };
 

@@ -1,73 +1,91 @@
 {
+  "kolibri-version": "1.2",
+  "styling": {
+    "color-palette" : {
+      "color1": "#121212",
+      "color2": "#FFFFFF",
+      "color3": "#000000",
+      "color4": "#242424"
+    },
+    "font-sizes": {
+      "size1":"36",
+      "size2":"14",
+      "size1":"12"
+    }
+  },
   "navigation": {
     "type": "drawer",
     "settings": {
+      "mail-logo" : "http://amp.wildeisen.ch/assets/main-logo.png",
       "hamburger": {
-        "logo_closed": "http://amp.wildeisen.ch/assets/hamburger_closed.png",
-        "logo_opened": "http://amp.wildeisen.ch/assets/hamburger_open.png"
+        "logo_closed" : "http://amp.wildeisen.ch/assets/hamburger_closed.png",
+        "logo_opened" : "http://amp.wildeisen.ch/assets/hamburger_open.png"
       }
     },
     "items": [
       {
-        "id": "search",
-        "label": "Enter to search...",
-        "component": "kolibri://navigation/search?query=http://amp.wildeisen.ch/search",
-        "icon": "http://amp.wildeisen.ch/assets/search.png"
+        "component" : "kolibri://navigation/search",
+        "id"	: "search",
+        "label" : "Enter to search...",
+        "icon" : "http://amp.wildeisen.ch/assets/search.png",
+        "url": "http://amp.wildeisen.ch/search?query=###value1###"
       },
       {
+        "component" : "kolibri://navigation/link",
         "id": "recepies",
-        "label": "Rezepte",
-        "component": "kolibri://navigation?target=internal&url=http://amp.wildeisen.ch/rezepte",
+        "label" : "Rezepte",
+        "url": "http://amp.wildeisen.ch/rezepte?target=_internal",
         "items": [
           {
-            "id": "meat",
-            "label": "Fleisch",
-            "component": "kolibri://navigation?target=internal&url=http://amp.wildeisen.ch/rezepte?=fleisch"
+            "component" : "kolibri://navigation/link",
+            "id"	: "meat",
+            "label":"Fleisch",
+            "url": "http://amp.wildeisen.ch/rezepte/fleisch?target=_internal"
           },
           {
-            "id": "fisch",
-            "label": "Fisch",
-            "component": "kolibri://navigation?target=internal&url=http://amp.wildeisen.ch/rezepte/fisch"
+            "component" : "kolibri://navigation/link",
+            "id"	: "fisch",
+            "label":"Fisch",
+            "url": "http://amp.wildeisen.ch/rezepte/fisch?target=_internal"
+
           }
         ]
       },
       {
-        "id": "howtos",
-        "label": "Kochwissen",
-        "component": "kolibri://navigation?target=internal&url=http://amp.wildeisen.ch/kochwissen"
+        "component" : "kolibri://navigation/link",
+        "id"	: "howtos",
+        "label":"Kochwissen",
+        "url": "http://amp.wildeisen.ch/kochwissen?target=_internal"
       },
       {
-        "id": "service",
-        "label": "Service",
-        "component": "kolibri://navigation?target=internal&url=http://www.wildeisen.ch/service?kolibri-target=_external"
-      },
-      {
-        "component": "kolibri://navigation/separator"
-      },
-      {
-        "id": "shop",
-        "label": "Shop",
-        "component": "kolibri://navigation?target=internal&url=http://www.wildeisen.ch/shop"
+        "component" : "kolibri://navigation/link",
+        "id"	: "service",
+        "label":"Service",
+        "url" : "http://www.wildeisen.ch/service?taget=_external"
       },
       {
         "component": "kolibri://navigation/separator"
       },
       {
-        "id": "search-by-ingridient",
-        "label": "Schuttelapp",
-        "component": "kolibri://schuttelapp",
-        "JSON": "http://www.wildeisen.ch/schuttelapp.json"
+        "component" : "kolibri://navigation/link",
+        "id"	: "shop",
+        "label" : "Shop",
+        "url" : "http://www.wildeisen.ch/shop?target=_internal"
       },
       {
-        "id": "shopping-list",
-        "label": "Shopping Liste",
-        "component": "kolibri://shoppinglist",
-        "JSON": "http://www.wildeisen.ch/shoppinglist.json"
+        "component": "kolibri://navigation/separator"
       },
       {
-        "id": "favorits",
-        "label": "Favoriten",
-        "component": "kolibri://favortits"
+        "component":"kolibri://navivation/contributed/schuttelapp",
+        "id"	: "schuttelapp",
+        "label":"Schuttelapp",
+        "ingredientJSON": "http://www.wildeisen.ch/schuttelapp.json",
+        "url": "http://www.wildeisen.ch/schuttelapp?ingerident-list=###value1###"
+      },
+      {
+        "component": "kolibri://navivation/favorits",
+        "id"	: "favorits",
+        "label" : "Favoriten"
       }
     ]
   }
