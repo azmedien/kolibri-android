@@ -13,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +22,7 @@ import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriActivity;
 import ch.yanova.kolibri.NavigationListener;
 import ch.yanova.kolibri.components.KolibriWebView;
+import io.fabric.sdk.android.Fabric;
 
 
 public class MainActivity extends KolibriActivity
