@@ -29,7 +29,7 @@ public class HandleUrlTargetTest {
     public static final String URL_HOST = "www.wildeisen.ch";
     public static final String URL_AMP_HOST = "www.amp.wildeisen.ch";
 
-    public static final String PARAM_TARGET = "target";
+    public static final String PARAM_TARGET = "kolibri-target";
     public static final String TARGET_SELF = "_self";
     public static final String TARGET_INTERNAL = "_internal";
     public static final String TARGET_EXTERNAL = "_external";
