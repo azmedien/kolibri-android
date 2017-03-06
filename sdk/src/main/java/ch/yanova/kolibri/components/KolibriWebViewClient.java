@@ -16,7 +16,7 @@ import android.webkit.WebViewClient;
 
 public class KolibriWebViewClient extends WebViewClient {
 
-    public static final String PARAM_TARGET = "target";
+    public static final String PARAM_TARGET = "kolibri-target";
     public static final String TARGET_INTERNAL = "_internal";
     public static final String TARGET_EXTERNAL = "_external";
     public static final String TARGET_SELF = "_self";
