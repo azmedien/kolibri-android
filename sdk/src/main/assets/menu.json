@@ -10,16 +10,16 @@
     "font-sizes": {
       "size1":"36",
       "size2":"14",
-      "size1":"12"
+      "size3":"12"
     }
   },
   "navigation": {
     "type": "drawer",
     "settings": {
-      "mail-logo" : "http://amp.wildeisen.ch/assets/main-logo.png",
+      "mail-logo" : "http://stage.yanova.ch/dev/kolibri/wildeisen/wildeisen_logo.png",
       "hamburger": {
-        "logo_closed" : "http://amp.wildeisen.ch/assets/hamburger_closed.png",
-        "logo_opened" : "http://amp.wildeisen.ch/assets/hamburger_open.png"
+        "logo_closed" : "http://stage.yanova.ch/dev/kolibri/wildeisen/hamburger_closed.png",
+        "logo_opened" : "http://stage.yanova.ch/dev/kolibri/wildeisen/hamburger_closed.png"
       }
     },
     "items": [
@@ -27,41 +27,47 @@
         "component" : "kolibri://navigation/search",
         "id"	: "search",
         "label" : "Enter to search...",
-        "icon" : "http://amp.wildeisen.ch/assets/search.png",
-        "url": "http://amp.wildeisen.ch/search?query=###value1###"
+        "icon" : "http://www.wildeisen.ch/assets/search.png",
+        "url": "http://www.wildeisen.ch/search?query=###value1###"
       },
       {
         "component" : "kolibri://navigation/link",
         "id": "recepies",
         "label" : "Rezepte",
-        "url": "http://amp.wildeisen.ch/rezepte?target=_internal",
+        "url": "http://wildeisen-features.herokuapp.com/amp/rezepte/avocado-mango-carpaccio-mit-peperoncinodressing?kolibri-target=_self",
         "items": [
           {
             "component" : "kolibri://navigation/link",
-            "id"	: "meat",
-            "label":"Fleisch",
-            "url": "http://amp.wildeisen.ch/rezepte/fleisch?target=_internal"
+            "id"	: "vegetarian",
+            "label":"Vegetarian",
+            "url": "http://wildeisen-features.herokuapp.com/amp/rezepte/rueebli-kartoffel-gratin-mit-blauschimmelkaese?kolibri-target=_self"
           },
           {
             "component" : "kolibri://navigation/link",
-            "id"	: "fisch",
-            "label":"Fisch",
-            "url": "http://amp.wildeisen.ch/rezepte/fisch?target=_internal"
+            "id"	: "dessert",
+            "label":"Dessert",
+            "url": "http://wildeisen-features.herokuapp.com/amp/rezepte/caramelisierte-rhabarbertopfchen?kolibri-target=_self"
 
           }
         ]
       },
       {
         "component" : "kolibri://navigation/link",
+        "id"	: "ingredients",
+        "label":"Zutaten",
+        "url": "http://wildeisen-features.herokuapp.com/amp/zutaten/minze?kolibri-target=_self"
+      },
+      {
+        "component" : "kolibri://navigation/link",
         "id"	: "howtos",
         "label":"Kochwissen",
-        "url": "http://amp.wildeisen.ch/kochwissen?target=_internal"
+        "url": "http://wildeisen-features.herokuapp.com/amp/howtos/pasta-ravioli?kolibri-target=_self"
       },
       {
         "component" : "kolibri://navigation/link",
         "id"	: "service",
         "label":"Service",
-        "url" : "http://www.wildeisen.ch/service?taget=_external"
+        "url" : "http://www.wildeisen.ch/service?kolibri-target=_external"
       },
       {
         "component": "kolibri://navigation/separator"
@@ -70,7 +76,7 @@
         "component" : "kolibri://navigation/link",
         "id"	: "shop",
         "label" : "Shop",
-        "url" : "http://www.wildeisen.ch/shop?target=_internal"
+        "url" : "http://www.wildeisen.ch/shop?kolibri-target=_internal"
       },
       {
         "component": "kolibri://navigation/separator"
