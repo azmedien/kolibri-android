@@ -12,6 +12,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.KolibriActivity;
 
 /**
@@ -20,7 +21,7 @@ import ch.yanova.kolibri.KolibriActivity;
 
 public class KolibriWebView extends WebView implements KolibriComponent {
 
-    public static final String TAG = "KolibriWebView";
+    public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
 
     public KolibriWebView(Context context) {
         super(context);
@@ -48,8 +49,8 @@ public class KolibriWebView extends WebView implements KolibriComponent {
         if (!isInEditMode()) {
             setWebViewClient(new KolibriWebViewClient());
             getSettings().setJavaScriptEnabled(true);
+            getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
         }
-
     }
 
     @Override

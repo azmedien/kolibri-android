@@ -15,7 +15,7 @@ import ch.yanova.kolibri.R;
 
 public class WebViewActivity extends AppCompatActivity {
 
-    private WebView webView;
+    private KolibriWebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,14 +27,13 @@ public class WebViewActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        webView = (WebView) findViewById(R.id.activity_web_view);
+        webView = (KolibriWebView) findViewById(R.id.activity_web_view);
         webView.setWebViewClient(new KolibriWebViewClient() {
             @Override
             protected boolean shouldHandleInternal() {
                 return false;
             }
         });
-        webView.getSettings().setJavaScriptEnabled(true);
 
         Intent linkIntent = getIntent();
 
