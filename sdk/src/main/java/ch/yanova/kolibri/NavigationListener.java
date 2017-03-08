@@ -9,5 +9,5 @@ import org.json.JSONObject;
 public interface NavigationListener {
 
     void onLoaded(JSONObject nav);
-    boolean onFailed();
+    boolean onFailed(Exception e);
 }

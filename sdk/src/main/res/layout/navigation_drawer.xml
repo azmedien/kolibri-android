@@ -28,9 +28,10 @@
         </android.support.design.widget.AppBarLayout>
 
         <FrameLayout
+            android:paddingTop="?attr/actionBarSize"
             android:id="@+id/mainContentView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"></FrameLayout>
+            android:layout_height="match_parent" />
 
     </android.support.design.widget.CoordinatorLayout>
 
@@ -41,6 +42,15 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/drawer_menu" />
+        app:menu="@menu/drawer_menu">
+
+        <include
+            layout="@layout/loading_error"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:visibility="gone" />
+
+    </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>

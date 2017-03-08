@@ -3,17 +3,13 @@ package ch.yanova.kolibri.components;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.UrlQuerySanitizer;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import ch.yanova.kolibri.BuildConfig;
-import ch.yanova.kolibri.KolibriActivity;
 
 /**
  * Created by mmironov on 2/26/17.
@@ -55,12 +51,17 @@ public class KolibriWebView extends WebView implements KolibriComponent {
 
     @Override
     public void handleIntent(Intent intent) {
-        String url = intent.getData().getQueryParameter("url");
-        KolibriWebViewClient client = new KolibriWebViewClient();
-        boolean handled = client.handleUri(getContext(), Uri.parse(url));
 
-        if (!handled) {
-            loadUrl(url);
+        final UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(intent.getData().toString());
+
+        if (sanitizer.hasParameter("url")) {
+            String url = intent.getData().getQueryParameter("url");
+            KolibriWebViewClient client = new KolibriWebViewClient();
+            boolean handled = client.handleUri(getContext(), Uri.parse(url));
+
+            if (!handled) {
+                loadUrl(url);
+            }
         }
     }
 }

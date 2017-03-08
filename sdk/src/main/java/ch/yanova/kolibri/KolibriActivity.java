@@ -32,15 +32,16 @@ public abstract class KolibriActivity extends AppCompatActivity {
     }
 
     public void loadLocalNavigation() {
+
         try {
             InputStream is = getAssets().open("menu.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
             is.close();
-            String json = new String(buffer, "UTF-8");
 
-            JSONObject navJson = new JSONObject(json);
+            final String json = new String(buffer, "UTF-8");
+            final JSONObject navJson = new JSONObject(json);
 
             if (navigationListener != null) {
                 navigationListener.onLoaded(navJson);
@@ -48,6 +49,10 @@ public abstract class KolibriActivity extends AppCompatActivity {
 
         } catch (IOException | JSONException ex) {
             Log.e(TAG, "loadLocalNavigation: ", ex);
+
+            if (navigationListener != null) {
+                navigationListener.onFailed(ex);
+            }
         }
     }
 
@@ -57,16 +62,17 @@ public abstract class KolibriActivity extends AppCompatActivity {
             final Bundle bundle = ai.metaData;
 
             return bundle.getString(META_NAVIGATION);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return null;
     }
 
     private void loadNavigation() {
 
-        OkHttpClient client = new OkHttpClient();
+        final OkHttpClient client = new OkHttpClient();
 
-        Request request = new Request.Builder()
+        final Request request = new Request.Builder()
                 .url(NAVIGATION_URL)
                 .build();
 
@@ -74,7 +80,7 @@ public abstract class KolibriActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (navigationListener != null) {
-                    boolean userDefined = navigationListener.onFailed();
+                    final boolean userDefined = navigationListener.onFailed(e);
                     if (!userDefined) {
                         Log.d(TAG, "onFailure() called with: call = [" + call + "], e = [" + e + "]");
                     }
@@ -84,12 +90,23 @@ public abstract class KolibriActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
 
-                String json = response.body().string();
+                final String json = response.body().string();
+
                 try {
-                    JSONObject navigationJson = new JSONObject(json);
+                    final JSONObject navigationJson = new JSONObject(json);
+
                     Log.w(TAG, "onResponse: " + navigationJson.toString());
+
+                    if (navigationListener != null) {
+                        navigationListener.onLoaded(navigationJson);
+                    }
+
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse: ", e);
+
+                    if (navigationListener != null) {
+                        navigationListener.onFailed(e);
+                    }
                 }
             }
         });
