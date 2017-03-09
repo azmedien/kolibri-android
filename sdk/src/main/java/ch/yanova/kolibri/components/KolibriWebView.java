@@ -9,6 +9,11 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.webkit.WebView;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+
+import ch.yanova.kolibri.ActionButtonListener;
 import ch.yanova.kolibri.BuildConfig;
 
 /**
@@ -18,6 +23,8 @@ import ch.yanova.kolibri.BuildConfig;
 public class KolibriWebView extends WebView implements KolibriComponent {
 
     public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
+
+    private KolibriWebViewClient client;
 
     public KolibriWebView(Context context) {
         super(context);
@@ -43,9 +50,16 @@ public class KolibriWebView extends WebView implements KolibriComponent {
     private void init() {
 
         if (!isInEditMode()) {
-            setWebViewClient(new KolibriWebViewClient());
+            client = new KolibriWebViewClient();
+            setWebViewClient(client);
             getSettings().setJavaScriptEnabled(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
+        }
+    }
+
+    public void setActionButtonListener(ActionButtonListener listener) {
+        if (client != null) {
+            client.setActionButtonListener(listener);
         }
     }
 

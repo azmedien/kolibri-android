@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
@@ -30,6 +31,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
     private NavigationView navigationView;
     private FrameLayout mainContentView;
+    private FloatingActionButton floatingActionButton;
 
     private View mLayoutError;
     private View mLayoutLoading;
@@ -44,12 +46,14 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         setContentView(R.layout.navigation_drawer);
 
-        mainContentView = (FrameLayout) findViewById(R.id.mainContentView);
+        mainContentView = (FrameLayout) findViewById(R.id.kolibri_main_content);
         mainContentView.addView(getMainContentView());
 
         mLayoutError = findViewById(R.id.error);
         mLayoutLoading = findViewById(R.id.progress);
         mLayoutOverlay = findViewById(R.id.overlay);
+
+        floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -159,6 +163,10 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
     public abstract View getMainContentView();
 
+    public FloatingActionButton getFloatingActionButton() {
+        return floatingActionButton;
+    }
+
     protected void showNavigationLoading() {
 
         if (mLayoutOverlay.getVisibility() != View.VISIBLE) {
@@ -222,8 +230,28 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         navigationView.startAnimation(getAminFadeIn());
     }
 
+    protected void showFloatingButton() {
+        floatingActionButton.show();
+    }
+
+    protected void hideFloatingButton() {
+        floatingActionButton.show();
+    }
+
+    protected void toggleFloatingButton() {
+        if (floatingActionButton.isShown()) {
+            floatingActionButton.hide();
+        } else {
+            floatingActionButton.show();
+        }
+    }
+
     protected boolean isNavigationVisible() {
         return navigationView.getVisibility() == View.VISIBLE;
+    }
+
+    protected boolean isFabVisible() {
+        return floatingActionButton.getVisibility() == View.VISIBLE;
     }
 
     public Animation getAminFadeIn() {
