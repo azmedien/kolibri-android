@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ch.yanova.kolibri.components.KolibriComponent;
+import ch.yanova.kolibri.components.KolibriFloatingActionButton;
 
 public abstract class KolibriNavigationActivity extends KolibriActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -31,7 +32,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
     private NavigationView navigationView;
     private FrameLayout mainContentView;
-    private FloatingActionButton floatingActionButton;
+    private KolibriFloatingActionButton floatingActionButton;
 
     private View mLayoutError;
     private View mLayoutLoading;
@@ -53,7 +54,8 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         mLayoutLoading = findViewById(R.id.progress);
         mLayoutOverlay = findViewById(R.id.overlay);
 
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
+        floatingActionButton = (KolibriFloatingActionButton) findViewById(R.id.kolibri_fab);
+        Kolibri.bind(floatingActionButton, KolibriFloatingActionButton.URI_SHOW);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

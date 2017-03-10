@@ -26,6 +26,16 @@ public class KolibriWebView extends WebView implements KolibriComponent {
 
     private KolibriWebViewClient client;
 
+    public void setListener(ActionButtonListener listener) {
+        this.listener = listener;
+    }
+
+    public ActionButtonListener getListener() {
+        return listener;
+    }
+
+    private ActionButtonListener listener;
+
     public KolibriWebView(Context context) {
         super(context);
         init();
@@ -57,12 +67,6 @@ public class KolibriWebView extends WebView implements KolibriComponent {
         }
     }
 
-    public void setActionButtonListener(ActionButtonListener listener) {
-        if (client != null) {
-            client.setActionButtonListener(listener);
-        }
-    }
-
     @Override
     public void handleIntent(Intent intent) {
 
@@ -71,7 +75,7 @@ public class KolibriWebView extends WebView implements KolibriComponent {
         if (sanitizer.hasParameter("url")) {
             String url = intent.getData().getQueryParameter("url");
             KolibriWebViewClient client = new KolibriWebViewClient();
-            boolean handled = client.handleUri(getContext(), Uri.parse(url));
+            boolean handled = client.handleUri(this, getContext(), Uri.parse(url));
 
             if (!handled) {
                 loadUrl(url);

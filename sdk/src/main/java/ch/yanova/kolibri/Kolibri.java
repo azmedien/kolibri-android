@@ -16,7 +16,7 @@ public final class Kolibri {
         if (component instanceof View) {
             View view = (View) component;
             view.addOnAttachStateChangeListener(
-                    new Binding(new KolibriCoordinator(view.getContext(), uris), component));
+                    new Binding(new KolibriCoordinator(component, uris), component));
         } else if (component instanceof Activity) {
 
         } else if (component instanceof Fragment) {

@@ -24,8 +24,11 @@ public class MainActivity extends KolibriNavigationActivity implements ActionBut
     @Override
     public View getMainContentView() {
 
-        webView = (webView == null) ? new KolibriWebView(this) : webView;
-        webView.setActionButtonListener(this);
+        if (webView == null) {
+            webView = new KolibriWebView(this);
+            webView.setListener(this);
+
+        }
 
         return webView;
     }

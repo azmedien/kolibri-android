@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -15,6 +17,9 @@ import android.webkit.WebViewClient;
 import java.io.IOException;
 
 import ch.yanova.kolibri.ActionButtonListener;
+import ch.yanova.kolibri.Kolibri;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -31,8 +36,9 @@ public class KolibriWebViewClient extends WebViewClient {
     public static final String TARGET_SELF = "_self";
     public static final String AMP_REGEX = "^(www\\.)?amp.*$";
     public static final String TAG = "KolibriWebViewClient";
-
-    private ActionButtonListener actionButtonListener;
+    public static final String HEADER_FAVORITES = "kolibri-favorizable";
+    public static final String TRUE = "ture";
+    public static final String FALSE = "false";
 
     protected boolean shouldHandleInternal() {
         return true;
@@ -43,28 +49,17 @@ public class KolibriWebViewClient extends WebViewClient {
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
         Uri link = Uri.parse(url);
-        return handleUri(view.getContext(), link);
+        return handleUri((KolibriWebView)view, view.getContext(), link);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         Uri link = request.getUrl();
-        return handleUri(view.getContext(), link);
+        return handleUri((KolibriWebView)view, view.getContext(), link);
     }
 
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        return preprocessRequest(url);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, final WebResourceRequest request) {
-        return preprocessRequest(request.getUrl().toString());
-    }
-
-    private WebResourceResponse preprocessRequest(final String url) {
+    void getHeaders(final KolibriWebView view, final String url) {
         final OkHttpClient client = new OkHttpClient();
 
         final Request request = new Request.Builder()
@@ -74,39 +69,42 @@ public class KolibriWebViewClient extends WebViewClient {
                 .get()
                 .build();
 
-        try {
-            final Response response = client.newCall(request).execute();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
 
-            if (response != null && response.isSuccessful()) {
-
-                final String kolibriInfo = response.header("Kolibri-Info");
-
-                if (kolibriInfo != null) {
-                    // Quick and dirty
-                    if (kolibriInfo.contains("categroy:recipie;favorit-button:yes") && actionButtonListener != null) {
-                        actionButtonListener.showActionButton();
-                        actionButtonListener.onActionButtonClick(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Snackbar.make(v, url, Snackbar.LENGTH_INDEFINITE);
-                            }
-                        });
-                    }
-                }
-
-                // FIXME: https://artemzin.com/blog/android-webview-io/
-                return new WebResourceResponse("text/html", "UTF-8", response.body().byteStream());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response != null && response.isSuccessful()) {
+
+                    Log.i(TAG, "getHeaders: " + response);
+
+                    String headerFavorites = response.header(HEADER_FAVORITES);
+                    headerFavorites = TRUE;
+
+                    Intent intent = new Intent();
+                    Uri uri = TRUE.equals(headerFavorites) ?
+                            Uri.parse(KolibriFloatingActionButton.URI_SHOW) :
+                            Uri.parse(KolibriFloatingActionButton.URI_HIDE);
+
+                    intent.putExtra("handle", true);
+                    intent.setData(uri);
+
+                    Kolibri.bind(view, KolibriFloatingActionButton.URI_SHOW);
+
+                    LocalBroadcastManager.getInstance(view.getContext()).sendBroadcast(intent);
+                }
+                }
+        });
     }
 
-    boolean handleUri(Context context, Uri link) {
+    boolean handleUri(KolibriWebView view, Context context, Uri link) {
         String target = link.getQueryParameter(PARAM_TARGET);
         String host = link.getHost();
+
+        getHeaders(view, link.toString());
 
         if (target == null) {
             target = host.matches(AMP_REGEX) ? TARGET_SELF : TARGET_INTERNAL;
@@ -127,9 +125,5 @@ public class KolibriWebViewClient extends WebViewClient {
 
         context.startActivity(linkIntent);
         return true;
-    }
-
-    public void setActionButtonListener(ActionButtonListener actionButtonListener) {
-        this.actionButtonListener = actionButtonListener;
     }
 }

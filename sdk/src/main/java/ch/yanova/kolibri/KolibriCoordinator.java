@@ -23,9 +23,13 @@ class KolibriCoordinator {
     private String[] uriStrings;
     private Context context;
 
-    KolibriCoordinator(Context context, String... uris) {
+    KolibriCoordinator(KolibriComponent view, String... uris) {
         this.uriStrings = uris;
-        this.context = context;
+        this.context = ((View)view).getContext();
+
+        if (receiver == null) {
+            bindReceiver(view);
+        }
     }
 
     final void setAttached(boolean attached) {
@@ -41,6 +45,21 @@ class KolibriCoordinator {
      */
     void attach(final KolibriComponent view) {
 
+        bindReceiver(view);
+    }
+
+    /**
+     * Called when the view is detached from a Window.
+     *
+     * Default implementation does nothing.
+     *
+     * @see View#onDetachedFromWindow()
+     */
+    void detach(KolibriComponent view) {
+        manager.unregisterReceiver(receiver);
+    }
+
+    private void bindReceiver(final KolibriComponent view) {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -70,17 +89,6 @@ class KolibriCoordinator {
         }
 
         manager.registerReceiver(receiver, filter);
-    }
-
-    /**
-     * Called when the view is detached from a Window.
-     *
-     * Default implementation does nothing.
-     *
-     * @see View#onDetachedFromWindow()
-     */
-    void detach(KolibriComponent view) {
-        manager.unregisterReceiver(receiver);
     }
 
     /**
