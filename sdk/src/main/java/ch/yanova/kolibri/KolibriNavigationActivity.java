@@ -94,10 +94,9 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-        final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
         final Intent intent = item.getIntent();
 
-        manager.sendBroadcast(intent);
+        Kolibri.notifyComponents(getApplicationContext(), intent);
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

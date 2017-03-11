@@ -2,8 +2,10 @@ package ch.yanova.kolibri;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
 import ch.yanova.kolibri.components.KolibriComponent;
@@ -32,5 +34,9 @@ public final class Kolibri {
         res.putExtra(KolibriCoordinator.HANDLE, true);
 
         return res;
+    }
+
+    public static void notifyComponents(Context context, Intent intent) {
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 }

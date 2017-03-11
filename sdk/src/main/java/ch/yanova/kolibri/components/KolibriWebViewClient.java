@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -86,9 +85,7 @@ public class KolibriWebViewClient extends WebViewClient {
 
                     final Intent intent = Kolibri.createIntent(uri);
 
-                    Kolibri.bind(view, KolibriFloatingActionButton.URI_SHOW, KolibriFloatingActionButton.URI_HIDE);
-
-                    LocalBroadcastManager.getInstance(view.getContext().getApplicationContext()).sendBroadcast(intent);
+                    Kolibri.notifyComponents(view.getContext(), intent);
                 }
             }
         });
