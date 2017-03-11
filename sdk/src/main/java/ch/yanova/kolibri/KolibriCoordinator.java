@@ -16,6 +16,8 @@ import ch.yanova.kolibri.components.KolibriComponent;
 
 class KolibriCoordinator {
 
+    static final String HANDLE = "handle";
+
     private boolean attached;
 
     private BroadcastReceiver receiver;
@@ -64,8 +66,8 @@ class KolibriCoordinator {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                if (intent.hasExtra("handle")) {
-                    intent.removeExtra("handle");
+                if (intent.hasExtra(HANDLE)) {
+                    intent.removeExtra(HANDLE);
                     view.handleIntent(intent);
                 }
             }

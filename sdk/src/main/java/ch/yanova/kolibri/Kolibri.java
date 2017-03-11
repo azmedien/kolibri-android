@@ -2,6 +2,8 @@ package ch.yanova.kolibri;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.View;
 
 import ch.yanova.kolibri.components.KolibriComponent;
@@ -22,5 +24,13 @@ public final class Kolibri {
         } else if (component instanceof Fragment) {
 
         }
+    }
+
+    public static Intent createIntent(Uri uri) {
+        final Intent res = new Intent(Intent.ACTION_VIEW);
+        res.setData(uri);
+        res.putExtra(KolibriCoordinator.HANDLE, true);
+
+        return res;
     }
 }

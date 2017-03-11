@@ -5,18 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.view.View;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import java.io.IOException;
 
-import ch.yanova.kolibri.ActionButtonListener;
 import ch.yanova.kolibri.Kolibri;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -49,14 +45,14 @@ public class KolibriWebViewClient extends WebViewClient {
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
         Uri link = Uri.parse(url);
-        return handleUri((KolibriWebView)view, view.getContext(), link);
+        return handleUri((KolibriWebView) view, view.getContext(), link);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         Uri link = request.getUrl();
-        return handleUri((KolibriWebView)view, view.getContext(), link);
+        return handleUri((KolibriWebView) view, view.getContext(), link);
     }
 
     void getHeaders(final KolibriWebView view, final String url) {
@@ -84,19 +80,17 @@ public class KolibriWebViewClient extends WebViewClient {
                     String headerFavorites = response.header(HEADER_FAVORITES);
                     headerFavorites = TRUE;
 
-                    Intent intent = new Intent();
-                    Uri uri = TRUE.equals(headerFavorites) ?
+                    final Uri uri = TRUE.equals(headerFavorites) ?
                             Uri.parse(KolibriFloatingActionButton.URI_SHOW) :
                             Uri.parse(KolibriFloatingActionButton.URI_HIDE);
 
-                    intent.putExtra("handle", true);
-                    intent.setData(uri);
+                    final Intent intent = Kolibri.createIntent(uri);
 
-                    Kolibri.bind(view, KolibriFloatingActionButton.URI_SHOW);
+                    Kolibri.bind(view, KolibriFloatingActionButton.URI_SHOW, KolibriFloatingActionButton.URI_HIDE);
 
-                    LocalBroadcastManager.getInstance(view.getContext()).sendBroadcast(intent);
+                    LocalBroadcastManager.getInstance(view.getContext().getApplicationContext()).sendBroadcast(intent);
                 }
-                }
+            }
         });
     }
 

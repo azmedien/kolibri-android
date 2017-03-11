@@ -96,7 +96,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
         final Intent intent = item.getIntent();
-        intent.putExtra("handle", true);
+
         manager.sendBroadcast(intent);
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -156,9 +156,8 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         Kolibri.bind((KolibriComponent) getMainContentView(), componentUri);
 
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
         final Uri uri = Uri.parse(componentUri);
-        intent.setData(uri);
+        final Intent intent = Kolibri.createIntent(uri);
 
         menu.add(label).setIntent(intent);
     }
