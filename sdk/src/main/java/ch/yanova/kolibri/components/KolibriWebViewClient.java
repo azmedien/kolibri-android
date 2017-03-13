@@ -79,11 +79,13 @@ public class KolibriWebViewClient extends WebViewClient {
                     String headerFavorites = response.header(HEADER_FAVORITES);
                     headerFavorites = TRUE;
 
-                    final Uri uri = TRUE.equals(headerFavorites) ?
-                            Uri.parse(KolibriFloatingActionButton.URI_SHOW) :
-                            Uri.parse(KolibriFloatingActionButton.URI_HIDE);
+                    String uriString = TRUE.equals(headerFavorites) ?
+                            KolibriFloatingActionButton.URI_SHOW :
+                            KolibriFloatingActionButton.URI_HIDE;
 
-                    final Intent intent = Kolibri.createIntent(uri);
+                    uriString += "?url=" + url;
+
+                    final Intent intent = Kolibri.createIntent(Uri.parse(uriString));
 
                     Kolibri.notifyComponents(view.getContext(), intent);
                 }

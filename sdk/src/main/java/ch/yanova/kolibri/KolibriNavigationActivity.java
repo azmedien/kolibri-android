@@ -96,6 +96,15 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         final Intent intent = item.getIntent();
 
+        if (intent.getDataString().startsWith("kolibri://navigation/favorites")) {
+            startActivity(intent);
+            final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        }
+
+        intent.putExtra(KolibriCoordinator.HANDLE, true);
+
         Kolibri.notifyComponents(getApplicationContext(), intent);
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -163,7 +172,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
     public abstract View getMainContentView();
 
-    public FloatingActionButton getFloatingActionButton() {
+    public KolibriFloatingActionButton getFloatingActionButton() {
         return floatingActionButton;
     }
 

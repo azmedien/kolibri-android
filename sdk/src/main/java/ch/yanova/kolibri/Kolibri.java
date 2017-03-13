@@ -39,4 +39,8 @@ public final class Kolibri {
     public static void notifyComponents(Context context, Intent intent) {
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
+
+    public static void notifyActivity(Context context, Intent intent) {
+        context.startActivity(intent);
+    }
 }

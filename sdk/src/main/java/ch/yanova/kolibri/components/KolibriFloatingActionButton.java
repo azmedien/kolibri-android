@@ -2,6 +2,7 @@ package ch.yanova.kolibri.components;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.design.widget.FloatingActionButton;
 import android.util.AttributeSet;
 
@@ -13,6 +14,8 @@ public class KolibriFloatingActionButton extends FloatingActionButton implements
 
     public static final String URI_SHOW = "kolibri://fab/show";
     public static final String URI_HIDE = "kolibri://fab/hide";
+
+    private String urlToBookmark;
 
     public KolibriFloatingActionButton(Context context) {
         super(context);
@@ -36,14 +39,20 @@ public class KolibriFloatingActionButton extends FloatingActionButton implements
         }
     }
 
+    public String getUrlToBookmark() {
+        return urlToBookmark;
+    }
+
     @Override
     public void handleIntent(Intent intent) {
 
-        if (URI_SHOW.equals(intent.getDataString())) {
+        urlToBookmark = intent.getData().getQueryParameter("url");
+
+        if (intent.getDataString().startsWith(URI_SHOW)) {
             show();
         }
 
-        if (URI_HIDE.equals(intent.getDataString())) {
+        if (intent.getDataString().startsWith(URI_HIDE)) {
             hide();
         }
     }
