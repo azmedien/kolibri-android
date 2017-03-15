@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -69,6 +70,10 @@ public class KolibriWebView extends WebView implements KolibriComponent {
         init();
     }
 
+    public void addWebClientListener(KolibriWebViewClient.WebClientListener listener) {
+        client.addWebClientListener(listener);
+    }
+
     private void init() {
 
         if (!isInEditMode()) {
@@ -76,6 +81,7 @@ public class KolibriWebView extends WebView implements KolibriComponent {
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
                     loadUrl(GET_HTML_STRING);
                 }
             };

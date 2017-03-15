@@ -3,14 +3,18 @@ package ch.yanova.kolibri.components;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import ch.yanova.kolibri.Kolibri;
 import okhttp3.Call;
@@ -37,6 +41,22 @@ public class KolibriWebViewClient extends WebViewClient {
 
     protected boolean shouldHandleInternal() {
         return true;
+    }
+
+    public interface WebClientListener {
+        void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error);
+
+        void onPageStarted(WebView view, String url, Bitmap favicon);
+
+        void onPageFinished(WebView view, String url);
+    }
+
+    private List<WebClientListener> listeners = new ArrayList<>();
+
+    public void addWebClientListener(WebClientListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -91,6 +111,31 @@ public class KolibriWebViewClient extends WebViewClient {
                 }
             }
         });
+    }
+
+
+    @Override
+    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+        super.onReceivedError(view, request, error);
+        for (WebClientListener listener : listeners) {
+            listener.onReceivedError(view, request, error);
+        }
+    }
+
+    @Override
+    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        super.onPageStarted(view, url, favicon);
+        for (WebClientListener listener : listeners) {
+            listener.onPageStarted(view, url, favicon);
+        }
+    }
+
+    @Override
+    public void onPageFinished(WebView view, String url) {
+        super.onPageFinished(view, url);
+        for (WebClientListener listener : listeners) {
+            listener.onPageFinished(view, url);
+        }
     }
 
     boolean handleUri(KolibriWebView view, Context context, Uri link) {
