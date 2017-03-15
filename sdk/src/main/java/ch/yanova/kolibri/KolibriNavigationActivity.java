@@ -29,7 +29,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         NavigationListener {
 
     private NavigationView navigationView;
-    private FrameLayout mainContentView;
+    private View mainContentView;
     private KolibriFloatingActionButton floatingActionButton;
 
     private View mLayoutError;
@@ -45,12 +45,10 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         setContentView(R.layout.navigation_drawer);
 
-        mainContentView = (FrameLayout) findViewById(R.id.kolibri_main_content);
-        mainContentView.addView(getMainContentView());
+        mainContentView = getMainContentView();
 
-        mLayoutError = findViewById(R.id.error);
-        mLayoutLoading = findViewById(R.id.progress);
-        mLayoutOverlay = findViewById(R.id.overlay);
+        final FrameLayout container = (FrameLayout) findViewById(R.id.kolibri_main_content);
+        container.addView(mainContentView);
 
         floatingActionButton = (KolibriFloatingActionButton) findViewById(R.id.kolibri_fab);
         Kolibri.bind(floatingActionButton, KolibriFloatingActionButton.URI_SHOW);
@@ -66,6 +64,10 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        mLayoutError = navigationView.findViewById(R.id.error);
+        mLayoutLoading = navigationView.findViewById(R.id.progress);
+        mLayoutOverlay = navigationView.findViewById(R.id.overlay);
     }
 
     @Override
@@ -160,10 +162,11 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
             componentUri += "?url=" + url;
         }
 
-        Kolibri.bind((KolibriComponent) getMainContentView(), componentUri);
+        Kolibri.bind((KolibriComponent) mainContentView.findViewWithTag(KolibriComponent.class), componentUri);
 
         final Uri uri = Uri.parse(componentUri);
         final Intent intent = Kolibri.createIntent(uri);
+        intent.putExtra(Intent.EXTRA_TITLE, label);
 
         menu.add(label).setIntent(intent);
     }
@@ -235,30 +238,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         navigationView.setVisibility(View.VISIBLE);
         navigationView.startAnimation(getAminFadeIn());
-    }
-
-    protected void showFloatingButton() {
-        floatingActionButton.show();
-    }
-
-    protected void hideFloatingButton() {
-        floatingActionButton.show();
-    }
-
-    protected void toggleFloatingButton() {
-        if (floatingActionButton.isShown()) {
-            floatingActionButton.hide();
-        } else {
-            floatingActionButton.show();
-        }
-    }
-
-    protected boolean isNavigationVisible() {
-        return navigationView.getVisibility() == View.VISIBLE;
-    }
-
-    protected boolean isFabVisible() {
-        return floatingActionButton.getVisibility() == View.VISIBLE;
     }
 
     public Animation getAminFadeIn() {
