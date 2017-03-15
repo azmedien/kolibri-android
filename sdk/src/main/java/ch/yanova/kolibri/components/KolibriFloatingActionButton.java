@@ -74,7 +74,4 @@ public class KolibriFloatingActionButton extends FloatingActionButton implements
         }
     }
 
-    public void onVisibilityChanged(boolean visible) {
-
-    }
 }

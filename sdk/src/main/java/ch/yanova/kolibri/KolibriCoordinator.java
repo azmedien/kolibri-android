@@ -9,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
 import ch.yanova.kolibri.components.KolibriComponent;
+import ch.yanova.kolibri.components.KolibriFloatingActionButton;
 
 /**
  * Created by mmironov on 2/26/17.
@@ -66,7 +67,7 @@ class KolibriCoordinator {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                if (intent.hasExtra(HANDLE)) {
+                if (view instanceof KolibriFloatingActionButton || intent.hasExtra(HANDLE)) {
                     intent.removeExtra(HANDLE);
                     view.handleIntent(intent);
                 }

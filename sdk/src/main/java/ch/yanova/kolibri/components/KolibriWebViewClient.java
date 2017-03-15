@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -35,8 +36,8 @@ public class KolibriWebViewClient extends WebViewClient {
     public static final String TARGET_SELF = "_self";
     public static final String AMP_REGEX = "^(www\\.)?amp.*$";
     public static final String TAG = "KolibriWebViewClient";
-    public static final String HEADER_FAVORITES = "kolibri-favorizable";
-    public static final String TRUE = "ture";
+    public static final String HEADER_FAVORITES = "Kolibri-Favorizable";
+    public static final String TRUE = "true";
     public static final String FALSE = "false";
 
     protected boolean shouldHandleInternal() {
@@ -81,6 +82,7 @@ public class KolibriWebViewClient extends WebViewClient {
                 .url(url)
                 .addHeader("Content-Type", "text/html")
                 .addHeader("Content-Encoding", "UTF-8")
+                .addHeader("User-Agent", view.getSettings().getUserAgentString())
                 .get()
                 .build();
 
@@ -94,10 +96,10 @@ public class KolibriWebViewClient extends WebViewClient {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response != null && response.isSuccessful()) {
 
-                    Log.i(TAG, "getHeaders: " + response);
 
                     String headerFavorites = response.header(HEADER_FAVORITES);
-                    headerFavorites = TRUE;
+
+                    Log.i(TAG, "getHeaders: " + response.headers());
 
                     String uriString = TRUE.equals(headerFavorites) ?
                             KolibriFloatingActionButton.URI_SHOW :
@@ -157,9 +159,8 @@ public class KolibriWebViewClient extends WebViewClient {
         }
 
         Intent linkIntent = target.equals(TARGET_INTERNAL) ?
-                new Intent(context, WebViewActivity.class) :
-                new Intent(Intent.ACTION_VIEW);
-        linkIntent.setData(link);
+                new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?" + link)) :
+                new Intent(Intent.ACTION_VIEW, link);
 
         context.startActivity(linkIntent);
         return true;
