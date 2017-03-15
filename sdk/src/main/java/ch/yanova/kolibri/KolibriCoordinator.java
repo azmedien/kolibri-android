@@ -15,9 +15,9 @@ import ch.yanova.kolibri.components.KolibriFloatingActionButton;
  * Created by mmironov on 2/26/17.
  */
 
-class KolibriCoordinator {
+public class KolibriCoordinator {
 
-    static final String HANDLE = "handle";
+    public static final String HANDLE = "handle";
 
     private boolean attached;
 

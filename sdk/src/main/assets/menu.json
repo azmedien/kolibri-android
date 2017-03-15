@@ -27,19 +27,19 @@
         "component" : "kolibri://navigation/link",
         "id": "recepies",
         "label" : "Rezepte",
-        "url": "http://wildeisen-features.herokuapp.com/amp/rezepte/avocado-mango-carpaccio-mit-peperoncinodressing?kolibri-target=_self"
+        "url": "http://wildeisen-features.herokuapp.com/amp/suche/rezepte?kolibri-target=_self"
       },
       {
         "component" : "kolibri://navigation/link",
         "id"	: "ingredients",
         "label":"Zutaten",
-        "url": "http://wildeisen-features.herokuapp.com/amp/zutaten/minze?kolibri-target=_self"
+        "url": "http://wildeisen-features.herokuapp.com/amp/suche/zutaten?kolibri-target=_self"
       },
       {
         "component" : "kolibri://navigation/link",
         "id"	: "howtos",
         "label":"How to",
-        "url": "http://wildeisen-features.herokuapp.com/amp/howtos/pasta-ravioli?kolibri-target=_self"
+        "url": "http://wildeisen-features.herokuapp.com/amp/suche/howtos?kolibri-target=_self"
       },
       {
         "component" : "kolibri://navigation/link",

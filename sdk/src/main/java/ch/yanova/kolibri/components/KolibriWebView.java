@@ -8,6 +8,7 @@ import android.net.UrlQuerySanitizer;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -23,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ch.yanova.kolibri.BuildConfig;
+import ch.yanova.kolibri.KolibriCoordinator;
 
 /**
  * Created by mmironov on 2/26/17.
@@ -70,8 +72,8 @@ public class KolibriWebView extends WebView implements KolibriComponent {
         init();
     }
 
-    public void addWebClientListener(KolibriWebViewClient.WebClientListener listener) {
-        client.addWebClientListener(listener);
+    public void setWebClientListener(KolibriWebViewClient.WebClientListener listener) {
+        client.setWebClientListener(listener);
     }
 
     private void init() {

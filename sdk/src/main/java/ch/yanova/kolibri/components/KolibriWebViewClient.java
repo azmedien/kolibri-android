@@ -41,7 +41,12 @@ public class KolibriWebViewClient extends WebViewClient {
     public static final String FALSE = "false";
 
     protected boolean shouldHandleInternal() {
-        return true;
+
+        if (listener != null) {
+            return listener.shouldHandleInternal();
+        }
+
+        return false;
     }
 
     public interface WebClientListener {
@@ -50,14 +55,14 @@ public class KolibriWebViewClient extends WebViewClient {
         void onPageStarted(WebView view, String url, Bitmap favicon);
 
         void onPageFinished(WebView view, String url);
+
+        boolean shouldHandleInternal();
     }
 
-    private List<WebClientListener> listeners = new ArrayList<>();
+    private WebClientListener listener;
 
-    public void addWebClientListener(WebClientListener listener) {
-        if (listener != null) {
-            listeners.add(listener);
-        }
+    public void setWebClientListener(WebClientListener listener) {
+        this.listener = listener;
     }
 
     @SuppressWarnings("deprecation")
@@ -119,25 +124,20 @@ public class KolibriWebViewClient extends WebViewClient {
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         super.onReceivedError(view, request, error);
-        for (WebClientListener listener : listeners) {
             listener.onReceivedError(view, request, error);
-        }
+
     }
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         super.onPageStarted(view, url, favicon);
-        for (WebClientListener listener : listeners) {
             listener.onPageStarted(view, url, favicon);
-        }
     }
 
     @Override
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
-        for (WebClientListener listener : listeners) {
             listener.onPageFinished(view, url);
-        }
     }
 
     boolean handleUri(KolibriWebView view, Context context, Uri link) {
@@ -159,7 +159,7 @@ public class KolibriWebViewClient extends WebViewClient {
         }
 
         Intent linkIntent = target.equals(TARGET_INTERNAL) ?
-                new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?" + link)) :
+                new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
                 new Intent(Intent.ACTION_VIEW, link);
 
         context.startActivity(linkIntent);
