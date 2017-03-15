@@ -11,6 +11,13 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,10 +31,22 @@ public class KolibriWebView extends WebView implements KolibriComponent {
 
     public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
 
-    private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');";
+    private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
     private static final String JS_INTERFACE_NAME = "GetHtml";
 
+    public static final String FAV_IMAGE = "og:image";
+    public static final String FAV_LABEL = "og:title";
+    public static final String ATTR_CONTENT = "content";
+    public static final String TAG_META = "meta";
+    public static final String ATTR_PROPERTY = "property";
+
     private KolibriWebViewClient client;
+
+    public void setOnAmpDataFoundListener(OnAmpDataFoundListener onAmpDataFoundListener) {
+        this.onAmpDataFoundListener = onAmpDataFoundListener;
+    }
+
+    private OnAmpDataFoundListener onAmpDataFoundListener;
 
     public KolibriWebView(Context context) {
         super(context);
@@ -86,11 +105,28 @@ public class KolibriWebView extends WebView implements KolibriComponent {
         }
     }
 
-    private static class GetHtmlJsInterface {
+    private class GetHtmlJsInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void processHTML(String html) {
-            
+
+            Document content = Jsoup.parseBodyFragment(html);
+            Elements links = content.getElementsByTag(TAG_META);
+            Log.i("PARSING", "processHTML: " + links);
+            Map<String, String> favData = new HashMap<>();
+            for (Element link : links) {
+                if (FAV_IMAGE.equals(link.attr(ATTR_PROPERTY)) || FAV_LABEL.equals(link.attr(ATTR_PROPERTY))) {
+                    String contentData = link.attr(ATTR_CONTENT);
+
+                    String key = FAV_IMAGE.equals(link.attr(ATTR_PROPERTY)) ?
+                            FAV_IMAGE : FAV_LABEL;
+
+                    if (onAmpDataFoundListener != null) {
+                        favData.put(key, contentData);
+                        onAmpDataFoundListener.onFound(favData);
+                    }
+                }
+            }
         }
     }
 }
