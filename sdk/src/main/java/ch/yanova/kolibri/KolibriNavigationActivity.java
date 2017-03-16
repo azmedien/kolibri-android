@@ -135,6 +135,12 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
                 }
             }
 
+            final Intent intent = menu.getItem(0).getIntent();
+
+            intent.putExtra(KolibriCoordinator.HANDLE, true);
+
+            Kolibri.notifyComponents(getApplicationContext(), intent);
+
             showNavigation();
         } catch (JSONException e) {
             e.printStackTrace();
