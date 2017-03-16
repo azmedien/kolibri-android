@@ -87,11 +87,10 @@ public class KolibriWebView extends WebView implements KolibriComponent {
                     loadUrl(GET_HTML_STRING);
                 }
             };
-            setWebViewClient(new WebViewClient());
+            setWebViewClient(client);
             getSettings().setJavaScriptEnabled(true);
             getSettings().setAppCacheEnabled(true);
             getSettings().setDomStorageEnabled(true);
-            getSettings().setLoadWithOverviewMode(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
 
             addJavascriptInterface(new GetHtmlJsInterface(), JS_INTERFACE_NAME);
