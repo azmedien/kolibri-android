@@ -137,7 +137,11 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
                 }
             }
 
-            final Intent intent = menu.getItem(0).getIntent();
+            MenuItem defaultItem = menu.getItem(0);
+
+            getSupportActionBar().setTitle(defaultItem.getTitle());
+
+            final Intent intent = defaultItem.getIntent();
 
             intent.putExtra(KolibriCoordinator.HANDLE, true);
 
