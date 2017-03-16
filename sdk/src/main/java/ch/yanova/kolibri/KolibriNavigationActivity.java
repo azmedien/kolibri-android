@@ -105,6 +105,8 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         intent.putExtra(KolibriCoordinator.HANDLE, true);
 
+        getSupportActionBar().setTitle(item.getTitle());
+
         Kolibri.notifyComponents(getApplicationContext(), intent);
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
