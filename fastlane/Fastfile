@@ -7,7 +7,7 @@
 # All lines starting with a # are ignored when running `fastlane`
 
 # If you want to automatically update fastlane if a new version is available:
-update_fastlane
+# update_fastlane
 
 # This is the minimum version number required.
 # Update this, if you use features of a newer version
@@ -18,15 +18,54 @@ default_platform :android
 platform :android do
   before_all do
     ENV["SLACK_URL"] = "https://hooks.slack.com/services/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"
+    ENV["KOLIBRI_URL"] = "http://localhost:3000"
+    ENV["KOLIBRI_PROJECT"] = "mdt1j2g67Lja9LghaNmd1JWq"
+  end
+
+  desc "Kolibri Build & Test"
+  lane :all do
+    build
+    test
   end
 
   desc "Runs all the tests"
   lane :test do
+    kolibri(
+      stage: "test",
+      state: "started"
+    )
+
     gradle(task: "test")
+
+    kolibri(
+      stage: "test",
+      state: "finished"
+    )
+  end
+
+  desc "Build the project"
+  lane :build do
+
+    kolibri(
+      stage: "build",
+      state: "started"
+    )
+
+    gradle(task: "build")
+
+    kolibri(
+      stage: "build",
+      state: "finished"
+    )
   end
 
   after_all do |lane|
     # This block is called, only if the executed lane was successful
+
+    kolibri(
+      stage: "publish",
+      state: "finished"
+    )
 
     slack(
       message: "Successfully builded and tested"
@@ -34,6 +73,12 @@ platform :android do
   end
 
   error do |lane, exception|
+
+    kolibri(
+      stage: lane.to_s,
+      state: "failed"
+    )
+
     slack(
        message: exception.message,
        success: false
