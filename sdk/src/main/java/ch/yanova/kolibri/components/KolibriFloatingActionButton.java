@@ -55,12 +55,11 @@ public class KolibriFloatingActionButton extends FloatingActionButton implements
     @Override
     public void handleIntent(Intent intent) {
 
-        urlToBookmark = intent.getData().getQueryParameter("url");
-
         if (intent.getDataString().startsWith(URI_SHOW)) {
             show();
 
             if (listener != null) {
+                urlToBookmark = intent.getData().getQueryParameter("url");
                 listener.onVisibilityChanged(true);
             }
         }

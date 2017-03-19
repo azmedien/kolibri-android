@@ -68,11 +68,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         mLayoutError = navigationView.findViewById(R.id.error);
         mLayoutLoading = navigationView.findViewById(R.id.progress);
         mLayoutOverlay = navigationView.findViewById(R.id.overlay);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
 
         showNavigationLoading();
 
