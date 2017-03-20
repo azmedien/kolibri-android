@@ -31,7 +31,6 @@ public final class Kolibri {
     public static Intent createIntent(Uri uri) {
         final Intent res = new Intent(Intent.ACTION_VIEW);
         res.setData(uri);
-        res.putExtra(KolibriCoordinator.HANDLE, true);
 
         return res;
     }

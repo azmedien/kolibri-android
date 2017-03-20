@@ -98,8 +98,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
             return true;
         }
 
-        intent.putExtra(KolibriCoordinator.HANDLE, true);
-
         getSupportActionBar().setTitle(item.getTitle());
 
         Kolibri.notifyComponents(getApplicationContext(), intent);
@@ -137,8 +135,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
             getSupportActionBar().setTitle(defaultItem.getTitle());
 
             final Intent intent = defaultItem.getIntent();
-
-            intent.putExtra(KolibriCoordinator.HANDLE, true);
 
             Kolibri.notifyComponents(getApplicationContext(), intent);
 

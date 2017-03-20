@@ -17,8 +17,6 @@ import ch.yanova.kolibri.components.KolibriFloatingActionButton;
 
 public class KolibriCoordinator {
 
-    public static final String HANDLE = "handle";
-
     private boolean attached;
 
     private BroadcastReceiver receiver;
@@ -67,10 +65,7 @@ public class KolibriCoordinator {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                if (view instanceof KolibriFloatingActionButton || intent.hasExtra(HANDLE)) {
-                    intent.removeExtra(HANDLE);
-                    view.handleIntent(intent);
-                }
+                view.handleIntent(intent);
             }
         };
 
