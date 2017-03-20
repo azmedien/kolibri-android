@@ -1,11 +1,13 @@
 package ch.yanova.kolibri.components;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
 import android.os.Build;
+import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -106,6 +108,12 @@ public class KolibriWebView extends WebView implements KolibriComponent {
             String url = intent.getData().getQueryParameter("url");
             KolibriWebViewClient client = new KolibriWebViewClient();
             boolean handled = client.handleUri(this, getContext(), Uri.parse(url));
+
+            if (intent.hasExtra(Intent.EXTRA_TITLE)) {
+                AppCompatActivity activity = (AppCompatActivity) getContext();
+                activity.getSupportActionBar().setTitle(intent.getStringExtra(Intent.EXTRA_TITLE));
+            }
+
 
             if (!handled) {
                 loadUrl(url);
