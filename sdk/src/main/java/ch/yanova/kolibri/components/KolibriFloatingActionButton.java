@@ -11,7 +11,7 @@ import ch.yanova.kolibri.FloatingActionListener;
  * Created by mmironov on 3/10/17.
  */
 
-public class KolibriFloatingActionButton extends FloatingActionButton implements KolibriComponent {
+public class KolibriFloatingActionButton extends FloatingActionButton {
 
     public static final String URI_SHOW = "kolibri://fab/show";
     public static final String URI_HIDE = "kolibri://fab/hide";
@@ -50,7 +50,6 @@ public class KolibriFloatingActionButton extends FloatingActionButton implements
         return urlToBookmark;
     }
 
-    @Override
     public void handleIntent(Intent intent) {
 
         if (intent.getDataString().startsWith(URI_SHOW)) {

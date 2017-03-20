@@ -3,14 +3,12 @@ package ch.yanova.kolibri;
 import android.support.annotation.NonNull;
 import android.view.View;
 
-import ch.yanova.kolibri.components.KolibriComponent;
-
 final class Binding implements View.OnAttachStateChangeListener {
 
   private KolibriCoordinator kolibriCoordinator;
-  private KolibriComponent component;
+  private View component;
 
-  Binding(KolibriCoordinator kolibriCoordinator, KolibriComponent component) {
+  Binding(View component, KolibriCoordinator kolibriCoordinator) {
     this.kolibriCoordinator = kolibriCoordinator;
     this.component = component;
   }

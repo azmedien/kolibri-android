@@ -32,7 +32,7 @@ import ch.yanova.kolibri.KolibriCoordinator;
  * Created by mmironov on 2/26/17.
  */
 
-public class KolibriWebView extends WebView implements KolibriComponent {
+public class KolibriWebView extends WebView {
 
     public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
 
@@ -99,7 +99,6 @@ public class KolibriWebView extends WebView implements KolibriComponent {
         }
     }
 
-    @Override
     public void handleIntent(Intent intent) {
 
         final UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(intent.getData().toString());

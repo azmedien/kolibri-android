@@ -8,26 +8,19 @@ import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
-import ch.yanova.kolibri.components.KolibriComponent;
-import ch.yanova.kolibri.components.KolibriFloatingActionButton;
+import java.util.List;
 
 /**
  * Created by mmironov on 2/26/17.
  */
 
-public class KolibriCoordinator {
+public abstract class KolibriCoordinator {
 
     private boolean attached;
 
     private BroadcastReceiver receiver;
     private LocalBroadcastManager manager;
-    private String[] uriStrings;
     private Context context;
-
-    KolibriCoordinator(KolibriComponent view, String... uris) {
-        this.uriStrings = uris;
-        this.context = ((View)view).getContext();
-    }
 
     final void setAttached(boolean attached) {
         this.attached = attached;
@@ -40,13 +33,14 @@ public class KolibriCoordinator {
      *
      * @see View#onAttachedToWindow()
      */
-    void attach(final KolibriComponent view) {
+    void attach(final View view) {
 
-        if (!attached) {
-            bindReceiver(view);
+        if (!isAttached()) {
+            context = view.getContext();
+            bindReceiver();
+            setAttached(true);
         }
 
-        setAttached(true);
     }
 
     /**
@@ -56,17 +50,17 @@ public class KolibriCoordinator {
      *
      * @see View#onDetachedFromWindow()
      */
-    void detach(KolibriComponent view) {
+    void detach(View view) {
         manager.unregisterReceiver(receiver);
         attached = false;
     }
 
-    private void bindReceiver(final KolibriComponent view) {
+    private void bindReceiver() {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                view.handleIntent(intent);
+                handleIntent(intent);
             }
         };
 
@@ -76,10 +70,10 @@ public class KolibriCoordinator {
         filter.addAction(Intent.ACTION_VIEW);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
 
-        final Uri[] uris = new Uri[uriStrings.length];
+        final Uri[] uris = new Uri[kolibriUris().length];
 
         for (int i = 0; i < uris.length; ++i) {
-            uris[i] = Uri.parse(uriStrings[i]);
+            uris[i] = Uri.parse(kolibriUris()[i]);
 
             final Uri uri = uris[i];
 
@@ -96,4 +90,8 @@ public class KolibriCoordinator {
     public final boolean isAttached() {
         return attached;
     }
+
+    public abstract void handleIntent(Intent intent);
+
+    public abstract String[] kolibriUris();
 }

@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import ch.yanova.kolibri.components.KolibriComponent;
 import ch.yanova.kolibri.components.KolibriFloatingActionButton;
+import ch.yanova.kolibri.components.KolibriWebView;
 
 public abstract class KolibriNavigationActivity extends KolibriActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -51,7 +52,18 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         container.addView(mainContentView);
 
         floatingActionButton = (KolibriFloatingActionButton) findViewById(R.id.kolibri_fab);
-        Kolibri.bind(floatingActionButton, KolibriFloatingActionButton.URI_SHOW, KolibriFloatingActionButton.URI_HIDE);
+
+        final Binding floatingBinding = new Binding(floatingActionButton, new KolibriCoordinator() {
+            @Override
+            public void handleIntent(Intent intent) {
+                floatingActionButton.handleIntent(intent);
+            }
+
+            @Override
+            public String[] kolibriUris() {
+                return new String[] {KolibriFloatingActionButton.URI_SHOW, KolibriFloatingActionButton.URI_HIDE};
+            }
+        });
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -69,8 +81,20 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         mLayoutLoading = navigationView.findViewById(R.id.progress);
         mLayoutOverlay = navigationView.findViewById(R.id.overlay);
 
-        String navigationUri = "kolibri://navigation/link";
-        Kolibri.bind((KolibriComponent) mainContentView.findViewWithTag(KolibriComponent.class), navigationUri);
+        final String navigationUri = "kolibri://navigation/link";
+        final KolibriWebView kolibriWebView = (KolibriWebView) mainContentView.findViewWithTag(KolibriComponent.class);
+
+        Kolibri.bind(kolibriWebView, new KolibriCoordinator() {
+            @Override
+            public void handleIntent(Intent intent) {
+                kolibriWebView.handleIntent(intent);
+            }
+
+            @Override
+            public String[] kolibriUris() {
+                return new String[] {navigationUri};
+            }
+        });
 
         showNavigationLoading();
 
