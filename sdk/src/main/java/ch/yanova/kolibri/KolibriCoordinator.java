@@ -27,10 +27,6 @@ public class KolibriCoordinator {
     KolibriCoordinator(KolibriComponent view, String... uris) {
         this.uriStrings = uris;
         this.context = ((View)view).getContext();
-
-        if (receiver == null) {
-            bindReceiver(view);
-        }
     }
 
     final void setAttached(boolean attached) {
@@ -46,7 +42,11 @@ public class KolibriCoordinator {
      */
     void attach(final KolibriComponent view) {
 
-        bindReceiver(view);
+        if (!attached) {
+            bindReceiver(view);
+        }
+
+        setAttached(true);
     }
 
     /**
@@ -58,6 +58,7 @@ public class KolibriCoordinator {
      */
     void detach(KolibriComponent view) {
         manager.unregisterReceiver(receiver);
+        attached = false;
     }
 
     private void bindReceiver(final KolibriComponent view) {

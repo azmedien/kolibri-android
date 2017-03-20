@@ -51,7 +51,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         container.addView(mainContentView);
 
         floatingActionButton = (KolibriFloatingActionButton) findViewById(R.id.kolibri_fab);
-        Kolibri.bind(floatingActionButton, KolibriFloatingActionButton.URI_SHOW);
+        Kolibri.bind(floatingActionButton, KolibriFloatingActionButton.URI_SHOW, KolibriFloatingActionButton.URI_HIDE);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -68,6 +68,9 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         mLayoutError = navigationView.findViewById(R.id.error);
         mLayoutLoading = navigationView.findViewById(R.id.progress);
         mLayoutOverlay = navigationView.findViewById(R.id.overlay);
+
+        String navigationUri = "kolibri://navigation/link";
+        Kolibri.bind((KolibriComponent) mainContentView.findViewWithTag(KolibriComponent.class), navigationUri);
 
         showNavigationLoading();
 
@@ -130,14 +133,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
                 }
             }
 
-            MenuItem defaultItem = menu.getItem(0);
-
-            getSupportActionBar().setTitle(defaultItem.getTitle());
-
-            final Intent intent = defaultItem.getIntent();
-
-            Kolibri.notifyComponents(getApplicationContext(), intent);
-
             showNavigation();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -164,8 +159,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
             final String url = item.getString("url");
             componentUri += "?url=" + url;
         }
-
-        Kolibri.bind((KolibriComponent) mainContentView.findViewWithTag(KolibriComponent.class), componentUri);
 
         final Uri uri = Uri.parse(componentUri);
         final Intent intent = Kolibri.createIntent(uri);

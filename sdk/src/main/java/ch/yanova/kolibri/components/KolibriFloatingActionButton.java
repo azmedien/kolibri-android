@@ -2,8 +2,6 @@ package ch.yanova.kolibri.components;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.preference.Preference;
 import android.support.design.widget.FloatingActionButton;
 import android.util.AttributeSet;
 
