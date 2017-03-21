@@ -18,6 +18,7 @@ import java.util.List;
 
 import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
+import ch.yanova.kolibri.coordinators.ActionButtonCoordinator;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -107,8 +108,8 @@ public class KolibriWebViewClient extends WebViewClient {
                     Log.i(TAG, "getHeaders: " + response.headers());
 
                     String uriString = TRUE.equals(headerFavorites) ?
-                            KolibriFloatingActionButton.URI_SHOW :
-                            KolibriFloatingActionButton.URI_HIDE;
+                            ActionButtonCoordinator.URI_SHOW :
+                            ActionButtonCoordinator.URI_HIDE;
 
                     uriString += "?url=" + url;
 

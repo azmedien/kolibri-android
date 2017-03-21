@@ -113,7 +113,6 @@ public class KolibriWebView extends WebView {
                 activity.getSupportActionBar().setTitle(intent.getStringExtra(Intent.EXTRA_TITLE));
             }
 
-
             if (!handled) {
                 loadUrl(url);
             }
@@ -136,8 +135,9 @@ public class KolibriWebView extends WebView {
                     String key = FAV_IMAGE.equals(link.attr(ATTR_PROPERTY)) ?
                             FAV_IMAGE : FAV_LABEL;
 
+                    favData.put(key, contentData);
+
                     if (onAmpDataFoundListener != null) {
-                        favData.put(key, contentData);
                         onAmpDataFoundListener.onFound(favData);
                     }
                 }

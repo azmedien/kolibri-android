@@ -14,7 +14,7 @@ import java.util.List;
  * Created by mmironov on 2/26/17.
  */
 
-public abstract class KolibriCoordinator {
+public abstract class KolibriCoordinator<T extends View> {
 
     private boolean attached;
 
@@ -28,39 +28,33 @@ public abstract class KolibriCoordinator {
 
     /**
      * Called when the view is attached to a Window.
-     *
+     * <p>
      * Default implementation does nothing.
      *
      * @see View#onAttachedToWindow()
      */
-    void attach(final View view) {
-
-        if (!isAttached()) {
-            context = view.getContext();
-            bindReceiver();
-            setAttached(true);
-        }
-
+    protected void attach(final T view) {
+        context = view.getContext();
+        bindReceiver(view);
     }
 
     /**
      * Called when the view is detached from a Window.
-     *
+     * <p>
      * Default implementation does nothing.
      *
      * @see View#onDetachedFromWindow()
      */
-    void detach(View view) {
+    protected void detach(T view) {
         manager.unregisterReceiver(receiver);
-        attached = false;
     }
 
-    private void bindReceiver() {
+    private void bindReceiver(final T view) {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                handleIntent(intent);
+                handleIntent(view, intent);
             }
         };
 
@@ -91,7 +85,7 @@ public abstract class KolibriCoordinator {
         return attached;
     }
 
-    public abstract void handleIntent(Intent intent);
+    protected abstract void handleIntent(T view, Intent intent);
 
-    public abstract String[] kolibriUris();
+    protected abstract String[] kolibriUris();
 }

@@ -5,23 +5,36 @@ import android.view.View;
 
 final class Binding implements View.OnAttachStateChangeListener {
 
-  private KolibriCoordinator kolibriCoordinator;
-  private View component;
+    private KolibriCoordinator coordinator;
+    private View view;
+    private View attached;
 
-  Binding(View component, KolibriCoordinator kolibriCoordinator) {
-    this.kolibriCoordinator = kolibriCoordinator;
-    this.component = component;
-  }
-  
-  @Override public void onViewAttachedToWindow(@NonNull View v) {
-    // ...
-    kolibriCoordinator.attach(component);
-//    view.setTag(R.id.kolibriCoordinator, kolibriCoordinator);  // <------- !!!
-  }
+    Binding(View view, KolibriCoordinator coordinator) {
+        this.coordinator = coordinator;
+        this.view = view;
+    }
 
-  @Override public void onViewDetachedFromWindow(@NonNull View v) {
-    // ...
-    kolibriCoordinator.detach(component);
-//    view.setTag(R.id.kolibriCoordinator, null);  // <------- !!!
-  }
+    @Override
+    public void onViewAttachedToWindow(@NonNull View v) {
+        if (v != attached) {
+            attached = v;
+            if (coordinator.isAttached()) {
+                throw new IllegalStateException(
+                        "Coordinator " + coordinator + " is already attached to a View");
+            }
+            coordinator.setAttached(true);
+            coordinator.attach(view);
+            view.setTag(R.id.coordinator, coordinator);
+        }
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull View v) {
+        if (v == attached) {
+            attached = null;
+            coordinator.detach(view);
+            coordinator.setAttached(false);
+            view.setTag(R.id.coordinator, null);
+        }
+    }
 }

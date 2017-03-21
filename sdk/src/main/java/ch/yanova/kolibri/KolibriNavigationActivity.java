@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,8 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import ch.yanova.kolibri.components.KolibriComponent;
-import ch.yanova.kolibri.components.KolibriFloatingActionButton;
 import ch.yanova.kolibri.components.KolibriWebView;
 
 public abstract class KolibriNavigationActivity extends KolibriActivity
@@ -31,7 +31,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
     private NavigationView navigationView;
     private View mainContentView;
-    private KolibriFloatingActionButton floatingActionButton;
+    private FloatingActionButton floatingActionButton;
 
     private View mLayoutError;
     private View mLayoutLoading;
@@ -51,19 +51,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         final FrameLayout container = (FrameLayout) findViewById(R.id.kolibri_main_content);
         container.addView(mainContentView);
 
-        floatingActionButton = (KolibriFloatingActionButton) findViewById(R.id.kolibri_fab);
-
-        final Binding floatingBinding = new Binding(floatingActionButton, new KolibriCoordinator() {
-            @Override
-            public void handleIntent(Intent intent) {
-                floatingActionButton.handleIntent(intent);
-            }
-
-            @Override
-            public String[] kolibriUris() {
-                return new String[] {KolibriFloatingActionButton.URI_SHOW, KolibriFloatingActionButton.URI_HIDE};
-            }
-        });
+        floatingActionButton = (FloatingActionButton) findViewById(R.id.kolibri_fab);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -82,17 +70,23 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         mLayoutOverlay = navigationView.findViewById(R.id.overlay);
 
         final String navigationUri = "kolibri://navigation/link";
-        final KolibriWebView kolibriWebView = (KolibriWebView) mainContentView.findViewWithTag(KolibriComponent.class);
+        final KolibriWebView kolibriWebView = (KolibriWebView) mainContentView.findViewWithTag(KolibriWebView.class);
 
-        Kolibri.bind(kolibriWebView, new KolibriCoordinator() {
+        Kolibri.bind(kolibriWebView, new KolibriProvider() {
+            @Nullable
             @Override
-            public void handleIntent(Intent intent) {
-                kolibriWebView.handleIntent(intent);
-            }
+            public KolibriCoordinator provideCoordinator(View view) {
+                return new KolibriCoordinator() {
+                    @Override
+                    public void handleIntent(View v, Intent intent) {
+                        kolibriWebView.handleIntent(intent);
+                    }
 
-            @Override
-            public String[] kolibriUris() {
-                return new String[] {navigationUri};
+                    @Override
+                    public String[] kolibriUris() {
+                        return new String[]{navigationUri};
+                    }
+                };
             }
         });
 
@@ -193,7 +187,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
     public abstract View getMainContentView();
 
-    public KolibriFloatingActionButton getFloatingActionButton() {
+    public FloatingActionButton getFloatingActionButton() {
         return floatingActionButton;
     }
 
