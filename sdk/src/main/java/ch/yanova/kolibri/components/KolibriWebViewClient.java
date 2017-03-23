@@ -148,7 +148,7 @@ public class KolibriWebViewClient extends WebViewClient {
         getHeaders(view, link.toString());
 
         if (target == null) {
-            target = host.matches(AMP_REGEX) ? TARGET_SELF : TARGET_INTERNAL;
+            target = TARGET_SELF;
         }
 
         if (TARGET_INTERNAL.equals(target) && !shouldHandleInternal()) {
