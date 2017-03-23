@@ -37,6 +37,9 @@ public class HandleUrlTargetTest {
     @Mock
     Context context;
 
+    @Mock
+    KolibriWebView webView;
+
     @Spy
     KolibriWebViewClient webViewClient = new KolibriWebViewClient();
 
@@ -54,7 +57,7 @@ public class HandleUrlTargetTest {
         when(uri.getHost()).thenReturn(URL_HOST);
         when(uri.getQueryParameter(PARAM_TARGET)).thenReturn(TARGET_SELF);
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertFalse(webViewClient.handleUri(context, Uri.parse("")));
+        Assert.assertFalse(webViewClient.handleUri(webView, context, Uri.parse("")));
     }
 
     @Test
@@ -62,7 +65,7 @@ public class HandleUrlTargetTest {
         when(uri.getHost()).thenReturn(URL_HOST);
         when(uri.getQueryParameter(PARAM_TARGET)).thenReturn(TARGET_INTERNAL);
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertTrue(webViewClient.handleUri(context, Uri.parse("")));
+        Assert.assertTrue(webViewClient.handleUri(webView, context, Uri.parse("")));
     }
 
     @Test
@@ -70,7 +73,7 @@ public class HandleUrlTargetTest {
         when(uri.getHost()).thenReturn(URL_HOST);
         when(uri.getQueryParameter(PARAM_TARGET)).thenReturn(TARGET_EXTERNAL);
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertTrue(webViewClient.handleUri(context, Uri.parse("")));
+        Assert.assertTrue(webViewClient.handleUri(webView, context, Uri.parse("")));
     }
 
     @Test
@@ -78,7 +81,7 @@ public class HandleUrlTargetTest {
         when(uri.getHost()).thenReturn(URL_AMP_HOST);
         when(uri.getQueryParameter(PARAM_TARGET)).thenReturn(null);
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertFalse(webViewClient.handleUri(context, Uri.parse("")));
+        Assert.assertFalse(webViewClient.handleUri(webView, context, Uri.parse("")));
     }
 
     @Test
@@ -86,6 +89,6 @@ public class HandleUrlTargetTest {
         when(uri.getHost()).thenReturn(URL_HOST);
         when(uri.getQueryParameter(PARAM_TARGET)).thenReturn(null);
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertTrue(webViewClient.handleUri(context, Uri.parse("")));
+        Assert.assertTrue(webViewClient.handleUri(webView, context, Uri.parse("")));
     }
 }

@@ -24,44 +24,22 @@
     },
     "items": [
       {
-        "component" : "kolibri://navigation/search",
-        "id"	: "search",
-        "label" : "Enter to search...",
-        "icon" : "http://www.wildeisen.ch/assets/search.png",
-        "url": "http://www.wildeisen.ch/search?query=###value1###"
-      },
-      {
         "component" : "kolibri://navigation/link",
         "id": "recepies",
         "label" : "Rezepte",
-        "url": "http://wildeisen-features.herokuapp.com/amp/rezepte/avocado-mango-carpaccio-mit-peperoncinodressing?kolibri-target=_self",
-        "items": [
-          {
-            "component" : "kolibri://navigation/link",
-            "id"	: "vegetarian",
-            "label":"Vegetarian",
-            "url": "http://wildeisen-features.herokuapp.com/amp/rezepte/rueebli-kartoffel-gratin-mit-blauschimmelkaese?kolibri-target=_self"
-          },
-          {
-            "component" : "kolibri://navigation/link",
-            "id"	: "dessert",
-            "label":"Dessert",
-            "url": "http://wildeisen-features.herokuapp.com/amp/rezepte/caramelisierte-rhabarbertopfchen?kolibri-target=_self"
-
-          }
-        ]
+        "url": "http://wildeisen-features.herokuapp.com/amp/suche/rezepte?kolibri-target=_self"
       },
       {
         "component" : "kolibri://navigation/link",
         "id"	: "ingredients",
         "label":"Zutaten",
-        "url": "http://wildeisen-features.herokuapp.com/amp/zutaten/minze?kolibri-target=_self"
+        "url": "http://wildeisen-features.herokuapp.com/amp/suche/zutaten?kolibri-target=_self"
       },
       {
         "component" : "kolibri://navigation/link",
         "id"	: "howtos",
-        "label":"Kochwissen",
-        "url": "http://wildeisen-features.herokuapp.com/amp/howtos/pasta-ravioli?kolibri-target=_self"
+        "label":"How to",
+        "url": "http://wildeisen-features.herokuapp.com/amp/suche/howtos?kolibri-target=_self"
       },
       {
         "component" : "kolibri://navigation/link",
@@ -82,16 +60,16 @@
         "component": "kolibri://navigation/separator"
       },
       {
-        "component":"kolibri://navivation/contributed/schuttelapp",
-        "id"	: "schuttelapp",
-        "label":"Schuttelapp",
-        "ingredientJSON": "http://www.wildeisen.ch/schuttelapp.json",
-        "url": "http://www.wildeisen.ch/schuttelapp?ingerident-list=###value1###"
-      },
-      {
-        "component": "kolibri://navivation/favorits",
+        "component": "kolibri://navigation/favorites",
         "id"	: "favorits",
         "label" : "Favoriten"
+      },
+      {
+        "component" : "kolibri://navigation/search",
+        "id"	: "search",
+        "label" : "Suche",
+        "icon" : "http://www.wildeisen.ch/assets/search.png",
+        "url": "http://www.wildeisen.ch/search?query=###value1###"
       }
     ]
   }
