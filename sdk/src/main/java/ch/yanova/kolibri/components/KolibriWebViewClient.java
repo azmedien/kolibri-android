@@ -13,10 +13,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.coordinators.ActionButtonCoordinator;
 import okhttp3.Call;
@@ -147,7 +144,7 @@ public class KolibriWebViewClient extends WebViewClient {
         }
     }
 
-    boolean handleAsSelf(String target) {
+    boolean handleInNewView(String target) {
         if (target == null) {
             target = TARGET_SELF;
         }
@@ -167,11 +164,11 @@ public class KolibriWebViewClient extends WebViewClient {
         String target = link.getQueryParameter(PARAM_TARGET);
         String host = link.getHost();
 
-        getHeaders(view, host);
+        getHeaders(view, link.toString());
 
-        boolean handleAsSelf = handleAsSelf(target);
+        boolean handleInNewView = handleInNewView(target);
 
-        if (!handleAsSelf) {
+        if (handleInNewView) {
             Intent linkIntent = target.equals(TARGET_INTERNAL) ?
                     new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
                     new Intent(Intent.ACTION_VIEW, link);
@@ -179,6 +176,6 @@ public class KolibriWebViewClient extends WebViewClient {
             context.startActivity(linkIntent);
         }
 
-        return handleAsSelf;
+        return handleInNewView;
     }
 }

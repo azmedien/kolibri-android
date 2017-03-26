@@ -33,24 +33,24 @@ public class KolibriUrlTargetTest {
     @Test
     public void selfTargetTest() {
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertFalse(webViewClient.handleAsSelf(TARGET_SELF));
+        Assert.assertFalse(webViewClient.handleInNewView(TARGET_SELF));
     }
 
     @Test
     public void internalTargetTest() {
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertTrue(webViewClient.handleAsSelf(TARGET_INTERNAL));
+        Assert.assertTrue(webViewClient.handleInNewView(TARGET_INTERNAL));
     }
 
     @Test
     public void externalTargetTest() {
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertTrue(webViewClient.handleAsSelf(TARGET_EXTERNAL));
+        Assert.assertTrue(webViewClient.handleInNewView(TARGET_EXTERNAL));
     }
 
     @Test
     public void noTarget() {
         doReturn(true).when(webViewClient).shouldHandleInternal();
-        Assert.assertFalse(webViewClient.handleAsSelf(null));
+        Assert.assertFalse(webViewClient.handleInNewView(null));
     }
 }
