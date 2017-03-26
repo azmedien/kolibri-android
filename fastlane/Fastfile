@@ -18,8 +18,8 @@ default_platform :android
 platform :android do
   before_all do
     ENV["SLACK_URL"] = "https://hooks.slack.com/services/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"
-    ENV["KOLIBRI_URL"] = "http://localhost:3000"
-    ENV["KOLIBRI_PROJECT"] = "mdt1j2g67Lja9LghaNmd1JWq"
+    ENV["KOLIBRI_URL"] = "https://kolibri.herokuapp.com"
+    ENV["KOLIBRI_PROJECT"] = "wpUn99KXFbo9J6LmihcfqCf3"
   end
 
   desc "Kolibri Build & Test"
