@@ -147,12 +147,7 @@ public class KolibriWebViewClient extends WebViewClient {
         }
     }
 
-    boolean handleUri(KolibriWebView view, Context context, Uri link) {
-        String target = link.getQueryParameter(PARAM_TARGET);
-        String host = link.getHost();
-
-        getHeaders(view, link.toString());
-
+    boolean handleAsSelf(String target) {
         if (target == null) {
             target = TARGET_SELF;
         }
@@ -165,11 +160,25 @@ public class KolibriWebViewClient extends WebViewClient {
             return false;
         }
 
-        Intent linkIntent = target.equals(TARGET_INTERNAL) ?
-                new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
-                new Intent(Intent.ACTION_VIEW, link);
-
-        context.startActivity(linkIntent);
         return true;
+    }
+
+    boolean handleUri(KolibriWebView view, Context context, Uri link) {
+        String target = link.getQueryParameter(PARAM_TARGET);
+        String host = link.getHost();
+
+        getHeaders(view, host);
+
+        boolean handleAsSelf = handleAsSelf(target);
+
+        if (!handleAsSelf) {
+            Intent linkIntent = target.equals(TARGET_INTERNAL) ?
+                    new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
+                    new Intent(Intent.ACTION_VIEW, link);
+
+            context.startActivity(linkIntent);
+        }
+
+        return handleAsSelf;
     }
 }

@@ -23,17 +23,27 @@ xcode-select --install
 </tr>
 <tr>
 <td width="33%"><code>brew cask install fastlane</code></td>
-<td width="33%"><a href="https://download.fastlane.tools/fastlane.zip">Download the zip file</a>. Then double click on the <code>install</code> script (or run it in a terminal window).</td>
+<td width="33%"><a href="https://download.fastlane.tools">Download the zip file</a>. Then double click on the <code>install</code> script (or run it in a terminal window).</td>
 <td width="33%"><code>sudo gem install fastlane -NV</code></td>
 </tr>
 </table>
 # Available Actions
 ## Android
+### android all
+```
+fastlane android all
+```
+Kolibri Build & Test
 ### android test
 ```
 fastlane android test
 ```
 Runs all the tests
+### android build
+```
+fastlane android build
+```
+Build the project
 
 ----
 
