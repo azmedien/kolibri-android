@@ -40,4 +40,5 @@ dependencies {
     testCompile 'org.mockito:mockito-core:1.10.19'
     testCompile 'org.powermock:powermock-api-mockito:1.6.6'
     testCompile 'org.powermock:powermock-module-junit4:1.6.6'
+    testCompile 'com.squareup.okhttp3:mockwebserver:3.6.0'
 }
