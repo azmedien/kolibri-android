@@ -9,7 +9,9 @@ module Fastlane
         require 'uri'
 
         uri = URI.parse("#{params[:kolibri_url]}/webhooks/receive")
-        http = Net::HTTP.new(uri.host, uri.port)
+        https = Net::HTTP.new(uri.host, uri.port)
+        https.use_ssl = true
+
         req = Net::HTTP::Post.new(uri.request_uri)
 
         req.set_form_data({
@@ -19,7 +21,7 @@ module Fastlane
           "status"  => params[:state]
         })
 
-        response = http.request(req)
+        response = https.request(req)
         check_response_code(response)
       end
 
