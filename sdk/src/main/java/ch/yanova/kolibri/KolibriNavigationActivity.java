@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -113,6 +114,13 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         final Intent intent = item.getIntent();
 
         if (intent.getDataString().startsWith("kolibri://navigation/favorites")) {
+            startActivity(intent);
+            final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        }
+
+        if (intent.getDataString().startsWith("kolibri://navigation/search")) {
             startActivity(intent);
             final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);

@@ -31,17 +31,17 @@
             android:id="@+id/kolibri_main_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="?attr/actionBarSize" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/kolibri_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
             android:src="@drawable/ic_heart_outline_white_24dp"
             android:visibility="gone"
             app:fabSize="normal"
-            android:layout_margin="16dp"
             app:layout_anchor="@id/kolibri_main_content"
             app:layout_anchorGravity="bottom|right|end" />
 
