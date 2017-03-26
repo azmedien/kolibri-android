@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
 import android.os.Build;
@@ -81,6 +82,7 @@ public class KolibriWebView extends WebView {
     private void init() {
 
         if (!isInEditMode()) {
+            setLayerType(View.LAYER_TYPE_NONE, null);
             client = new KolibriWebViewClient() {
 
                 @Override

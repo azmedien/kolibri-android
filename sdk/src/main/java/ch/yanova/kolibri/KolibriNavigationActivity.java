@@ -38,9 +38,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
     private View mLayoutLoading;
     private View mLayoutOverlay;
 
-    private AlphaAnimation mAminFadeIn;
-    private AlphaAnimation mAminFadeOut;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -203,16 +200,13 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         if (mLayoutOverlay.getVisibility() != View.VISIBLE) {
             mLayoutOverlay.setVisibility(View.VISIBLE);
-            mLayoutOverlay.startAnimation(getAminFadeIn());
         }
 
         if (mLayoutError != null && mLayoutError.getVisibility() != View.GONE) {
             mLayoutError.setVisibility(View.GONE);
-            mLayoutError.startAnimation(getAminFadeOut());
         }
 
         navigationView.setVisibility(View.GONE);
-        navigationView.startAnimation(getAminFadeOut());
 
         mLayoutLoading.setVisibility(View.VISIBLE);
     }
@@ -221,12 +215,10 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         if (mLayoutOverlay.getVisibility() != View.VISIBLE) {
             mLayoutOverlay.setVisibility(View.VISIBLE);
-            mLayoutOverlay.startAnimation(getAminFadeIn());
         }
 
         if (mLayoutLoading.getVisibility() != View.GONE) {
             mLayoutLoading.setVisibility(View.GONE);
-            mLayoutLoading.startAnimation(getAminFadeOut());
         }
 
         if (text != null) {
@@ -235,46 +227,24 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         if (navigationView.getVisibility() != View.GONE) {
             navigationView.setVisibility(View.GONE);
-            navigationView.startAnimation(getAminFadeOut());
         }
 
         mLayoutError.setVisibility(View.VISIBLE);
-        mLayoutError.startAnimation(getAminFadeIn());
     }
 
     protected void showNavigation() {
         if (mLayoutLoading.getVisibility() != View.GONE) {
             mLayoutLoading.setVisibility(View.GONE);
-            mLayoutLoading.startAnimation(getAminFadeOut());
         }
 
         if (mLayoutError.getVisibility() != View.GONE) {
             mLayoutError.setVisibility(View.GONE);
-            mLayoutError.startAnimation(getAminFadeOut());
         }
 
         if (mLayoutOverlay.getVisibility() != View.GONE) {
             mLayoutOverlay.setVisibility(View.GONE);
-            mLayoutOverlay.startAnimation(getAminFadeOut());
         }
 
         navigationView.setVisibility(View.VISIBLE);
-        navigationView.startAnimation(getAminFadeIn());
-    }
-
-    public Animation getAminFadeIn() {
-        if (mAminFadeIn == null) {
-            mAminFadeIn = new AlphaAnimation(0f, 1f);
-            mAminFadeIn.setDuration(200);
-        }
-        return mAminFadeIn;
-    }
-
-    public Animation getAminFadeOut() {
-        if (mAminFadeOut == null) {
-            mAminFadeOut = new AlphaAnimation(1f, 0f);
-            mAminFadeOut.setDuration(200);
-        }
-        return mAminFadeOut;
     }
 }
