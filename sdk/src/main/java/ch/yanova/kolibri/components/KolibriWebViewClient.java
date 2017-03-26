@@ -125,23 +125,26 @@ public class KolibriWebViewClient extends WebViewClient {
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         super.onReceivedError(view, request, error);
-        assert listener != null;
-        listener.onReceivedError(view, request, error);
+        if (listener != null) {
+            listener.onReceivedError(view, request, error);
+        }
 
     }
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         super.onPageStarted(view, url, favicon);
-        assert listener != null;
-        listener.onPageStarted(view, url, favicon);
+        if (listener != null) {
+            listener.onPageStarted(view, url, favicon);
+        }
     }
 
     @Override
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
-        assert listener != null;
-        listener.onPageFinished(view, url);
+        if (listener != null) {
+            listener.onPageFinished(view, url);
+        }
     }
 
     boolean handleUri(KolibriWebView view, Context context, Uri link) {
