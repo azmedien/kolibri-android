@@ -37,22 +37,8 @@ public class KolibriWebView extends WebView {
 
     public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
 
-    private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
-    private static final String JS_INTERFACE_NAME = "GetHtml";
-
-    public static final String FAV_IMAGE = "og:image";
-    public static final String FAV_LABEL = "og:title";
-    public static final String ATTR_CONTENT = "content";
-    public static final String TAG_META = "meta";
-    public static final String ATTR_PROPERTY = "property";
-
     private KolibriWebViewClient client;
 
-    public void setOnAmpDataFoundListener(OnAmpDataFoundListener onAmpDataFoundListener) {
-        this.onAmpDataFoundListener = onAmpDataFoundListener;
-    }
-
-    private OnAmpDataFoundListener onAmpDataFoundListener;
 
     public KolibriWebView(Context context) {
         super(context);
@@ -83,67 +69,26 @@ public class KolibriWebView extends WebView {
 
         if (!isInEditMode()) {
             setLayerType(View.LAYER_TYPE_NONE, null);
-            client = new KolibriWebViewClient() {
-
-                @Override
-                public void onPageFinished(WebView view, String url) {
-                    super.onPageFinished(view, url);
-                    loadUrl(GET_HTML_STRING);
-                }
-            };
-            setWebViewClient(client);
+            setWebViewClient(new KolibriWebViewClient());
             getSettings().setJavaScriptEnabled(true);
             getSettings().setAppCacheEnabled(true);
             getSettings().setDomStorageEnabled(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
-
-            addJavascriptInterface(new GetHtmlJsInterface(), JS_INTERFACE_NAME);
         }
     }
 
-    public void handleIntent(Intent intent) {
+    @Override
+    public void setWebViewClient(WebViewClient client) {
 
-        final UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(intent.getData().toString());
-
-        if (sanitizer.hasParameter("url")) {
-            String url = intent.getData().getQueryParameter("url");
-            KolibriWebViewClient client = new KolibriWebViewClient();
-            boolean handled = client.handleUri(this, getContext(), Uri.parse(url));
-
-            if (intent.hasExtra(Intent.EXTRA_TITLE)) {
-                AppCompatActivity activity = (AppCompatActivity) getContext();
-                activity.getSupportActionBar().setTitle(intent.getStringExtra(Intent.EXTRA_TITLE));
-            }
-
-            if (!handled) {
-                loadUrl(url);
-            }
+        if (this.client != null) {
+            throw new IllegalAccessError("Cannot override kolibri's webview client");
+        } else {
+            super.setWebViewClient(client);
+            this.client = (KolibriWebViewClient) client;
         }
     }
 
-    private class GetHtmlJsInterface {
-        @JavascriptInterface
-        @SuppressWarnings("unused")
-        public void processHTML(String html) {
-
-            Document content = Jsoup.parseBodyFragment(html);
-            Elements links = content.getElementsByTag(TAG_META);
-            Log.i("PARSING", "processHTML: " + links);
-            Map<String, String> favData = new HashMap<>();
-            for (Element link : links) {
-                if (FAV_IMAGE.equals(link.attr(ATTR_PROPERTY)) || FAV_LABEL.equals(link.attr(ATTR_PROPERTY))) {
-                    String contentData = link.attr(ATTR_CONTENT);
-
-                    String key = FAV_IMAGE.equals(link.attr(ATTR_PROPERTY)) ?
-                            FAV_IMAGE : FAV_LABEL;
-
-                    favData.put(key, contentData);
-
-                    if (onAmpDataFoundListener != null) {
-                        onAmpDataFoundListener.onFound(favData);
-                    }
-                }
-            }
-        }
+    public KolibriWebViewClient getClient() {
+        return client;
     }
 }
