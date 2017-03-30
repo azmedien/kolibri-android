@@ -2,16 +2,22 @@ package ch.yanova.kolibri;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
+
+import com.google.gson.Gson;
 
 /**
  * Created by mmironov on 2/26/17.
  */
 
 public final class Kolibri {
+
+    private static final String PREFS_NAME = "KolibriPrefs";
+    private static final String KEY_SEARCH_JSON = "searchJson";
 
     public static void bind(View view, KolibriCoordinator coordinator) {
         view.addOnAttachStateChangeListener(new Binding(view, coordinator));
@@ -46,5 +52,19 @@ public final class Kolibri {
 
     public static void notifyComponents(Context context, Intent intent) {
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    }
+
+    public static boolean updateSearchSetup(Context context, String searchJson) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor prefsEditor = prefs.edit();
+        Gson gson = new Gson();
+        prefsEditor.putString(KEY_SEARCH_JSON, searchJson);
+        return prefsEditor.commit();
+    }
+
+    public static String getSearchJson(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_SEARCH_JSON, null);
     }
 }

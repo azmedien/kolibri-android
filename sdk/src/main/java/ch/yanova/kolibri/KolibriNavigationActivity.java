@@ -12,6 +12,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -133,13 +134,12 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         return true;
     }
 
-    @Override
-    public void onLoaded(JSONObject nav) {
+    private void constructNavigation(JSONObject navigation) {
         final Menu menu = navigationView.getMenu();
         menu.clear();
 
         try {
-            final JSONArray items = nav.getJSONObject("navigation").getJSONArray("items");
+            final JSONArray items = navigation.getJSONArray("items");
             for (int i = 0; i < items.length(); ++i) {
 
                 final JSONObject item = items.getJSONObject(i);
@@ -160,6 +160,20 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         } catch (JSONException e) {
             e.printStackTrace();
             showNavigationError(e.getLocalizedMessage());
+        }
+    }
+
+    @Override
+    public void onLoaded(JSONObject nav) {
+        try {
+            JSONObject navigation = nav.getJSONObject("navigation");
+            JSONObject search = nav.getJSONObject("search");
+            Kolibri.updateSearchSetup(this, search.toString());
+            if (navigation != null) {
+                constructNavigation(navigation);
+            }
+        } catch (JSONException e) {
+            Log.d("KolibriNavActivity", "onLoaded() returned: " + e);
         }
     }
 
