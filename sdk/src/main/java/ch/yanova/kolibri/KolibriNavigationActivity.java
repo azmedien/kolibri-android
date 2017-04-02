@@ -2,6 +2,7 @@ package ch.yanova.kolibri;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.net.UrlQuerySanitizer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -26,6 +28,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ch.yanova.kolibri.components.KolibriWebView;
+import ch.yanova.kolibri.components.KolibriWebViewClient;
+import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
 public abstract class KolibriNavigationActivity extends KolibriActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -68,29 +72,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         mLayoutLoading = navigationView.findViewById(R.id.progress);
         mLayoutOverlay = navigationView.findViewById(R.id.overlay);
 
-        final String navigationUri = "kolibri://navigation/link";
-        final KolibriWebView kolibriWebView = (KolibriWebView) mainContentView.findViewWithTag(KolibriWebView.class);
-
-        Kolibri.bind(kolibriWebView, new KolibriProvider() {
-            @Nullable
-            @Override
-            public KolibriCoordinator provideCoordinator(View view) {
-                return new KolibriCoordinator() {
-                    @Override
-                    public void handleIntent(View v, Intent intent) {
-                        kolibriWebView.handleIntent(intent);
-                    }
-
-                    @Override
-                    public String[] kolibriUris() {
-                        return new String[]{navigationUri};
-                    }
-                };
-            }
-        });
-
         showNavigationLoading();
-
         setNavigationListener(this);
         loadLocalNavigation();
     }
@@ -124,8 +106,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
             drawer.closeDrawer(GravityCompat.START);
             return true;
         }
-
-        getSupportActionBar().setTitle(item.getTitle());
 
         Kolibri.notifyComponents(getApplicationContext(), intent);
 
