@@ -2,8 +2,8 @@ package ch.yanova.kolibri;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.net.UrlQuerySanitizer;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -12,14 +12,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -27,16 +24,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
-import ch.yanova.kolibri.coordinators.WebViewCoordinator;
-
 public abstract class KolibriNavigationActivity extends KolibriActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        NavigationListener {
+        NavigationListener, KolibriInitializeListener {
 
     private NavigationView navigationView;
-    private View mainContentView;
     private FloatingActionButton floatingActionButton;
 
     private View mLayoutError;
@@ -47,12 +39,9 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        onPreInitialize();
+
         setContentView(R.layout.navigation_drawer);
-
-        mainContentView = getMainContentView();
-
-        final FrameLayout container = (FrameLayout) findViewById(R.id.kolibri_main_content);
-        container.addView(mainContentView);
 
         floatingActionButton = (FloatingActionButton) findViewById(R.id.kolibri_fab);
 
@@ -75,6 +64,9 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         showNavigationLoading();
         setNavigationListener(this);
         loadLocalNavigation();
+
+        final Fragment fragment = onPostInitialize();
+        getSupportFragmentManager().beginTransaction().replace(R.id.kolibri_main_content, fragment).commit();
     }
 
     @Override
@@ -183,8 +175,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         menu.add(label).setIntent(intent);
     }
-
-    public abstract View getMainContentView();
 
     public FloatingActionButton getFloatingActionButton() {
         return floatingActionButton;
