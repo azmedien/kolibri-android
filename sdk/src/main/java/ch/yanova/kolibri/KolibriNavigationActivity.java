@@ -3,9 +3,7 @@ package ch.yanova.kolibri;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -17,7 +15,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -28,6 +25,7 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         NavigationListener, KolibriInitializeListener {
 
+    public static final String TAG_MAIN_FRAGMENT = "mainFragment";
     private NavigationView navigationView;
     private FloatingActionButton floatingActionButton;
 
@@ -66,7 +64,15 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         loadLocalNavigation();
 
         final Fragment fragment = onPostInitialize();
-        getSupportFragmentManager().beginTransaction().replace(R.id.kolibri_main_content, fragment).commit();
+        startMainFragment(fragment);
+    }
+
+    private void startMainFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction().replace(R.id.kolibri_main_content, fragment, TAG_MAIN_FRAGMENT).commitAllowingStateLoss();
+    }
+
+    protected Fragment getMainFragment() {
+        return getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
     }
 
     @Override
