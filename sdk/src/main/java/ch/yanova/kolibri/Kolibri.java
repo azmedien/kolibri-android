@@ -74,7 +74,7 @@ public final class Kolibri {
     public static String searchParamKey(Context context) {
         try {
             final JSONObject searchJson = new JSONObject(getSearchJson(context));
-            return searchJson.getJSONObject("search").getJSONObject("settings").getString("search-param");
+            return searchJson.getJSONObject("settings").getString("search-param");
         } catch (JSONException e) {
             e.printStackTrace();
         }
