@@ -91,6 +91,8 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         final Intent intent = item.getIntent();
 
+
+        // FIXME: Make this activity implicit intents automatically opened
         if (intent.getDataString().startsWith("kolibri://navigation/favorites")) {
             startActivity(intent);
             final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -99,6 +101,13 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         }
 
         if (intent.getDataString().startsWith("kolibri://navigation/search")) {
+            startActivity(intent);
+            final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        }
+
+        if (intent.getDataString().startsWith("kolibri://navigation/shaker")) {
             startActivity(intent);
             final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
