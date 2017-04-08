@@ -1,6 +1,9 @@
 package ch.yanova.kolibri;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,9 +20,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class KolibriNavigationActivity extends KolibriActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -188,7 +197,37 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         final Intent intent = Kolibri.createIntent(uri);
         intent.putExtra(Intent.EXTRA_TITLE, label);
 
-        menu.add(label).setIntent(intent);
+        MenuItem menuItem = menu.add(label).setIntent(intent);
+
+        if (item.has("icon-normal")) {
+            String iconUrl = item.getString("icon-normal");
+            loadMenuIcon(menuItem, iconUrl);
+        }
+    }
+
+    // this set prevents collecting targets by garbage collector
+    final Set<Target> targets = new HashSet<>();
+
+    private void loadMenuIcon(final MenuItem menuItem, String url) {
+
+        Target target = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
+                BitmapDrawable mBitmapDrawable = new BitmapDrawable(getResources(), bitmap);
+                menuItem.setIcon(mBitmapDrawable);
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable drawable) {}
+
+            @Override
+            public void onPrepareLoad(Drawable drawable) {}
+        };
+
+        targets.add(target);
+
+        Picasso.with(this).load(url).into(target);
+
     }
 
     public FloatingActionButton getFloatingActionButton() {
