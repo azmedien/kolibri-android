@@ -34,7 +34,7 @@ import okhttp3.Response;
  * Created by lekov on 3/28/17.
  */
 
-public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements KolibriWebViewClient.WebClientListener {
+public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements KolibriWebViewClient.WebClientListener, OnAmpDataFoundListener {
 
     private static final String[] sURIs = new String[]{"kolibri://content/link"};
 
@@ -125,6 +125,13 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         });
     }
 
+    @Override
+    public void onFound(Map<String, String> data) {
+        if (listener != null) {
+            listener.onFound(data);
+        }
+    }
+
     private class GetHtmlJsInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
@@ -142,8 +149,10 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                     favData.put(key, contentData);
                 }
             }
-            if (listener != null) {
-                listener.onFound(favData);
+
+            // There's no need to report if actually there's no data
+            if (favData.size() > 0) {
+                onFound(favData);
             }
         }
     }

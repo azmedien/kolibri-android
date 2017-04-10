@@ -10,4 +10,5 @@ public interface KolibriInitializeListener {
     void onPreInitialize();
     Fragment onPostInitialize();
     void onBindComponents();
+    void onNavigationInitialize();
 }
