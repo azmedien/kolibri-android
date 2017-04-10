@@ -1,42 +1,41 @@
 package ch.yanova.kolibri;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.net.UrlQuerySanitizer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.widget.FrameLayout;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
-import ch.yanova.kolibri.coordinators.WebViewCoordinator;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class KolibriNavigationActivity extends KolibriActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        NavigationListener {
+        NavigationListener, KolibriInitializeListener {
 
+    public static final String TAG_MAIN_FRAGMENT = "mainFragment";
     private NavigationView navigationView;
-    private View mainContentView;
     private FloatingActionButton floatingActionButton;
 
     private View mLayoutError;
@@ -47,12 +46,9 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        onPreInitialize();
+
         setContentView(R.layout.navigation_drawer);
-
-        mainContentView = getMainContentView();
-
-        final FrameLayout container = (FrameLayout) findViewById(R.id.kolibri_main_content);
-        container.addView(mainContentView);
 
         floatingActionButton = (FloatingActionButton) findViewById(R.id.kolibri_fab);
 
@@ -75,6 +71,17 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         showNavigationLoading();
         setNavigationListener(this);
         loadLocalNavigation();
+
+        final Fragment fragment = onPostInitialize();
+        startMainFragment(fragment);
+    }
+
+    private void startMainFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction().replace(R.id.kolibri_main_content, fragment, TAG_MAIN_FRAGMENT).commitAllowingStateLoss();
+    }
+
+    protected Fragment getMainFragment() {
+        return getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
     }
 
     @Override
@@ -93,6 +100,8 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         final Intent intent = item.getIntent();
 
+
+        // FIXME: Make this activity implicit intents automatically opened
         if (intent.getDataString().startsWith("kolibri://navigation/favorites")) {
             startActivity(intent);
             final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -101,6 +110,13 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         }
 
         if (intent.getDataString().startsWith("kolibri://navigation/search")) {
+            startActivity(intent);
+            final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        }
+
+        if (intent.getDataString().startsWith("kolibri://navigation/shaker")) {
             startActivity(intent);
             final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
@@ -181,10 +197,38 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         final Intent intent = Kolibri.createIntent(uri);
         intent.putExtra(Intent.EXTRA_TITLE, label);
 
-        menu.add(label).setIntent(intent);
+        MenuItem menuItem = menu.add(label).setIntent(intent);
+
+        if (item.has("icon-normal")) {
+            String iconUrl = item.getString("icon-normal");
+            loadMenuIcon(menuItem, iconUrl);
+        }
     }
 
-    public abstract View getMainContentView();
+    // this set prevents collecting targets by garbage collector
+    final Set<Target> targets = new HashSet<>();
+
+    private void loadMenuIcon(final MenuItem menuItem, String url) {
+
+        Target target = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
+                BitmapDrawable mBitmapDrawable = new BitmapDrawable(getResources(), bitmap);
+                menuItem.setIcon(mBitmapDrawable);
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable drawable) {}
+
+            @Override
+            public void onPrepareLoad(Drawable drawable) {}
+        };
+
+        targets.add(target);
+
+        Picasso.with(this).load(url).into(target);
+
+    }
 
     public FloatingActionButton getFloatingActionButton() {
         return floatingActionButton;

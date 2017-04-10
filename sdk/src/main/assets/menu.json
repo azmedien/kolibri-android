@@ -92,6 +92,11 @@
         "id": "search",
         "label": "Suche",
         "icon-normal": "https://api.pcloud.com/getpubthumb?code=XZ0oCUZQg7DoPybYvL0MAs4eq8MU7EAJg7V&linkpassword=undefined&size=88x88&crop=0&type=auto"
+      },
+      {
+        "component": "kolibri://navigation/shaker",
+        "id": "shaker",
+        "label": "Shaker app"
       }
     ]
   },

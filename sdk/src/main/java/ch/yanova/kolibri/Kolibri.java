@@ -10,6 +10,9 @@ import android.view.View;
 
 import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by mmironov on 2/26/17.
  */
@@ -66,5 +69,16 @@ public final class Kolibri {
     public static String getSearchJson(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return prefs.getString(KEY_SEARCH_JSON, null);
+    }
+
+    public static String searchParamKey(Context context) {
+        try {
+            final JSONObject searchJson = new JSONObject(getSearchJson(context));
+            return searchJson.getJSONObject("settings").getString("search-param");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

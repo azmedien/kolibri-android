@@ -36,7 +36,7 @@ import okhttp3.Response;
 
 public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements KolibriWebViewClient.WebClientListener {
 
-    private static final String[] sURIs = new String[]{"kolibri://navigation/link"};
+    private static final String[] sURIs = new String[]{"kolibri://content/link"};
 
     public static final String HEADER_FAVORITES = "Kolibri-Favorizable";
 
