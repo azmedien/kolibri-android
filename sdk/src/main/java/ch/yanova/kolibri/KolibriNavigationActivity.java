@@ -13,8 +13,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,9 +30,9 @@ import org.json.JSONObject;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class KolibriNavigationActivity extends KolibriActivity
+public abstract class KolibriNavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        NavigationListener, KolibriInitializeListener {
+        RuntimeListener, KolibriInitializeListener {
 
     public static final String TAG_MAIN_FRAGMENT = "mainFragment";
     private NavigationView navigationView;
@@ -68,12 +68,16 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         mLayoutLoading = navigationView.findViewById(R.id.progress);
         mLayoutOverlay = navigationView.findViewById(R.id.overlay);
 
-        showNavigationLoading();
-        setNavigationListener(this);
-        loadLocalNavigation();
-
         final Fragment fragment = onPostInitialize();
         startMainFragment(fragment);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        showNavigationLoading();
+        Kolibri kolibri = Kolibri.getInstance(this);
+        kolibri.loadRuntimeConfiguration(this);
     }
 
     private void startMainFragment(Fragment fragment) {
@@ -100,7 +104,6 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
 
         final Intent intent = item.getIntent();
 
-
         // FIXME: Make this activity implicit intents automatically opened
         if (intent.getDataString().startsWith("kolibri://navigation/favorites")) {
             startActivity(intent);
@@ -124,6 +127,15 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
         }
 
         Kolibri.notifyComponents(getApplicationContext(), intent);
+
+        for (int i = 0; i < navigationView.getMenu().size(); i++) {
+            if (item.equals(navigationView.getMenu().getItem(i))) {
+                item.setChecked(true);
+            } else {
+                navigationView.getMenu().getItem(i).setChecked(false);
+            }
+        }
+
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -152,7 +164,20 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
                 }
             }
 
+            menu.getItem(navigation.getJSONObject("settings").getInt("default-item")).getIntent().addCategory(Intent.CATEGORY_DEFAULT);
+
             showNavigation();
+
+            for (int i = 0; i < menu.size(); i++) {
+                final MenuItem item = menu.getItem(i);
+                if (item.getIntent().getCategories().contains(Intent.CATEGORY_DEFAULT)) {
+                    item.setChecked(true);
+                    Kolibri.notifyComponents(this, item.getIntent());
+                    break;
+                }
+            }
+
+            onNavigationInitialize();
         } catch (JSONException e) {
             e.printStackTrace();
             showNavigationError(e.getLocalizedMessage());
@@ -160,22 +185,32 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
     }
 
     @Override
-    public void onLoaded(JSONObject nav) {
-        try {
-            JSONObject navigation = nav.getJSONObject("navigation");
-            JSONObject search = nav.getJSONObject("search");
-            Kolibri.updateSearchSetup(this, search.toString());
-            if (navigation != null) {
-                constructNavigation(navigation);
+    public void onLoaded(final Kolibri.Runtime runtime) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final JSONObject navigation = runtime.getNavigation();
+                final JSONObject search = runtime.getComponent("search");
+
+                Kolibri.updateSearchSetup(KolibriNavigationActivity.this, search.toString());
+
+                if (navigation != null) {
+                    constructNavigation(navigation);
+                }
             }
-        } catch (JSONException e) {
-            Log.d("KolibriNavActivity", "onLoaded() returned: " + e);
-        }
+        });
     }
 
     @Override
-    public boolean onFailed(Exception e) {
-        showNavigationError(e.getLocalizedMessage());
+    public boolean onFailed(final Exception e) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showNavigationError(e.getLocalizedMessage());
+            }
+        });
         return false;
     }
 
@@ -218,10 +253,12 @@ public abstract class KolibriNavigationActivity extends KolibriActivity
             }
 
             @Override
-            public void onBitmapFailed(Drawable drawable) {}
+            public void onBitmapFailed(Drawable drawable) {
+            }
 
             @Override
-            public void onPrepareLoad(Drawable drawable) {}
+            public void onPrepareLoad(Drawable drawable) {
+            }
         };
 
         targets.add(target);

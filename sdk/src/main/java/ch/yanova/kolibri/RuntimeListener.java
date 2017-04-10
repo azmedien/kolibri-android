@@ -1,13 +1,11 @@
 package ch.yanova.kolibri;
 
-import org.json.JSONObject;
-
 /**
  * Created by mmironov on 2/26/17.
  */
 
-public interface NavigationListener {
+interface RuntimeListener {
 
-    void onLoaded(JSONObject nav);
+    void onLoaded(Kolibri.Runtime runtime);
     boolean onFailed(Exception e);
 }
