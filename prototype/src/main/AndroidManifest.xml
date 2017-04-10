@@ -23,6 +23,11 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="5b0e4ca8fe72e1ad97ccbd82e18f18ba4cacd219" />
+
+        <meta-data
+            android:name="kolibri_navigation_url"
+            android:value="https://kolibri.herokuapp.com/apps/1/runtime" />
+
     </application>
 
 </manifest>
