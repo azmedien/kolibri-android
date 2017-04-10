@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,6 +18,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -88,11 +90,14 @@ public class Kolibri {
     private static Kolibri mInstance;
     private static Context fContext;
 
+
+    private SharedPreferences preferences;
     private Runtime runtime;
 
     private Kolibri(Context context) {
         // There's no memory leak when we get the application context.
         fContext = context.getApplicationContext();
+        preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
     public static synchronized Kolibri getInstance(Context context) {
@@ -110,19 +115,29 @@ public class Kolibri {
             throw new IllegalAccessError("Kolibri navigation url must be set as meta-data in the Manifest.");
         }
 
-        final OkHttpClient client = new OkHttpClient();
+        int cacheSize = 10 * 1024 * 1024; // 10 MiB
+        Cache cache = new Cache(fContext.getCacheDir(), cacheSize);
+
+        final OkHttpClient client = new OkHttpClient.Builder().cache(cache).build();
 
         final Request request = new Request.Builder()
                 .url(getNavigationUrl())
+                .header("Cache-Control", "max-stale=360")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (runtimeListener != null) {
-                    final boolean userDefined = runtimeListener.onFailed(e);
-                    if (!userDefined) {
-                        Log.d(TAG, "onFailure() called with: call = [" + call + "], e = [" + e + "]");
+
+                    try {
+                        runtime = new Runtime(new JSONObject(preferences.getString("runtime", "{}")));
+                        runtimeListener.onLoaded(runtime);
+                    } catch (JSONException je) {
+                        final boolean userDefined = runtimeListener.onFailed(e);
+                        if (!userDefined) {
+                            Log.d(TAG, "onFailure() called with: call = [" + call + "], e = [" + e + "]");
+                        }
                     }
                 }
             }
@@ -133,19 +148,17 @@ public class Kolibri {
                 final String json = response.body().string();
 
                 try {
-                    final JSONObject navigationJson = new JSONObject(json);
-
+                    JSONObject navigationJson = new JSONObject(json);
+                    preferences.edit().putString("runtime", json).apply();
                     runtime = new Runtime(navigationJson);
-
+                } catch (JSONException e) {
+                    try {
+                        runtime = new Runtime(new JSONObject(preferences.getString("runtime", "{}")));
+                    } catch (JSONException ignored) {
+                    }
+                } finally {
                     if (runtimeListener != null) {
                         runtimeListener.onLoaded(runtime);
-                    }
-
-                } catch (JSONException e) {
-                    Log.e(TAG, "onResponse: ", e);
-
-                    if (runtimeListener != null) {
-                        runtimeListener.onFailed(e);
                     }
                 }
             }
