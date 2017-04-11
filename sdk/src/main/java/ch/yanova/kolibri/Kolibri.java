@@ -122,7 +122,7 @@ public class Kolibri {
 
         final Request request = new Request.Builder()
                 .url(getNavigationUrl())
-                .header("Cache-Control", "max-stale=360")
+                .header("Cache-Control", "public, max-age=604800")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -148,6 +148,10 @@ public class Kolibri {
                 final String json = response.body().string();
 
                 try {
+
+                    Log.i(TAG, "onResponse: cache " + response.cacheResponse());
+                    Log.i(TAG, "onResponse: network " + response.networkResponse());
+
                     JSONObject navigationJson = new JSONObject(json);
                     preferences.edit().putString("runtime", json).apply();
                     runtime = new Runtime(navigationJson);
