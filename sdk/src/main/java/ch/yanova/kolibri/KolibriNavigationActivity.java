@@ -42,6 +42,8 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     private View mLayoutLoading;
     private View mLayoutOverlay;
 
+    private boolean restarted;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +72,15 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         final Fragment fragment = onPostInitialize();
         startMainFragment(fragment);
+
+        restarted = false;
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        restarted = true;
     }
 
     @Override
@@ -168,19 +179,28 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
             showNavigation();
 
-            for (int i = 0; i < menu.size(); i++) {
-                final MenuItem item = menu.getItem(i);
-                if (item.getIntent().getCategories().contains(Intent.CATEGORY_DEFAULT)) {
-                    item.setChecked(true);
-                    Kolibri.notifyComponents(this, item.getIntent());
-                    break;
-                }
+            if (!restarted) {
+                loadDefaultItem();
             }
 
             onNavigationInitialize();
         } catch (JSONException e) {
             e.printStackTrace();
             showNavigationError(e.getLocalizedMessage());
+        }
+    }
+
+    protected void loadDefaultItem() {
+
+        final Menu menu = navigationView.getMenu();
+
+        for (int i = 0; i < menu.size(); i++) {
+            final MenuItem item = menu.getItem(i);
+            if (item.getIntent().getCategories().contains(Intent.CATEGORY_DEFAULT)) {
+                item.setChecked(true);
+                Kolibri.notifyComponents(this, item.getIntent());
+                break;
+            }
         }
     }
 
