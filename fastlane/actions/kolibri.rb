@@ -17,8 +17,10 @@ module Fastlane
         req.set_form_data({
           "project" => params[:kolibri_project],
           "build"   => params[:build] || ENV['BUILD_ID'],
+          "url"     => ENV['RUN_DISPLAY_URL'] || ENV['BUILD_URL'],
           "type"    => params[:stage],
-          "status"  => params[:state]
+          "status"  => params[:state],
+          "platform" => ENV['FASTLANE_PLATFORM_NAME']
         })
 
         response = https.request(req)
