@@ -218,14 +218,15 @@ public class Kolibri {
     }
 
     public static String searchParamKey(Context context) {
+        String searchKeyParam = null;
         try {
             final JSONObject searchJson = new JSONObject(getSearchJson(context));
-            return searchJson.getJSONObject("settings").getString("search-param");
+            searchKeyParam = searchJson.getJSONObject("settings").getString("search-param");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return searchKeyParam;
     }
 
     private String getNavigationUrl() {
