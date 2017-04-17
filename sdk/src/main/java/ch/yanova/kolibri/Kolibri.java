@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +33,29 @@ import okhttp3.Response;
 public class Kolibri {
 
     public static final String EXTRA_ID = "id";
+
+    public static boolean isPageSearchable(Context context, String pageId) {
+
+        if (pageId == null) {
+            return false;
+        }
+
+        try {
+            JSONObject searchJson = new JSONObject(getSearchJson(context));
+
+            JSONArray items = searchJson.getJSONObject("navigation").getJSONArray("items");
+
+            for(int i=0; i < items.length(); ++i) {
+                if (pageId.equals(items.getJSONObject(i).getString("id"))) {
+                    return true;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 
     public static class Runtime {
 
