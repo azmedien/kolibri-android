@@ -252,6 +252,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final Intent intent = Kolibri.createIntent(uri);
         intent.putExtra(Intent.EXTRA_TITLE, label);
 
+        final String id = item.getString("id");
+        intent.putExtra(Kolibri.EXTRA_ID, id);
+
         MenuItem menuItem = menu.add(label).setIntent(intent);
 
         if (item.has("icon-normal")) {

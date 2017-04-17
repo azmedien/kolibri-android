@@ -31,6 +31,8 @@ import okhttp3.Response;
 
 public class Kolibri {
 
+    public static final String EXTRA_ID = "id";
+
     public static class Runtime {
 
         private final JSONObject fRuntime;
