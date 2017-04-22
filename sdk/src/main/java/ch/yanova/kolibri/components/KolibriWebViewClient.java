@@ -96,7 +96,12 @@ public class KolibriWebViewClient extends WebViewClient {
     }
 
     public boolean handleUri(Context context, Uri link) {
-        final String target = link.getQueryParameter(PARAM_TARGET);
+        String target = link.getQueryParameter(PARAM_TARGET);
+
+        if (target == null) {
+            target = TARGET_INTERNAL;
+        }
+
         final boolean handleInNewView = handleInNewView(target);
 
         if (handleInNewView) {
