@@ -115,6 +115,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         final Intent intent = item.getIntent();
 
+        final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
+        Kolibri.setSelectedMenuItem(title);
+
         // FIXME: Make this activity implicit intents automatically opened
         if (intent.getDataString().startsWith("kolibri://navigation/favorites")) {
             startActivity(intent);

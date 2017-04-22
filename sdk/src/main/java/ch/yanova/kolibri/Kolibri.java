@@ -116,6 +116,7 @@ public class Kolibri {
     private static Kolibri mInstance;
     private static Context fContext;
 
+    private String selectedMenuItem;
 
     private SharedPreferences preferences;
     private Runtime runtime;
@@ -269,5 +270,13 @@ public class Kolibri {
 
     public synchronized Runtime getRuntime() {
         return runtime;
+    }
+
+    public static void setSelectedMenuItem(String selectedMenuItem) {
+        mInstance.selectedMenuItem = selectedMenuItem;
+    }
+
+    public static String selectedMenuItem() {
+        return mInstance.selectedMenuItem;
     }
 }
