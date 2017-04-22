@@ -45,6 +45,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
     public static final String FAV_IMAGE = "og:image";
     public static final String FAV_LABEL = "og:title";
+    public static final String META_CANONICAL_URL = "og:url";
     public static final String ATTR_CONTENT = "content";
     public static final String TAG_META = "meta";
     public static final String ATTR_PROPERTY = "property";
@@ -142,12 +143,14 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
             Log.i("PARSING", "processHTML: " + links);
             Map<String, String> favData = new HashMap<>();
             for (Element link : links) {
-                if (FAV_IMAGE.equals(link.attr(ATTR_PROPERTY)) || FAV_LABEL.equals(link.attr(ATTR_PROPERTY))) {
-                    final String contentData = link.attr(ATTR_CONTENT);
-                    final String key = FAV_IMAGE.equals(link.attr(ATTR_PROPERTY)) ? FAV_IMAGE : FAV_LABEL;
 
-                    favData.put(key, contentData);
-                }
+                if (!link.hasAttr(ATTR_PROPERTY))
+                    continue;
+
+                final String contentData = link.attr(ATTR_CONTENT);
+                final String key = link.attr(ATTR_PROPERTY);
+
+                favData.put(key, contentData);
             }
 
             // There's no need to report if actually there's no data
