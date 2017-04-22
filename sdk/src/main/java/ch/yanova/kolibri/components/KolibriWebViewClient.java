@@ -63,7 +63,16 @@ public class KolibriWebViewClient extends WebViewClient {
         if (listener != null) {
             listener.onReceivedError(view, request, error);
         }
+    }
 
+    //Implemented for backwards compatibility for devices running Android < Marshmallow (API 23)
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+        super.onReceivedError(view, errorCode, description, failingUrl);
+        if (listener != null) {
+            listener.onReceivedError(view, null, null);
+        }
     }
 
     @Override

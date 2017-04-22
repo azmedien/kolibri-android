@@ -216,7 +216,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
                 final JSONObject navigation = runtime.getNavigation();
                 final JSONObject search = runtime.getComponent("search");
 
-                Kolibri.updateSearchSetup(KolibriNavigationActivity.this, search.toString());
+                if (search != null) {
+                    Kolibri.updateSearchSetup(KolibriNavigationActivity.this, search.toString());
+                }
 
                 if (navigation != null) {
                     constructNavigation(navigation);
