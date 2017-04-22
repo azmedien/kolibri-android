@@ -1,6 +1,8 @@
 package ch.yanova.kolibri;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 /**
@@ -28,8 +30,13 @@ public class KolibriFragment extends Fragment {
         initializer = null;
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        bindComponents();
+    }
 
-    protected void bindComponents() {
+    private void bindComponents() {
         initializer.onBindComponents();
     }
 
