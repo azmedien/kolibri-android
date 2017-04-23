@@ -95,6 +95,16 @@ public class Kolibri {
             return null;
         }
 
+        public String getDomain() {
+            try {
+                return getNavigation().getJSONObject("settings").getString("domain");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
         public JSONObject getComponent(String name) {
             try {
                 return fRuntime.getJSONObject(name);

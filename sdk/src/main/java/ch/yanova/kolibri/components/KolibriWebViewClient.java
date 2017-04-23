@@ -11,6 +11,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import ch.yanova.kolibri.Kolibri;
+
 /**
  * Created by mmironov on 3/3/17.
  */
@@ -108,7 +110,13 @@ public class KolibriWebViewClient extends WebViewClient {
         String target = link.getQueryParameter(PARAM_TARGET);
 
         if (target == null) {
-            target = TARGET_INTERNAL;
+            final String domain = Kolibri.getInstance(context).getRuntime().getDomain();
+
+            if (link.getHost().equals(domain)) {
+                target = TARGET_INTERNAL;
+            } else {
+                target = TARGET_EXTERNAL;
+            }
         }
 
         final boolean handleInNewView = handleInNewView(target);
