@@ -96,8 +96,26 @@ public class Kolibri {
         }
 
         public String getDomain() {
+            return getSetting("domain");
+        }
+
+        public String getScheme() {
+            return getSetting("scheme");
+        }
+
+        public JSONObject getSettings() {
             try {
-                return getNavigation().getJSONObject("settings").getString("domain");
+                return getNavigation().getJSONObject("settings");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        public String getSetting(String key) {
+            try {
+                return getSettings().getString(key);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

@@ -127,6 +127,13 @@ public class KolibriWebViewClient extends WebViewClient {
                     new Intent(Intent.ACTION_VIEW, link);
 
             context.startActivity(linkIntent);
+
+            final String scheme = link.getScheme();
+
+            //TODO: Fix me. This is still experimental.
+            if (scheme.equals(Kolibri.getInstance(context).getRuntime().getScheme())) {
+                Kolibri.notifyComponents(context, Kolibri.createIntent(link));
+            }
         }
 
         return handleInNewView;
