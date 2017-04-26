@@ -26,7 +26,7 @@
 
         <meta-data
             android:name="kolibri_navigation_url"
-            android:value="https://kolibri.herokuapp.com/apps/1/runtime" />
+            android:value="https://kolibri.herokuapp.com/apps/wpUn99KXFbo9J6LmihcfqCf3/runtime" />
 
     </application>
 

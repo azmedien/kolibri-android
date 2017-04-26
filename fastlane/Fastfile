@@ -28,6 +28,12 @@ platform :android do
     test
   end
 
+  lane :beta do
+    build
+    test
+    publish
+  end
+
   desc "Runs all the tests"
   lane :test do
     kolibri(
@@ -51,7 +57,7 @@ platform :android do
       state: "started"
     )
 
-    gradle(task: "build")
+    gradle(task: "assembleDebug")
 
     kolibri(
       stage: "build",
@@ -59,13 +65,23 @@ platform :android do
     )
   end
 
+  desc "Publish to Fabric Beta"
+  lane :publish do
+    commit = last_git_commit
+
+    crashlytics(
+        api_token: "5b0e4ca8fe72e1ad97ccbd82e18f18ba4cacd219",
+        build_secret: "8f94e66fae0366a48a613623166a2586ae77e7fab1b68d021471e0036ba46ad8"
+     )
+
+     kolibri(
+       stage: "publish",
+       state: "finished"
+      )
+  end
+
   after_all do |lane|
     # This block is called, only if the executed lane was successful
-
-    kolibri(
-      stage: "publish",
-      state: "finished"
-    )
 
     slack(
       message: "Successfully builded and tested"
