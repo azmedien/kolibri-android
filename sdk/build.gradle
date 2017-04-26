@@ -1,4 +1,10 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: "com.jfrog.artifactory"
+apply plugin: 'maven-publish'
+
+group = 'ch.yanova.kolibri'
+version = "0.1.0-SNAPSHOT"
 
 android {
     compileSdkVersion 25
@@ -8,7 +14,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName project.version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -47,4 +53,66 @@ dependencies {
     testCompile 'org.powermock:powermock-module-junit4:1.6.6'
     testCompile 'com.squareup.okhttp3:mockwebserver:3.6.0'
     compile 'com.google.code.gson:gson:2.7'
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath +=    project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId project.group
+            version = project.version
+            artifactId project.name
+
+            // Tell maven to prepare the generated "*.aar" file for publishing
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            artifacts {
+                archives androidSourcesJar
+                archives androidJavadocsJar
+            }
+
+            pom.withXml {
+                def dependencies = asNode().appendNode('dependencies')
+                configurations.getByName("_releaseCompile").getResolvedConfiguration().getFirstLevelModuleDependencies().each {
+                    def dependency = dependencies.appendNode('dependency')
+                    dependency.appendNode('groupId', it.moduleGroup)
+                    dependency.appendNode('artifactId', it.moduleName)
+                    dependency.appendNode('version', it.moduleVersion)
+                }
+            }
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'http://localhost:8081/artifactory'
+    publish {
+        repository {
+            // The Artifactory repository key to publish to
+            repoKey = project.version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+        }
+        defaults {
+            publications('aar')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
 }
