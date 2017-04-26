@@ -96,6 +96,13 @@ artifactory {
 }
 
 task androidJavadocs(type: Javadoc) {
+
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            owner.classpath += variant.javaCompile.classpath
+        }
+    }
+
     source = android.sourceSets.main.java.srcDirs
     ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator)) + configurations.compile + files(ext.androidJar)
