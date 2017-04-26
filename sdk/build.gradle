@@ -55,26 +55,6 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7'
 }
 
-task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath +=    project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-    classifier = 'javadoc'
-    from androidJavadocs.destinationDir
-}
-
-task androidSourcesJar(type: Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
-}
-
-artifacts {
-    archives androidSourcesJar
-    archives androidJavadocsJar
-}
-
 publishing {
     publications {
         aar(MavenPublication) {
@@ -84,10 +64,8 @@ publishing {
 
             // Tell maven to prepare the generated "*.aar" file for publishing
             artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
-            artifacts {
-                archives androidSourcesJar
-                archives androidJavadocsJar
-            }
+            artifact androidJavadocsJar
+            artifact androidSourcesJar
 
             pom.withXml {
                 def dependencies = asNode().appendNode('dependencies')
@@ -115,4 +93,24 @@ artifactory {
             publishPom = true
         }
     }
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
 }
