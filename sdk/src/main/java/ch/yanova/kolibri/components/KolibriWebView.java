@@ -27,6 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ch.yanova.kolibri.BuildConfig;
+import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriCoordinator;
 
 /**
@@ -74,6 +75,8 @@ public class KolibriWebView extends WebView {
             getSettings().setAppCacheEnabled(true);
             getSettings().setDomStorageEnabled(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
+
+            KolibriApp.getInstance().setUserAgent(getSettings().getUserAgentString());
         }
     }
 

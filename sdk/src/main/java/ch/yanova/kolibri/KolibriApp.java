@@ -2,8 +2,15 @@ package ch.yanova.kolibri;
 
 import android.app.Application;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.franmontiel.persistentcookiejar.ClearableCookieJar;
+import com.franmontiel.persistentcookiejar.PersistentCookieJar;
+import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
+import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -28,24 +35,48 @@ public class KolibriApp extends Application {
     private FirebaseAnalytics mFirebaseAnalytics;
     private OkHttpClient mNetmetrixClient;
 
+    private String mUserAgent;
+
+    private static String mLastUrlLogged;
+
+    private static int widthPixels;
+    private static int heightPixels;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        final DisplayMetrics lDisplayMetrics = getResources().getDisplayMetrics();
+        final ClearableCookieJar cookieJar = new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(this));
 
         sInstance = this;
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        final CookieJar cookieJar = new NetworkUtils.KolibriCookieJar();
+        widthPixels = lDisplayMetrics.widthPixels;
+        heightPixels = lDisplayMetrics.heightPixels;
+
         mNetmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
     }
 
-    public void logEvent(String name, String url) {
+    public void logEvent(@Nullable String name, @NonNull String url) {
+
+        if (mLastUrlLogged != null && mLastUrlLogged.contentEquals(url)) {
+            Log.i("KolibriApp", String.format("Trying to log again event for %s. Skipped.", url));
+            return;
+        }
+
+        mLastUrlLogged = url;
+
+        Log.d("KolibriApp", "logEvent() called with: name = [" + name + "], url = [" + url + "]");
 
         final Bundle bundle = new Bundle();
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, url);
-        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
-        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "text/html");
+
+        if (name != null)
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
+
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "application/amp+html");
         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
 
@@ -56,7 +87,10 @@ public class KolibriApp extends Application {
         final String sb = Kolibri.getInstance(this).getNetmetrixUrl() + "/" + "wildeisen" +
                 "/" + "android" +
                 "/" + FirebaseInstanceId.getInstance().getId() +
-                "?d=" + System.currentTimeMillis();
+                "?r=" + url +
+                "&d=" + System.currentTimeMillis() +
+                "&x=" + widthPixels + "x" + heightPixels;
+
 
         // TODO:
         // 1. change user agent to be the kolibri one
@@ -66,7 +100,7 @@ public class KolibriApp extends Application {
                         .url(sb)
                         .get()
                         .header("Accept-Language", "de")
-                        .header("User-Agent", "Mozilla/5.0 (Linux; U; Android-phone)")
+                        .header("User-Agent", mUserAgent == null ? "Mozilla/5.0 (Linux; U; Android-phone)" : mUserAgent)
                         .build())
                 .enqueue(new Callback() {
                     @Override
@@ -83,6 +117,10 @@ public class KolibriApp extends Application {
                         }
                     }
                 });
+    }
+
+    public void setUserAgent(String mUserAgent) {
+        this.mUserAgent = mUserAgent;
     }
 
     public static KolibriApp getInstance() {

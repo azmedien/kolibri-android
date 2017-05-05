@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ch.yanova.kolibri.Kolibri;
+import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriCoordinator;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
@@ -74,8 +75,8 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         final UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(intent.getData().toString());
 
         if (sanitizer.hasParameter("url")) {
-            final Uri url = Uri.parse(intent.getData().getQueryParameter("url"));
 
+            final Uri url = Uri.parse(intent.getData().getQueryParameter("url"));
 
             //FIX ME: Not passing the intent extras, lose TITLE for example in case the client
             // starts internal webview activity
