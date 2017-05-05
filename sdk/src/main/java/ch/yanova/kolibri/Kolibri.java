@@ -138,6 +138,7 @@ public class Kolibri {
     private static final String KEY_SEARCH_JSON = "searchJson";
 
     private static final String META_NAVIGATION = "kolibri_navigation_url";
+    private static final String META_NETMETRIX = "kolibri_netmetrix_url";
     private static final String PREF_NAME = "ch.yanova.kolibri.RUNTIME_CONFIG";
     private static final String TAG = "Kolibri";
 
@@ -284,12 +285,24 @@ public class Kolibri {
         return searchKeyParam;
     }
 
-    private String getNavigationUrl() {
+    String getNavigationUrl() {
         try {
             final ApplicationInfo ai = fContext.getPackageManager().getApplicationInfo(fContext.getPackageName(), PackageManager.GET_META_DATA);
             final Bundle bundle = ai.metaData;
 
             return bundle.getString(META_NAVIGATION);
+        } catch (Exception ignored) {
+        }
+
+        return null;
+    }
+
+    String getNetmetrixUrl() {
+        try {
+            final ApplicationInfo ai = fContext.getPackageManager().getApplicationInfo(fContext.getPackageName(), PackageManager.GET_META_DATA);
+            final Bundle bundle = ai.metaData;
+
+            return bundle.getString(META_NETMETRIX);
         } catch (Exception ignored) {
         }
 
