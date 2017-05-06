@@ -9,6 +9,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import ch.yanova.kolibri.BuildConfig;
+import ch.yanova.kolibri.KolibriApp;
+import ch.yanova.kolibri.KolibriCoordinator;
 
 /**
  * Created by mmironov on 2/26/17.
@@ -55,6 +57,8 @@ public class KolibriWebView extends WebView {
             getSettings().setAppCacheEnabled(true);
             getSettings().setDomStorageEnabled(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
+
+            KolibriApp.getInstance().setUserAgent(getSettings().getUserAgentString());
         }
     }
 

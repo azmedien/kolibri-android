@@ -52,7 +52,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:clipToPadding="false"
         android:fitsSystemWindows="true"
+        android:paddingBottom="48dp"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_menu">
 
@@ -62,6 +64,17 @@
             android:layout_height="match_parent"
             android:layout_marginTop="?attr/actionBarSize"
             android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/kolibri_footer"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="-48dp"
+            android:background="@android:color/white"
+            android:elevation="8dp"
+            android:orientation="horizontal"
+            app:elevation="8dp" />
     </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>

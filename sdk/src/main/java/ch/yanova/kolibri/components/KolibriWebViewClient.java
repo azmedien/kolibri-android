@@ -6,12 +6,14 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import ch.yanova.kolibri.Kolibri;
+import ch.yanova.kolibri.KolibriApp;
 
 /**
  * Created by mmironov on 3/3/17.
@@ -106,7 +108,10 @@ public class KolibriWebViewClient extends WebViewClient {
 
     }
 
-    public boolean handleUri(Context context, Uri link) {
+    public final boolean handleUri(Context context, Uri link) {
+
+        KolibriApp.getInstance().logEvent(null, link.toString());
+
         String target = link.getQueryParameter(PARAM_TARGET);
 
         if (target == null) {
