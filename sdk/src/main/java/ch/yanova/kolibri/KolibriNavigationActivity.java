@@ -9,15 +9,20 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -43,6 +48,14 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     private View mLayoutOverlay;
 
     private boolean restarted;
+
+    private final View.OnClickListener onFooterClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final Intent i = (Intent) v.getTag();
+            startActivity(Intent.createChooser(i, "Open with..."));
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,9 +235,41 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
                 if (navigation != null) {
                     constructNavigation(navigation);
+                    if (navigation.has("footer")) {
+                        try {
+                            constructFooter(navigation.getJSONObject("footer"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         });
+    }
+
+    private void constructFooter(JSONObject footer) throws JSONException {
+
+        if (!footer.has("items") || isFooterConstructed()) {
+            return;
+        }
+
+        final JSONArray items = footer.getJSONArray("items");
+        final LinearLayout footerView = (LinearLayout) navigationView.findViewById(R.id.kolibri_footer);
+        final LayoutInflater inflater = LayoutInflater.from(this);
+
+        for (int i = 0; i < items.length(); i++) {
+            final TextView tv = (TextView) inflater.inflate(R.layout.footer_item, footerView, false);
+            tv.setText(items.getJSONObject(i).getString("label"));
+            tv.setTag(Kolibri.createIntent(Uri.parse(items.getJSONObject(i).getString("url"))));
+            tv.setOnClickListener(onFooterClick);
+
+            footerView.addView(tv);
+        }
+
+    }
+
+    private boolean isFooterConstructed() {
+        return ((LinearLayout) navigationView.findViewById(R.id.kolibri_footer)).getChildCount() > 0;
     }
 
     @Override
