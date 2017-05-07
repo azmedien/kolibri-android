@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Created by lekov on 4/2/17.
@@ -11,7 +14,6 @@ import android.support.v4.app.Fragment;
 
 public class KolibriFragment extends Fragment {
     KolibriInitializeListener initializer;
-
 
     @Override
     public void onAttach(Context context) {
