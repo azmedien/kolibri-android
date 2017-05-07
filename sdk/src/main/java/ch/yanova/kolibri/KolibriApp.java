@@ -16,10 +16,8 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.IOException;
 
-import ch.yanova.kolibri.network.NetworkUtils;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.CookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -30,17 +28,19 @@ import okhttp3.Response;
 
 public class KolibriApp extends Application {
 
-    private static KolibriApp sInstance;
+    private static KolibriApp instance;
 
-    private FirebaseAnalytics mFirebaseAnalytics;
-    private OkHttpClient mNetmetrixClient;
+    private FirebaseAnalytics firebaseAnalytics;
+    private OkHttpClient netmetrixClient;
 
-    private String mUserAgent;
+    private String userAgent;
 
-    private static String mLastUrlLogged;
+    private static String lastUrlLogged;
 
     private static int widthPixels;
     private static int heightPixels;
+
+    private static boolean firebaseEnabled = true;
 
     @Override
     public void onCreate() {
@@ -49,37 +49,32 @@ public class KolibriApp extends Application {
         final DisplayMetrics lDisplayMetrics = getResources().getDisplayMetrics();
         final ClearableCookieJar cookieJar = new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(this));
 
-        sInstance = this;
+        instance = this;
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         widthPixels = lDisplayMetrics.widthPixels;
         heightPixels = lDisplayMetrics.heightPixels;
 
-        mNetmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
+        netmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
     }
 
     public void logEvent(@Nullable String name, @NonNull String url) {
 
-        if (mLastUrlLogged != null && mLastUrlLogged.contentEquals(url)) {
+        if (lastUrlLogged != null && lastUrlLogged.contentEquals(url)) {
             Log.i("KolibriApp", String.format("Trying to log again event for %s. Skipped.", url));
             return;
         }
 
-        mLastUrlLogged = url;
+        lastUrlLogged = url;
 
         Log.d("KolibriApp", "logEvent() called with: name = [" + name + "], url = [" + url + "]");
 
-        final Bundle bundle = new Bundle();
-        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, url);
+        reportToFirebase(name, url);
+        reportToNetmetrix(url);
+    }
 
-        if (name != null)
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
-
-        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "application/amp+html");
-        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-
-
+    private void reportToNetmetrix(@NonNull String url) {
         // Netmetrix not configured
         if (Kolibri.getInstance(this).getNetmetrixUrl() == null)
             return;
@@ -93,14 +88,13 @@ public class KolibriApp extends Application {
 
 
         // TODO:
-        // 1. change user agent to be the kolibri one
-        // 2. check error if request is successful but the server return some error
-        mNetmetrixClient.newCall(
+        // 1. check error if request is successful but the server return some error
+        netmetrixClient.newCall(
                 new Request.Builder()
                         .url(sb)
                         .get()
                         .header("Accept-Language", "de")
-                        .header("User-Agent", mUserAgent == null ? "Mozilla/5.0 (Linux; U; Android-phone)" : mUserAgent)
+                        .header("User-Agent", userAgent == null ? "Mozilla/5.0 (Linux; U; Android-phone)" : userAgent)
                         .build())
                 .enqueue(new Callback() {
                     @Override
@@ -119,11 +113,33 @@ public class KolibriApp extends Application {
                 });
     }
 
+    private void reportToFirebase(@Nullable String name, @NonNull String url) {
+        if (firebaseEnabled) {
+
+            final Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, url);
+
+            if (name != null)
+                bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
+
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "application/amp+html");
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+        }
+    }
+
     public void setUserAgent(String mUserAgent) {
-        this.mUserAgent = mUserAgent;
+        this.userAgent = mUserAgent;
+    }
+
+    public static boolean isFirebaseEnabled() {
+        return firebaseEnabled;
+    }
+
+    public static void setFirebaseEnabled(boolean firebaseEnabled) {
+        KolibriApp.firebaseEnabled = firebaseEnabled;
     }
 
     public static KolibriApp getInstance() {
-        return sInstance;
+        return instance;
     }
 }
