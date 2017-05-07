@@ -2,4 +2,6 @@
     <string name="app_name">KolibriSDK</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="error_message">Something went wrong. We are really sorry!</string>
+    <string name="error_button_text">Schade</string>
 </resources>
