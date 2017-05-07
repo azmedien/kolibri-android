@@ -6,6 +6,6 @@ package ch.yanova.kolibri;
 
 interface RuntimeListener {
 
-    void onLoaded(Kolibri.Runtime runtime);
+    void onLoaded(RuntimeConfig runtime);
     boolean onFailed(Exception e);
 }

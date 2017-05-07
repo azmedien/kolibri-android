@@ -41,13 +41,15 @@ public class Kolibri {
         }
 
         try {
-            JSONObject searchJson = new JSONObject(getSearchJson(context));
+            final RuntimeConfig.Component search = Kolibri.getInstance(context).getRuntime().getComponent("search");
 
-            JSONArray items = searchJson.getJSONObject("navigation").getJSONArray("items");
+            if (search.hasSetting("navigation")) {
+                JSONArray items = search.getObject("navigation").getJSONArray("items");
 
-            for(int i=0; i < items.length(); ++i) {
-                if (pageId.equals(items.getJSONObject(i).getString("id"))) {
-                    return true;
+                for(int i=0; i < items.length(); ++i) {
+                    if (pageId.equals(items.getJSONObject(i).getString("id"))) {
+                        return true;
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -55,83 +57,6 @@ public class Kolibri {
         }
 
         return false;
-    }
-
-    public static class Runtime {
-
-        private final JSONObject fRuntime;
-
-        Runtime(JSONObject runtime) {
-            fRuntime = runtime;
-        }
-
-        public String getVersion() {
-            try {
-                return fRuntime.getString("kolibri-version");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        public JSONObject getStyling() {
-            try {
-                return fRuntime.getJSONObject("styling");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        public JSONObject getNavigation() {
-            try {
-                return fRuntime.getJSONObject("navigation");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        public String getDomain() {
-            return getSetting("domain");
-        }
-
-        public String getScheme() {
-            return getSetting("scheme");
-        }
-
-        public JSONObject getSettings() {
-            try {
-                return getNavigation().getJSONObject("settings");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        public String getSetting(String key) {
-            try {
-                return getSettings().getString(key);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        public JSONObject getComponent(String name) {
-            try {
-                return fRuntime.getJSONObject(name);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
     }
 
     private static final String PREFS_NAME = "KolibriPrefs";
@@ -148,7 +73,7 @@ public class Kolibri {
     private String selectedMenuItem;
 
     private SharedPreferences preferences;
-    private Runtime runtime;
+    private RuntimeConfig runtime;
 
     private Kolibri(Context context) {
         // There's no memory leak when we get the application context.
@@ -187,7 +112,7 @@ public class Kolibri {
                 if (runtimeListener != null) {
 
                     try {
-                        runtime = new Runtime(new JSONObject(preferences.getString("runtime", "{}")));
+                        runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
                         runtimeListener.onLoaded(runtime);
                     } catch (JSONException je) {
                         final boolean userDefined = runtimeListener.onFailed(e);
@@ -210,10 +135,10 @@ public class Kolibri {
 
                     JSONObject navigationJson = new JSONObject(json);
                     preferences.edit().putString("runtime", json).apply();
-                    runtime = new Runtime(navigationJson);
+                    runtime = new RuntimeConfig(navigationJson);
                 } catch (JSONException e) {
                     try {
-                        runtime = new Runtime(new JSONObject(preferences.getString("runtime", "{}")));
+                        runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
                     } catch (JSONException ignored) {
                     }
                 } finally {
@@ -260,29 +185,8 @@ public class Kolibri {
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
-    public static boolean updateSearchSetup(Context context, String searchJson) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-
-        SharedPreferences.Editor prefsEditor = prefs.edit();
-        prefsEditor.putString(KEY_SEARCH_JSON, searchJson);
-        return prefsEditor.commit();
-    }
-
-    public static String getSearchJson(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(KEY_SEARCH_JSON, null);
-    }
-
     public static String searchParamKey(Context context) {
-        String searchKeyParam = null;
-        try {
-            final JSONObject searchJson = new JSONObject(getSearchJson(context));
-            searchKeyParam = searchJson.getJSONObject("settings").getString("search-param");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return searchKeyParam;
+        return Kolibri.getInstance(context).getRuntime().getComponent("search").getSettings().getString("search-param");
     }
 
     String getNavigationUrl() {
@@ -309,7 +213,7 @@ public class Kolibri {
         return null;
     }
 
-    public synchronized Runtime getRuntime() {
+    public synchronized RuntimeConfig getRuntime() {
         return runtime;
     }
 

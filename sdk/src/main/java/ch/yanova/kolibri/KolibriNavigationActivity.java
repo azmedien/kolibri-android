@@ -9,12 +9,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ShareCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -33,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public abstract class KolibriNavigationActivity extends AppCompatActivity
@@ -169,42 +167,37 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         return true;
     }
 
-    private void constructNavigation(JSONObject navigation) {
+    private void constructNavigation(RuntimeConfig.Navigation navigation) {
         final Menu menu = navigationView.getMenu();
         menu.clear();
 
-        try {
-            final JSONArray items = navigation.getJSONArray("items");
-            for (int i = 0; i < items.length(); ++i) {
+        final Map<String, RuntimeConfig.NavigationItem> items = navigation.getItems();
+        for (String id : items.keySet()) {
+            final RuntimeConfig.NavigationItem item = items.get(id);
+            addNavigationItem(menu, item);
 
-                final JSONObject item = items.getJSONObject(i);
 
-                addJsonItem(menu, item);
+            if (!item.hasSubItems())
+                continue;
 
-                if (item.has("items")) {
+            final Map<String, RuntimeConfig.NavigationItem> subItems = item.getSubItems();
 
-                    final JSONArray subItems = item.getJSONArray("items");
-
-                    for (int j = 0; j < subItems.length(); ++j) {
-                        addJsonItem(menu, subItems.getJSONObject(j));
-                    }
-                }
+            for (String subId : subItems.keySet()) {
+                addNavigationItem(menu, subItems.get(subId));
             }
-
-            menu.getItem(navigation.getJSONObject("settings").getInt("default-item")).getIntent().addCategory(Intent.CATEGORY_DEFAULT);
-
-            showNavigation();
-
-            if (!restarted) {
-                loadDefaultItem();
-            }
-
-            onNavigationInitialize();
-        } catch (JSONException e) {
-            e.printStackTrace();
-            showNavigationError(e.getLocalizedMessage());
         }
+
+        menu.getItem(navigation.getSettings().getInt("default-item")).getIntent().addCategory(Intent.CATEGORY_DEFAULT);
+
+        showNavigation();
+
+        if (!restarted) {
+            loadDefaultItem();
+        }
+
+        onNavigationInitialize();
     }
+
 
     protected void loadDefaultItem() {
 
@@ -221,23 +214,18 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoaded(final Kolibri.Runtime runtime) {
+    public void onLoaded(final RuntimeConfig runtime) {
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final JSONObject navigation = runtime.getNavigation();
-                final JSONObject search = runtime.getComponent("search");
-
-                if (search != null) {
-                    Kolibri.updateSearchSetup(KolibriNavigationActivity.this, search.toString());
-                }
+                final RuntimeConfig.Navigation navigation = runtime.getNavigation();
 
                 if (navigation != null) {
                     constructNavigation(navigation);
-                    if (navigation.has("footer")) {
+                    if (navigation.hasSetting("footer")) {
                         try {
-                            constructFooter(navigation.getJSONObject("footer"));
+                            constructFooter(navigation.getObject("footer"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -284,16 +272,12 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         return false;
     }
 
-    private void addJsonItem(Menu menu, JSONObject item) throws JSONException {
+    private void addNavigationItem(Menu menu, RuntimeConfig.NavigationItem item) {
 
-        if (!item.has("label")) {
-            return;
-        }
+        final String label = item.getLabel();
+        String componentUri = item.getComponent();
 
-        final String label = item.getString("label");
-        String componentUri = item.getString("component");
-
-        if (item.has("url")) {
+        if (item.hasSetting("url")) {
             final String url = item.getString("url");
             componentUri += "?url=" + url;
         }
@@ -302,12 +286,12 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final Intent intent = Kolibri.createIntent(uri);
         intent.putExtra(Intent.EXTRA_TITLE, label);
 
-        final String id = item.getString("id");
+        final String id = item.getId();
         intent.putExtra(Kolibri.EXTRA_ID, id);
 
         MenuItem menuItem = menu.add(label).setIntent(intent);
 
-        if (item.has("icon-normal")) {
+        if (item.hasSetting("icon-normal")) {
             String iconUrl = item.getString("icon-normal");
             loadMenuIcon(menuItem, iconUrl);
         }
