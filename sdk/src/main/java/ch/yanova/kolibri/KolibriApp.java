@@ -2,6 +2,7 @@ package ch.yanova.kolibri;
 
 import android.app.Application;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -30,7 +31,6 @@ public class KolibriApp extends Application {
 
     private static KolibriApp instance;
 
-    private FirebaseAnalytics firebaseAnalytics;
     private OkHttpClient netmetrixClient;
 
     private String userAgent;
@@ -50,8 +50,6 @@ public class KolibriApp extends Application {
         final ClearableCookieJar cookieJar = new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(this));
 
         instance = this;
-
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         widthPixels = lDisplayMetrics.widthPixels;
         heightPixels = lDisplayMetrics.heightPixels;
@@ -76,12 +74,17 @@ public class KolibriApp extends Application {
 
     private void reportToNetmetrix(@NonNull String url) {
         // Netmetrix not configured
-        if (Kolibri.getInstance(this).getNetmetrixUrl() == null)
+        if (Kolibri.getInstance(this).getNetmetrixUrl() == null
+                || "".equals(Kolibri.getInstance(this).getNetmetrixUrl())) {
             return;
+        }
+
+        String id = isFirebaseEnabled() ? FirebaseInstanceId.getInstance().getId()
+                : "Phone";
 
         final String sb = Kolibri.getInstance(this).getNetmetrixUrl() + "/" + "wildeisen" +
                 "/" + "android" +
-                "/" + FirebaseInstanceId.getInstance().getId() +
+                "/" + id +
                 "?r=" + url +
                 "&d=" + System.currentTimeMillis() +
                 "&x=" + widthPixels + "x" + heightPixels;
@@ -115,6 +118,8 @@ public class KolibriApp extends Application {
 
     private void reportToFirebase(@Nullable String name, @NonNull String url) {
         if (firebaseEnabled) {
+
+            final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
             final Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.ITEM_ID, url);
