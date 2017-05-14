@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
@@ -78,5 +79,11 @@ public abstract class KolibriLoadingFragment extends KolibriFragment {
         mLayoutError.setVisibility(View.GONE);
         mLayoutOverlay.setVisibility(View.GONE);
         mainContentView.setVisibility(View.VISIBLE);
+    }
+
+    public void setProgressColor(int color) {
+        ProgressBar v = (ProgressBar) mLayoutLoading;
+        v.getIndeterminateDrawable().setColorFilter(color,
+                android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 }
