@@ -19,7 +19,7 @@ public class ClientWebViewCoordinator extends WebViewCoordinator {
 
     private boolean hasReceivedError;
 
-    protected ClientWebViewCoordinator(OnAmpDataFoundListener ampDataFoundListener, KolibriWebViewClient.WebClientListener listener) {
+    public ClientWebViewCoordinator(OnAmpDataFoundListener ampDataFoundListener, KolibriWebViewClient.WebClientListener listener) {
         super(ampDataFoundListener);
         this.listener = listener;
     }

@@ -13,53 +13,22 @@ import android.view.View;
 import com.crashlytics.android.Crashlytics;
 
 import ch.yanova.kolibri.Kolibri;
+import ch.yanova.kolibri.KolibriBaseActivity;
 import ch.yanova.kolibri.KolibriCoordinator;
-import ch.yanova.kolibri.KolibriNavigationActivity;
 import ch.yanova.kolibri.KolibriProvider;
-import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.coordinators.SearchWebviewCoordinator;
-import ch.yanova.kolibri.coordinators.WebViewCoordinator;
-import io.fabric.sdk.android.Fabric;
 
-
-public class MainActivity extends KolibriNavigationActivity implements View.OnClickListener {
-
-    private KolibriWebView webView;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onClick(View v) {
-    }
-
-    @Override
-    public void onPreInitialize() {
-    }
-
-    @Override
-    public Fragment onPostInitialize() {
-        return WebViewFragment.newInstance("");
-    }
+public class MainActivity extends KolibriBaseActivity implements View.OnClickListener {
 
     @Override
     public void onBindComponents() {
-        final WebViewFragment webViewFragment = (WebViewFragment) getMainFragment();
-        webView = webViewFragment.getWebView();
-
-        Kolibri.bind(webView, new KolibriProvider() {
+        Kolibri.bind(getWebView(), new KolibriProvider() {
             @Nullable
             @Override
             public KolibriCoordinator provideCoordinator(View view) {
-                return new SearchWebviewCoordinator(null, webViewFragment);
+                return new SearchWebviewCoordinator(null, getMainWebViewFragment());
             }
         });
-    }
-
-    @Override
-    public void onNavigationInitialize() {
     }
 
     @Override
@@ -86,6 +55,6 @@ public class MainActivity extends KolibriNavigationActivity implements View.OnCl
     }
 
     private SearchWebviewCoordinator getWebViewCoordinator() {
-        return ((SearchWebviewCoordinator)webView.getTag(R.id.coordinator));
+        return ((SearchWebviewCoordinator)getWebView().getTag(R.id.coordinator));
     }
 }
