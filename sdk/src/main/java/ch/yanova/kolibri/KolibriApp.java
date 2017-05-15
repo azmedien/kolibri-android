@@ -1,12 +1,16 @@
 package ch.yanova.kolibri;
 
+import android.annotation.TargetApi;
 import android.app.Application;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import com.franmontiel.persistentcookiejar.ClearableCookieJar;
 import com.franmontiel.persistentcookiejar.PersistentCookieJar;
@@ -16,6 +20,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -32,8 +38,6 @@ public class KolibriApp extends Application {
     private static KolibriApp instance;
 
     private OkHttpClient netmetrixClient;
-
-    private String userAgent;
 
     private static String lastUrlLogged;
 
@@ -57,9 +61,9 @@ public class KolibriApp extends Application {
         netmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
     }
 
-    public void logEvent(@Nullable String name, @NonNull String url) {
+    public void logEvent(@Nullable String name, @Nullable String url) {
 
-        if (lastUrlLogged != null && lastUrlLogged.contentEquals(url)) {
+        if (lastUrlLogged != null && lastUrlLogged.equals(url)) {
             Log.i("KolibriApp", String.format("Trying to log again event for %s. Skipped.", url));
             return;
         }
@@ -68,36 +72,39 @@ public class KolibriApp extends Application {
 
         Log.d("KolibriApp", "logEvent() called with: name = [" + name + "], url = [" + url + "]");
 
-        reportToFirebase(name, url);
+        if (url != null) {
+            reportToFirebase(name, url);
+        }
+
         reportToNetmetrix(url);
     }
 
-    private void reportToNetmetrix(@NonNull String url) {
-        // Netmetrix not configured
+    private void reportToNetmetrix(String url) {
+
+        // Netmetrix not configured, skipping
         if (Kolibri.getInstance(this).getNetmetrixUrl() == null
                 || "".equals(Kolibri.getInstance(this).getNetmetrixUrl())) {
             return;
         }
 
-        String id = isFirebaseEnabled() ? FirebaseInstanceId.getInstance().getId()
-                : "Phone";
+        final StringBuilder sb = new StringBuilder(Kolibri.getInstance(this).getNetmetrixUrl() + "/" + "wildeisen");
+        sb.append("/").append("phone");
+        sb.append("?d=").append(System.currentTimeMillis());
+        sb.append("&x=").append(widthPixels).append("x").append(heightPixels);
 
-        final String sb = Kolibri.getInstance(this).getNetmetrixUrl() + "/" + "wildeisen" +
-                "/" + "android" +
-                "/" + id +
-                "?r=" + url +
-                "&d=" + System.currentTimeMillis() +
-                "&x=" + widthPixels + "x" + heightPixels;
+        if (url != null) {
+            sb.append("&r=").append(url);
+        }
 
+        final String netmetrixAgent = Kolibri.getInstance(this).getNetmetrixAgent();
 
-        // TODO:
-        // 1. check error if request is successful but the server return some error
+        // TODO: check error if request is successful but the server return some error
         netmetrixClient.newCall(
                 new Request.Builder()
-                        .url(sb)
+                        .url(sb.toString())
                         .get()
                         .header("Accept-Language", "de")
-                        .header("User-Agent", userAgent == null ? "Mozilla/5.0 (Linux; U; Android-phone)" : userAgent)
+                        .header("User-Agent", netmetrixAgent == null ? "Mozilla/5.0 (Linux; U; Android-phone)" : netmetrixAgent)
                         .build())
                 .enqueue(new Callback() {
                     @Override
@@ -114,6 +121,8 @@ public class KolibriApp extends Application {
                         }
                     }
                 });
+
+        Log.d("KolibriApp", "reportToNetmetrix() called with: url = [" + sb.toString() + "]");
     }
 
     private void reportToFirebase(@Nullable String name, @NonNull String url) {
@@ -132,8 +141,21 @@ public class KolibriApp extends Application {
         }
     }
 
-    public void setUserAgent(String mUserAgent) {
-        this.userAgent = mUserAgent;
+    public static String getUserAgent(final Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return WebSettings.getDefaultUserAgent(context);
+        } else {
+            try {
+                final Class<?> webSettingsClassicClass = Class.forName("android.webkit.WebSettingsClassic");
+                final Constructor<?> constructor = webSettingsClassicClass.getDeclaredConstructor(Context.class, Class.forName("android.webkit.WebViewClassic"));
+                constructor.setAccessible(true);
+                final Method method = webSettingsClassicClass.getMethod("getUserAgentString");
+                return (String) method.invoke(constructor.newInstance(context, null));
+            } catch (final Exception e) {
+                return new WebView(context).getSettings()
+                        .getUserAgentString();
+            }
+        }
     }
 
     public static boolean isFirebaseEnabled() {
