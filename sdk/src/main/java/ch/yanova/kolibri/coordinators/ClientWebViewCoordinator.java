@@ -7,7 +7,6 @@ import android.webkit.WebView;
 
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
-import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
 /**
  * Created by lekov on 3/28/17.
