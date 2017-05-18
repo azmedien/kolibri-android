@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -65,6 +66,7 @@ public class Kolibri {
     private static final String META_NAVIGATION = "kolibri_navigation_url";
     private static final String META_NETMETRIX_URL = "kolibri_netmetrix_url";
     private static final String META_NETMETRIX_AGENT = "kolibri_netmetrix_agent";
+    private static final String META_NOTIFICATION_ICON = "kolibri_notification_icon";
 
     private static final String PREF_NAME = "ch.yanova.kolibri.RUNTIME_CONFIG";
     private static final String TAG = "Kolibri";
@@ -225,6 +227,19 @@ public class Kolibri {
         }
 
         return null;
+    }
+
+    @DrawableRes
+    public int getNotificationIcon() {
+        try {
+            final ApplicationInfo ai = fContext.getPackageManager().getApplicationInfo(fContext.getPackageName(), PackageManager.GET_META_DATA);
+            final Bundle bundle = ai.metaData;
+
+            return bundle.getInt(META_NOTIFICATION_ICON, R.drawable.ic_train_grey600_24dp);
+        } catch (Exception ignored) {
+        }
+
+        return R.drawable.ic_train_grey600_24dp;
     }
 
     public synchronized RuntimeConfig getRuntime() {
