@@ -130,21 +130,10 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         Kolibri.setSelectedMenuItem(title);
 
         // FIXME: Make this activity implicit intents automatically opened
-        if (intent.getDataString().startsWith("kolibri://navigation/favorites")) {
-            startActivity(intent);
-            final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            drawer.closeDrawer(GravityCompat.START);
-            return true;
-        }
-
-        if (intent.getDataString().startsWith("kolibri://navigation/search")) {
-            startActivity(intent);
-            final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            drawer.closeDrawer(GravityCompat.START);
-            return true;
-        }
-
-        if (intent.getDataString().startsWith("kolibri://navigation/shaker")) {
+        if (intent.getDataString().startsWith("kolibri://navigation/favorites")
+                || intent.getDataString().startsWith("kolibri://navigation/search")
+                || intent.getDataString().startsWith("kolibri://navigation/pregnancycalendar")
+                || intent.getDataString().startsWith("kolibri://navigation/shaker")) {
             startActivity(intent);
             final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);

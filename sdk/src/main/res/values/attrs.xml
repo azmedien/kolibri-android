@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="KolibriLoadingView">
+        <attr name="errorMessage" format="string" localization="suggested" />
+        <attr name="buttonText" format="string" />
+        <attr name="drawable" format="color|reference" />
+    </declare-styleable>
+
+</resources>
