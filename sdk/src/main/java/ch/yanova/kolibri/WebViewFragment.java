@@ -1,4 +1,4 @@
-package ch.yanova.kolibri.prototype;
+package ch.yanova.kolibri;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,7 +15,6 @@ import android.webkit.WebView;
 
 import java.util.Map;
 
-import ch.yanova.kolibri.KolibriLoadingFragment;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
@@ -65,7 +64,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
     @NonNull
     @Override
     protected View getMainContentView(LayoutInflater inflater, ViewGroup container) {
-        return inflater.inflate(R.layout.web_fragment, container, false);
+        return inflater.inflate(R.layout.kolibri_web_fragment, container, false);
     }
 
     @Override

@@ -1,16 +1,14 @@
 package ch.yanova.kolibri;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
@@ -78,5 +76,11 @@ public abstract class KolibriLoadingFragment extends KolibriFragment {
         mLayoutError.setVisibility(View.GONE);
         mLayoutOverlay.setVisibility(View.GONE);
         mainContentView.setVisibility(View.VISIBLE);
+    }
+
+    public void setProgressColor(int color) {
+        ProgressBar v = (ProgressBar) mLayoutLoading;
+        v.getIndeterminateDrawable().setColorFilter(color,
+                android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 }
