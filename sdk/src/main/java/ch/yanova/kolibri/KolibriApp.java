@@ -3,12 +3,16 @@ package ch.yanova.kolibri;
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.AnyThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
@@ -79,7 +83,30 @@ public class KolibriApp extends Application {
         reportToNetmetrix(url);
     }
 
-    private void reportToNetmetrix(String url) {
+    void logMenuItemToFirebase(@NonNull MenuItem item) {
+        if (firebaseEnabled) {
+
+            final Intent intent = item.getIntent();
+
+            if (intent == null) {
+                Log.i("KolibriApp", "logMenuItemToFirebase: Invalid menu item. Intent must be supplied!");
+                return;
+            }
+
+            final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+            final Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, intent.getStringExtra(Kolibri.EXTRA_ID));
+
+            if (intent.hasExtra(Intent.EXTRA_TITLE))
+                bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, intent.getStringExtra(Intent.EXTRA_TITLE));
+
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, intent.getStringExtra(Kolibri.EXTRA_ID));
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+        }
+    }
+
+    private void reportToNetmetrix(@Nullable String url) {
 
         // Netmetrix not configured, skipping
         if (Kolibri.getInstance(this).getNetmetrixUrl() == null
@@ -141,7 +168,8 @@ public class KolibriApp extends Application {
         }
     }
 
-    public static String getUserAgent(final Context context) {
+    @UiThread
+    public static String getUserAgent(@NonNull final Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return WebSettings.getDefaultUserAgent(context);
         } else {
@@ -158,10 +186,12 @@ public class KolibriApp extends Application {
         }
     }
 
+    @AnyThread
     public static boolean isFirebaseEnabled() {
         return firebaseEnabled;
     }
 
+    @AnyThread
     public static void setFirebaseEnabled(boolean firebaseEnabled) {
         KolibriApp.firebaseEnabled = firebaseEnabled;
     }

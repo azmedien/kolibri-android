@@ -1,6 +1,9 @@
 package ch.yanova.kolibri;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.v4.view.MenuItemCompat;
+import android.view.MenuItem;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,8 +26,12 @@ public class RuntimeConfig {
     private Map<String, Component> components;
     private Navigation navigation;
 
-    RuntimeConfig(JSONObject json) {
+    RuntimeConfig(@NonNull JSONObject json) {
         runtime = json;
+
+        if (json.length() == 0) {
+            throw new KolibriException("Runtime config JSON is empty. Cannot construct the menu.");
+        }
 
         components = new HashMap<>();
         final JSONArray names = runtime.names();
@@ -55,7 +62,7 @@ public class RuntimeConfig {
         }
 
         if (navigation == null || domain == null || scheme == null) {
-            throw new KolibriException("Runtime config is not a valid one.");
+            throw new KolibriException("Runtime config JSON is not valid one.");
         }
     }
 
@@ -64,15 +71,32 @@ public class RuntimeConfig {
      *
      * @return Returns current version of the Kolibri configuration
      */
+    @NonNull
     public String getVersion() {
         return version;
     }
 
 
+    /**
+     * Return current app scheme
+     *
+     * @return Returns components scheme for this application
+     */
+    @NonNull
     public String getScheme() {
         return scheme;
     }
 
+    /**
+     * Return current app domain
+     * <p>
+     *     The domain is used internally to determine whenever Kolibri must open
+     *     some URLs in external browser or within the app.
+     * </p>
+     *
+     * @return Returns domain for this application
+     */
+    @NonNull
     public String getDomain() {
         return domain;
     }
@@ -91,10 +115,19 @@ public class RuntimeConfig {
         return components.get(component);
     }
 
+    /**
+     * Return application navigation
+     *
+     * @return Return navigation object from the configuration
+     */
+    @NonNull
     public Navigation getNavigation() {
         return navigation;
     }
 
+    /**
+     *
+     */
     public static class Component extends Settings {
 
         static final String KEY_SETTINGS = "settings";
@@ -108,6 +141,9 @@ public class RuntimeConfig {
         }
     }
 
+    /**
+     *
+     */
     public static class Settings {
 
         final JSONObject json;
@@ -173,6 +209,9 @@ public class RuntimeConfig {
         }
     }
 
+    /**
+     *
+     */
     public static class Navigation extends Component {
 
         public enum Type {

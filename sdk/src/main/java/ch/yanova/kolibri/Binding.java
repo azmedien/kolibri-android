@@ -9,7 +9,7 @@ final class Binding implements View.OnAttachStateChangeListener {
     private View view;
     private View attached;
 
-    Binding(View view, KolibriCoordinator coordinator) {
+    Binding(@NonNull View view, @NonNull KolibriCoordinator coordinator) {
         this.coordinator = coordinator;
         this.view = view;
     }
