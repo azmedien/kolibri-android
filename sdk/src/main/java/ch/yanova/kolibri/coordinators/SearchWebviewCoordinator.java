@@ -73,7 +73,7 @@ public class SearchWebviewCoordinator extends ClientWebViewCoordinator implement
             Uri.Builder builder = uri.buildUpon();
             builder.clearQuery();
 
-            if (uri.getQueryParameterNames().size() <= 0) {
+            if (uri.getQueryParameterNames().size() <= 0 || uri.getQueryParameter(searchParamKey) == null) {
                 builder.appendQueryParameter(searchParamKey, text);
             } else {
                 for (String key : uri.getQueryParameterNames()) {

@@ -11,6 +11,24 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true">
+
+        <service android:name=".notifications.KolibriFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".notifications.KolibriFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".notifications.KolibriFirebasePushReceiver">
+            <intent-filter>
+                <action android:name="ch.azmedien.kolibri.MESSAGE_RECEIVED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

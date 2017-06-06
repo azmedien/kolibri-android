@@ -7,7 +7,6 @@ import android.webkit.WebView;
 
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
-import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
 /**
  * Created by lekov on 3/28/17.
@@ -19,7 +18,7 @@ public class ClientWebViewCoordinator extends WebViewCoordinator {
 
     private boolean hasReceivedError;
 
-    protected ClientWebViewCoordinator(OnAmpDataFoundListener ampDataFoundListener, KolibriWebViewClient.WebClientListener listener) {
+    public ClientWebViewCoordinator(OnAmpDataFoundListener ampDataFoundListener, KolibriWebViewClient.WebClientListener listener) {
         super(ampDataFoundListener);
         this.listener = listener;
     }

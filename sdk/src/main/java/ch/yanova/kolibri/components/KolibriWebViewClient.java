@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -49,7 +48,6 @@ public class KolibriWebViewClient extends WebViewClient {
     @SuppressWarnings("deprecation")
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
         Uri link = Uri.parse(url);
         return handleUri(view.getContext(), link);
     }
@@ -109,9 +107,6 @@ public class KolibriWebViewClient extends WebViewClient {
     }
 
     public final boolean handleUri(Context context, Uri link) {
-
-        KolibriApp.getInstance().logEvent(null, link.toString());
-
         String target = link.getQueryParameter(PARAM_TARGET);
 
         if (target == null) {
@@ -122,6 +117,11 @@ public class KolibriWebViewClient extends WebViewClient {
             } else {
                 target = TARGET_EXTERNAL;
             }
+        }
+
+        // Skip external targets when reporting to netmetrix
+        if (!TARGET_EXTERNAL.equals(target)) {
+            KolibriApp.getInstance().logEvent(null, link.toString());
         }
 
         final boolean handleInNewView = handleInNewView(target);
