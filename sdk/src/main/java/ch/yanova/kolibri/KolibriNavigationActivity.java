@@ -1,12 +1,15 @@
 package ch.yanova.kolibri;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -15,6 +18,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,6 +58,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             startActivity(Intent.createChooser(i, "Open with..."));
         }
     };
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +73,10 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -90,7 +95,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     @Override
     protected void onRestart() {
         super.onRestart();
-
         restarted = true;
     }
 
@@ -102,18 +106,17 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         kolibri.loadRuntimeConfiguration(this);
     }
 
-    private void startMainFragment(Fragment fragment) {
+    private void startMainFragment(@NonNull Fragment fragment) {
         getSupportFragmentManager().beginTransaction().replace(R.id.kolibri_main_content, fragment, TAG_MAIN_FRAGMENT).commitAllowingStateLoss();
     }
 
+    @NonNull
     protected Fragment getMainFragment() {
         return getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
     }
 
     @Override
     public void onBackPressed() {
-        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -127,15 +130,13 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final Intent intent = item.getIntent();
 
         final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-        Kolibri.setSelectedMenuItem(title);
 
-        // FIXME: Make this activity implicit intents automatically opened
-        if (intent.getDataString().startsWith("kolibri://navigation/favorites")
-                || intent.getDataString().startsWith("kolibri://navigation/search")
-                || intent.getDataString().startsWith("kolibri://navigation/pregnancycalendar")
-                || intent.getDataString().startsWith("kolibri://navigation/shaker")) {
+        Kolibri.setSelectedMenuItem(title);
+        KolibriApp.getInstance().logMenuItemToFirebase(item);
+
+        final PackageManager packageManager = getPackageManager();
+        if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent);
-            final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
             return true;
         }
@@ -150,8 +151,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             }
         }
 
-
-        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -203,7 +202,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoaded(final RuntimeConfig runtime) {
+    public void onLoaded(@NonNull final RuntimeConfig runtime) {
 
         runOnUiThread(new Runnable() {
             @Override
@@ -251,7 +250,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     @Override
     public boolean onFailed(final Exception e) {
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -262,7 +260,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     }
 
     private void addNavigationItem(Menu menu, RuntimeConfig.NavigationItem item) {
-
         final String label = item.getLabel();
         String componentUri = item.getComponent();
 
@@ -313,10 +310,12 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     }
 
+    @NonNull
     public FloatingActionButton getFloatingActionButton() {
         return floatingActionButton;
     }
 
+    @UiThread
     protected void showNavigationLoading() {
 
         if (mLayoutOverlay.getVisibility() != View.VISIBLE) {
@@ -332,6 +331,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         mLayoutLoading.setVisibility(View.VISIBLE);
     }
 
+    @UiThread
     protected void showNavigationError(String text) {
 
         if (mLayoutOverlay.getVisibility() != View.VISIBLE) {
@@ -353,6 +353,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         mLayoutError.setVisibility(View.VISIBLE);
     }
 
+    @UiThread
     protected void showNavigation() {
         if (mLayoutLoading.getVisibility() != View.GONE) {
             mLayoutLoading.setVisibility(View.GONE);

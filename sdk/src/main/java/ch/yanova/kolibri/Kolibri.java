@@ -7,8 +7,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.AnyThread;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
@@ -85,7 +88,7 @@ public class Kolibri {
         preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    public static synchronized Kolibri getInstance(Context context) {
+    public static synchronized Kolibri getInstance(@NonNull Context context) {
         if (mInstance == null) {
             mInstance = new Kolibri(context);
         }
@@ -114,14 +117,13 @@ public class Kolibri {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (runtimeListener != null) {
-
-                    try {
-                        runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
-                        runtimeListener.onLoaded(runtime);
-                    } catch (JSONException je) {
-                        final boolean userDefined = runtimeListener.onFailed(e);
-                        if (!userDefined) {
-                            Log.d(TAG, "onFailure() called with: call = [" + call + "], e = [" + e + "]");
+                    final boolean userDefined = runtimeListener.onFailed(e);
+                    if (!userDefined) {
+                        try { // Try to load saved one as a fallback configuratio
+                            runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
+                            runtimeListener.onLoaded(runtime);
+                        } catch (JSONException | KolibriException exception) {
+                            runtimeListener.onFailed(exception);
                         }
                     }
                 }
@@ -131,33 +133,43 @@ public class Kolibri {
             public void onResponse(Call call, Response response) throws IOException {
 
                 final String json = response.body().string();
+                Exception exception = null;
 
                 try {
-
                     Log.i(TAG, "onResponse: cache " + response.cacheResponse());
                     Log.i(TAG, "onResponse: network " + response.networkResponse());
 
                     JSONObject navigationJson = new JSONObject(json);
-                    preferences.edit().putString("runtime", json).apply();
                     runtime = new RuntimeConfig(navigationJson);
+                    preferences.edit().putString("runtime", json).apply();
                 } catch (JSONException e) {
-                    try {
+
+                    try { // Try to load saved one as a fallback configuratio
                         runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
-                    } catch (JSONException ignored) {
+                    } catch (JSONException | KolibriException ignored) {
+                        exception = ignored;
                     }
+                } catch (KolibriException kolibri) {
+                    exception = kolibri;
                 } finally {
                     if (runtimeListener != null) {
-                        runtimeListener.onLoaded(runtime);
+                        if (exception == null) {
+                            runtimeListener.onLoaded(runtime);
+                        } else {
+                            runtimeListener.onFailed(exception);
+                        }
                     }
                 }
             }
         });
     }
 
+    @UiThread
     public static void bind(View view, KolibriCoordinator coordinator) {
         view.addOnAttachStateChangeListener(new Binding(view, coordinator));
     }
 
+    @UiThread
     public static void bind(View view, KolibriProvider provider) {
         final KolibriCoordinator coordinator = provider.provideCoordinator(view);
         if (coordinator == null) {
@@ -178,14 +190,16 @@ public class Kolibri {
     }
 
 
-    public static Intent createIntent(Uri uri) {
+    @AnyThread
+    public static Intent createIntent(@NonNull Uri uri) {
         final Intent res = new Intent(Intent.ACTION_VIEW);
         res.setData(uri);
 
         return res;
     }
 
-    public static void notifyComponents(Context context, Intent intent) {
+    @AnyThread
+    public static void notifyComponents(@NonNull Context context, @NonNull Intent intent) {
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
@@ -242,6 +256,7 @@ public class Kolibri {
         return R.drawable.ic_train_grey600_24dp;
     }
 
+    @AnyThread
     public synchronized RuntimeConfig getRuntime() {
         return runtime;
     }
