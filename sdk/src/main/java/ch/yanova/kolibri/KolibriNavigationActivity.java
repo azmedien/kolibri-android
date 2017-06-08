@@ -135,7 +135,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
         final PackageManager packageManager = getPackageManager();
-        if (intent.resolveActivity(packageManager) == null) {
+        if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent);
             drawer.closeDrawer(GravityCompat.START);
             return true;

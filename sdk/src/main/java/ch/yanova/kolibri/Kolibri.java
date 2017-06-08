@@ -119,8 +119,12 @@ public class Kolibri {
                 if (runtimeListener != null) {
                     final boolean userDefined = runtimeListener.onFailed(e);
                     if (!userDefined) {
-                        // TODO: load fallback runtime configuration
-                        Log.d(TAG, "onFailure() called with: call = [" + call + "], e = [" + e + "]");
+                        try { // Try to load saved one as a fallback configuratio
+                            runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
+                            runtimeListener.onLoaded(runtime);
+                        } catch (JSONException | KolibriException exception) {
+                            runtimeListener.onFailed(exception);
+                        }
                     }
                 }
             }
@@ -129,27 +133,30 @@ public class Kolibri {
             public void onResponse(Call call, Response response) throws IOException {
 
                 final String json = response.body().string();
+                Exception exception = null;
 
                 try {
-
                     Log.i(TAG, "onResponse: cache " + response.cacheResponse());
                     Log.i(TAG, "onResponse: network " + response.networkResponse());
 
                     JSONObject navigationJson = new JSONObject(json);
-                    preferences.edit().putString("runtime", json).apply();
                     runtime = new RuntimeConfig(navigationJson);
+                    preferences.edit().putString("runtime", json).apply();
                 } catch (JSONException e) {
-                    try {
+
+                    try { // Try to load saved one as a fallback configuratio
                         runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
-
-                        if (runtimeListener != null) {
+                    } catch (JSONException | KolibriException ignored) {
+                        exception = ignored;
+                    }
+                } catch (KolibriException kolibri) {
+                    exception = kolibri;
+                } finally {
+                    if (runtimeListener != null) {
+                        if (exception == null) {
                             runtimeListener.onLoaded(runtime);
-                        }
-
-                    } catch (JSONException ignored) {
-                    } catch (KolibriException kolibri) {
-                        if (runtimeListener != null) {
-                            runtimeListener.onFailed(kolibri);
+                        } else {
+                            runtimeListener.onFailed(exception);
                         }
                     }
                 }
