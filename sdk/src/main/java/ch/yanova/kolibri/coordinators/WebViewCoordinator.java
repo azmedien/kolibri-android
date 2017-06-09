@@ -2,6 +2,7 @@ package ch.yanova.kolibri.coordinators;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
 import android.util.Log;
@@ -49,10 +50,17 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     public static final String ATTR_CONTENT = "content";
     public static final String TAG_META = "meta";
     public static final String ATTR_PROPERTY = "property";
+    public static final String META_THEME_COLOR = "theme-color";
 
     private static final String TAG = "WebViewCoordinator";
 
+    public static final int THEME_COLOR_PRIMARY = 5;
+    public static final int THEME_COLOR_PRIMARY_LIGHT = 1;
+    public static final int THEME_COLOR_PRIMARY_DARK = 7;
+    public static final int THEME_COLOR_ACCENT = 11;
+
     private final OnAmpDataFoundListener listener;
+    private String mCurrentThemeColor;
 
     public WebViewCoordinator(OnAmpDataFoundListener listener) {
         this.listener = listener;
@@ -137,12 +145,19 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void processHTML(String html) {
-
             Document content = Jsoup.parseBodyFragment(html);
             Elements links = content.getElementsByTag(TAG_META);
             Log.i("PARSING", "processHTML: " + links);
-            Map<String, String> favData = new HashMap<>();
+            Map<String, String> metaData = new HashMap<>();
+
             for (Element link : links) {
+
+                // Get current page theme color
+                if (link.hasAttr("name") && link.attr("name").equals(META_THEME_COLOR)) {
+                    mCurrentThemeColor = link.attr(META_THEME_COLOR);
+                    metaData.put(META_THEME_COLOR, mCurrentThemeColor);
+                    continue;
+                }
 
                 if (!link.hasAttr(ATTR_PROPERTY))
                     continue;
@@ -150,12 +165,12 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                 final String contentData = link.attr(ATTR_CONTENT);
                 final String key = link.attr(ATTR_PROPERTY);
 
-                favData.put(key, contentData);
+                metaData.put(key, contentData);
             }
 
             // There's no need to report if actually there's no data
-            if (favData.size() > 0) {
-                onFound(favData);
+            if (metaData.size() > 0) {
+                onFound(metaData);
             }
         }
     }
@@ -172,6 +187,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        mCurrentThemeColor = null;
         getHeaders(view, url);
     }
 
@@ -183,5 +199,44 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     @Override
     public boolean shouldHandleInternal() {
         return false;
+    }
+
+    public int[] getMaterialPalette() {
+        return mCurrentThemeColor == null ? new int[]{} : getMaterialPalette(mCurrentThemeColor);
+    }
+
+    public static int[] getMaterialPalette(String color){
+        int[] result = new int[14];
+
+        result[0] = shadeColor(color, 0.9   ); //----> 50
+        result[1] = shadeColor(color, 0.7   ); //----> 100
+        result[2] = shadeColor(color, 0.5   ); //----> 200
+        result[3] = shadeColor(color, 0.333 ); //----> 300
+        result[4] = shadeColor(color, 0.166 ); //----> 400
+        result[5] = shadeColor(color, 0     ); //----> 500
+        result[6] = shadeColor(color, -0.125); //----> 600
+        result[7] = shadeColor(color, -0.25 ); //----> 700
+        result[8] = shadeColor(color, -0.375); //----> 800
+        result[9] = shadeColor(color, -0.5  ); //----> 900
+
+        result[10] = shadeColor(color, 0.7  ); //----> A100
+        result[11] = shadeColor(color, 0.5  ); //----> A200
+        result[12] = shadeColor(color, 0.166); //----> A400
+        result[13] = shadeColor(color, -0.25); //----> A700
+
+        return result;
+    }
+
+    private static int shadeColor(String color, double percent) {
+        long f = Long.parseLong(color.substring(1), 16);
+        double t = percent < 0 ? 0 : 255;
+        double p = percent < 0 ? percent * -1 : percent;
+        long R = f >> 16;
+        long G = f >> 8 & 0x00FF;
+        long B = f & 0x0000FF;
+        int red = (int) (Math.round((t - R) * p) + R);
+        int green = (int) (Math.round((t - G) * p) + G);
+        int blue = (int) (Math.round((t - B) * p) + B);
+        return Color.rgb(red, green, blue);
     }
 }

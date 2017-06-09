@@ -1,5 +1,6 @@
 package ch.yanova.kolibri.prototype;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
@@ -20,8 +21,8 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
         Kolibri.bind(getWebView(), new KolibriProvider() {
             @Nullable
             @Override
-            public KolibriCoordinator provideCoordinator(View view) {
-                return new SearchWebviewCoordinator(null, getMainWebViewFragment());
+            public KolibriCoordinator provideCoordinator(@NonNull View view) {
+                return new SearchWebviewCoordinator(getMainWebViewFragment(), getMainWebViewFragment());
             }
         });
     }
@@ -50,6 +51,6 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
     }
 
     private SearchWebviewCoordinator getWebViewCoordinator() {
-        return ((SearchWebviewCoordinator)getWebView().getTag(R.id.coordinator));
+        return ((SearchWebviewCoordinator) getWebView().getTag(R.id.coordinator));
     }
 }

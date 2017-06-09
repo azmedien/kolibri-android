@@ -14,7 +14,6 @@ import android.util.Log;
 import com.google.firebase.messaging.RemoteMessage;
 
 import ch.yanova.kolibri.Kolibri;
-import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.RuntimeConfig;
 
 /**

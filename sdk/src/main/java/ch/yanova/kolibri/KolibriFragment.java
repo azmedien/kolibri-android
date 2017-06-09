@@ -38,5 +38,4 @@ public class KolibriFragment extends Fragment {
     private void bindComponents() {
         initializer.onBindComponents();
     }
-
 }

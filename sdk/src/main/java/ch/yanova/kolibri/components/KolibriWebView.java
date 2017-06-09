@@ -9,7 +9,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import ch.yanova.kolibri.BuildConfig;
-import ch.yanova.kolibri.KolibriApp;
 
 /**
  * Created by mmironov on 2/26/17.

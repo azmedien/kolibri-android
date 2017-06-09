@@ -1,14 +1,19 @@
 package ch.yanova.kolibri;
 
+import android.animation.Animator;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -20,6 +25,9 @@ import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
+import static ch.yanova.kolibri.coordinators.WebViewCoordinator.THEME_COLOR_PRIMARY;
+import static ch.yanova.kolibri.coordinators.WebViewCoordinator.THEME_COLOR_PRIMARY_DARK;
+
 /**
  * Created by lekov on 4/2/17.
  */
@@ -27,6 +35,7 @@ import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 public class WebViewFragment extends KolibriLoadingFragment implements KolibriWebViewClient.WebClientListener, OnAmpDataFoundListener {
 
     private Intent shareIntent;
+    private boolean isThemeTinted;
 
     KolibriWebView getWebView() {
         return webView;
@@ -76,6 +85,16 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
+
+        final int primary = ContextCompat.getColor(getActivity(), R.color.colorPrimary);
+        final int primaryDark = ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark);
+
+        if (getActivity() instanceof KolibriNavigationActivity && isThemeTinted) {
+            final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
+            tintTheme(toolbar, primary, primaryDark, false);
+            isThemeTinted = false;
+        }
+
         showPageLoading();
     }
 
@@ -100,5 +119,52 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
             shareIntent.putExtra(Intent.EXTRA_SUBJECT, data.get(WebViewCoordinator.FAV_LABEL));
             shareIntent.putExtra(Intent.EXTRA_TEXT, url);
         }
+
+        if (data.containsKey(WebViewCoordinator.META_THEME_COLOR)) {
+            final int[] palette = WebViewCoordinator.getMaterialPalette(data.get(WebViewCoordinator.META_THEME_COLOR));
+
+            if (isThemeTinted || palette.length == 0) {
+                return;
+            }
+
+            isThemeTinted = true;
+
+            getWebView().post(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (getActivity() instanceof KolibriNavigationActivity) {
+                        final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
+                        tintTheme(toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
+                    }
+                }
+            });
+        }
+    }
+
+    private void tintTheme(View view, int colorPrimary, int colorPrimaryDark, boolean tint) {
+
+        Window window = getActivity().getWindow();
+
+        // get the center for the clipping circle
+        int cx = view.getWidth() / 2;
+        int cy = view.getHeight() / 2;
+
+        // get the final radius for the clipping circle
+        float finalRadius = (float) Math.hypot(cx, cy);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0, finalRadius);
+            anim.start();
+
+            if (!tint) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                window.setStatusBarColor(colorPrimaryDark);
+            }
+        }
+        view.setBackgroundColor(colorPrimary);
+        setProgressColor(colorPrimary);
     }
 }

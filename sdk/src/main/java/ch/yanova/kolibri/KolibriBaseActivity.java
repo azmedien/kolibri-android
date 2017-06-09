@@ -36,7 +36,7 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
             @Nullable
             @Override
             public KolibriCoordinator provideCoordinator(View view) {
-                return new ClientWebViewCoordinator(null, getMainWebViewFragment());
+                return new ClientWebViewCoordinator(getMainWebViewFragment(), getMainWebViewFragment());
             }
         });
     }
@@ -51,6 +51,6 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
     }
 
     public WebViewFragment getMainWebViewFragment() {
-        return (WebViewFragment)getMainFragment();
+        return (WebViewFragment) getMainFragment();
     }
 }
