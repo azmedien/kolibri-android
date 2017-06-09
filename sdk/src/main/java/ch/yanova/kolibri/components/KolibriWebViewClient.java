@@ -110,9 +110,18 @@ public class KolibriWebViewClient extends WebViewClient {
         String target = link.getQueryParameter(PARAM_TARGET);
 
         if (target == null) {
-            final String domain = Kolibri.getInstance(context).getRuntime().getDomain();
+            String domain = Kolibri.getInstance(context).getRuntime().getDomain();
+            String host = link.getHost();
 
-            if (link.getHost().equals(domain)) {
+            if (domain.startsWith("www")) {
+                domain = domain.substring(3);
+            }
+
+            if (host.startsWith("www")) {
+                host = host.substring(3);
+            }
+
+            if (host.equals(domain)) {
                 target = TARGET_INTERNAL;
             } else {
                 target = TARGET_EXTERNAL;
