@@ -1,9 +1,8 @@
 package ch.yanova.kolibri;
 
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.v4.view.MenuItemCompat;
-import android.view.MenuItem;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +19,7 @@ import java.util.Map;
 
 public class RuntimeConfig {
     private final JSONObject runtime;
+    private Styling styling;
     private String version;
     private String scheme;
     private String domain;
@@ -54,6 +54,8 @@ public class RuntimeConfig {
                 case "scheme":
                     scheme = runtime.optString(current);
                     break;
+                case "styling":
+                    styling = new Styling(runtime.optJSONObject(current));
                 default:
                     components.put(current, new Component(runtime.optJSONObject(current)));
                     break;
@@ -61,7 +63,7 @@ public class RuntimeConfig {
             }
         }
 
-        if (navigation == null || domain == null || scheme == null) {
+        if (navigation == null || domain == null || scheme == null || styling == null) {
             throw new KolibriException("Runtime config JSON is not valid one.");
         }
     }
@@ -90,8 +92,8 @@ public class RuntimeConfig {
     /**
      * Return current app domain
      * <p>
-     *     The domain is used internally to determine whenever Kolibri must open
-     *     some URLs in external browser or within the app.
+     * The domain is used internally to determine whenever Kolibri must open
+     * some URLs in external browser or within the app.
      * </p>
      *
      * @return Returns domain for this application
@@ -99,6 +101,16 @@ public class RuntimeConfig {
     @NonNull
     public String getDomain() {
         return domain;
+    }
+
+    /**
+     * Return base styling of the app
+     *
+     * @return Returns current app styling from the current configuration
+     */
+    @NonNull
+    public Styling getStyling() {
+        return styling;
     }
 
     /**
@@ -131,6 +143,7 @@ public class RuntimeConfig {
     public static class Component extends Settings {
 
         static final String KEY_SETTINGS = "settings";
+        static final String KEY_STYLING = "styling";
 
         Component(JSONObject json) {
             super(json);
@@ -138,6 +151,18 @@ public class RuntimeConfig {
 
         public Settings getSettings() {
             return new Settings(json.optJSONObject(KEY_SETTINGS));
+        }
+
+        public boolean hasSettings() {
+            return json.has(KEY_SETTINGS);
+        }
+
+        public Styling getStyling() {
+            return new Styling(json.optJSONObject(KEY_STYLING));
+        }
+
+        public boolean hasStyling() {
+            return json.has(KEY_STYLING);
         }
     }
 
@@ -204,6 +229,91 @@ public class RuntimeConfig {
             try {
                 return json.getJSONArray(key);
             } catch (JSONException e) {
+                throw new KolibriException(e);
+            }
+        }
+    }
+
+    public static class Styling {
+
+        public static final String COLOR_PRIMARY = "primary";
+        public static final String COLOR_PRIMARY_DARK = "primaryDark";
+        public static final String COLOR_PRIMARY_LIGHT = "primaryLight";
+        public static final String COLOR_ACCENT = "accent";
+
+        public static final String OVERRIDES_TOOLBAR_BACKGROUND = "toolbarBackground";
+        public static final String OVERRIDES_TOOLBAR_TEXT = "toolbarText";
+
+        private final JSONObject json;
+
+        public Styling(JSONObject json) {
+            this.json = json;
+        }
+
+        public int getColor(String key) {
+            try {
+                return Color.parseColor(json.getString(key));
+            } catch (JSONException | IllegalArgumentException e) {
+                throw new KolibriException(e);
+            }
+        }
+
+        // ### PALETTE ###
+
+        public boolean hasPalette() {
+            return json.has("color-palette");
+        }
+
+        public boolean hasPaletteColor(String color) {
+            return hasPalette() && json.optJSONObject("color-palette").has(color);
+        }
+
+        public int getPrimary() {
+            return getPaletteColor(COLOR_PRIMARY);
+        }
+
+        public int getPrimaryDark() {
+            return getPaletteColor(COLOR_PRIMARY_DARK);
+        }
+
+        public int getPrimaryLight() {
+            return getPaletteColor(COLOR_PRIMARY_LIGHT);
+        }
+
+        public int getAccent() {
+            return getPaletteColor(COLOR_ACCENT);
+        }
+
+        private int getPaletteColor(String name) {
+            try {
+                return Color.parseColor(json.getJSONObject("color-palette").getString(name));
+            } catch (JSONException | IllegalArgumentException e) {
+                throw new KolibriException(e);
+            }
+        }
+
+        // ### OVERRIDES ###
+
+        public boolean hasOverrides() {
+            return json.has("color-overrides");
+        }
+
+        public boolean hasOverridesFor(String name) {
+            return hasOverrides() && json.optJSONObject("color-overrides").has(name);
+        }
+
+        public int getToolbarBackgroundOverride() {
+            return getOverrideColor(OVERRIDES_TOOLBAR_BACKGROUND);
+        }
+
+        public int getToolbarTextOverride() {
+            return getOverrideColor(OVERRIDES_TOOLBAR_TEXT);
+        }
+
+        private int getOverrideColor(String name) {
+            try {
+                return Color.parseColor(json.getJSONObject("color-overrides").getString(name));
+            } catch (JSONException | IllegalArgumentException e) {
                 throw new KolibriException(e);
             }
         }
