@@ -54,8 +54,19 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     private final View.OnClickListener onFooterClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            final Intent i = (Intent) v.getTag();
-            startActivity(Intent.createChooser(i, "Open with..."));
+            final Intent intent = (Intent) v.getTag();
+
+            final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
+            Kolibri.setSelectedMenuItem(title);
+
+            final PackageManager packageManager = getPackageManager();
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent);
+                drawer.closeDrawer(GravityCompat.START);
+            }
+
+            Kolibri.notifyComponents(getApplicationContext(), intent);
+            drawer.closeDrawer(GravityCompat.START);
         }
     };
     private DrawerLayout drawer;
@@ -235,8 +246,25 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         for (int i = 0; i < items.length(); i++) {
             final TextView tv = (TextView) inflater.inflate(R.layout.footer_item, footerView, false);
-            tv.setText(items.getJSONObject(i).getString("label"));
-            tv.setTag(Kolibri.createIntent(Uri.parse(items.getJSONObject(i).getString("url"))));
+
+            JSONObject item = items.getJSONObject(i);
+            final String label = item.getString("label");
+            tv.setText(label);
+
+            String componentUri = item.getString("component");
+            if (item.has("url")) {
+                final String url = item.getString("url");
+                componentUri += "?url=" + url;
+            }
+
+            final Uri uri = Uri.parse(componentUri);
+            final Intent intent = Kolibri.createIntent(uri);
+            intent.putExtra(Intent.EXTRA_TITLE, label);
+
+            final String id = item.getString("id");
+            intent.putExtra(Kolibri.EXTRA_ID, id);
+
+            tv.setTag(intent);
             tv.setOnClickListener(onFooterClick);
 
             footerView.addView(tv);
