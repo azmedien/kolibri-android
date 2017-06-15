@@ -1,7 +1,8 @@
 package ch.yanova.kolibri.prototype;
 
-import ch.yanova.kolibri.KolibriApp;
 import com.crashlytics.android.Crashlytics;
+
+import ch.yanova.kolibri.KolibriApp;
 import io.fabric.sdk.android.Fabric;
 
 /**

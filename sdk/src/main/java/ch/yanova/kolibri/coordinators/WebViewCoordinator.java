@@ -2,6 +2,7 @@ package ch.yanova.kolibri.coordinators;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
 import android.util.Log;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriCoordinator;
+import ch.yanova.kolibri.RuntimeConfig;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
@@ -49,8 +51,11 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     public static final String ATTR_CONTENT = "content";
     public static final String TAG_META = "meta";
     public static final String ATTR_PROPERTY = "property";
+    public static final String META_THEME_COLOR = "theme-color";
 
     private static final String TAG = "WebViewCoordinator";
+
+
 
     private final OnAmpDataFoundListener listener;
 
@@ -137,12 +142,18 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void processHTML(String html) {
-
             Document content = Jsoup.parseBodyFragment(html);
             Elements links = content.getElementsByTag(TAG_META);
             Log.i("PARSING", "processHTML: " + links);
-            Map<String, String> favData = new HashMap<>();
+            Map<String, String> metaData = new HashMap<>();
+
             for (Element link : links) {
+
+                // Get current page theme color
+                if (link.hasAttr("name") && link.attr("name").equals(META_THEME_COLOR)) {
+                    metaData.put(META_THEME_COLOR, link.attr(META_THEME_COLOR));
+                    continue;
+                }
 
                 if (!link.hasAttr(ATTR_PROPERTY))
                     continue;
@@ -150,12 +161,12 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                 final String contentData = link.attr(ATTR_CONTENT);
                 final String key = link.attr(ATTR_PROPERTY);
 
-                favData.put(key, contentData);
+                metaData.put(key, contentData);
             }
 
             // There's no need to report if actually there's no data
-            if (favData.size() > 0) {
-                onFound(favData);
+            if (metaData.size() > 0) {
+                onFound(metaData);
             }
         }
     }
@@ -184,4 +195,5 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     public boolean shouldHandleInternal() {
         return false;
     }
+
 }
