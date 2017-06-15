@@ -244,6 +244,8 @@ public class RuntimeConfig {
         public static final String OVERRIDES_TOOLBAR_BACKGROUND = "toolbarBackground";
         public static final String OVERRIDES_TOOLBAR_TEXT = "toolbarText";
 
+        public static final String OVERRIDES_MENU_ITEM_SELECTED = "menuItemSelectedColor";
+
         private final JSONObject json;
 
         public Styling(JSONObject json) {
@@ -295,11 +297,11 @@ public class RuntimeConfig {
         // ### OVERRIDES ###
 
         public boolean hasOverrides() {
-            return json.has("color-overrides");
+            return json.has("overrides");
         }
 
         public boolean hasOverridesFor(String name) {
-            return hasOverrides() && json.optJSONObject("color-overrides").has(name);
+            return hasOverrides() && json.optJSONObject("overrides").has(name);
         }
 
         public int getToolbarBackgroundOverride() {
@@ -310,9 +312,13 @@ public class RuntimeConfig {
             return getOverrideColor(OVERRIDES_TOOLBAR_TEXT);
         }
 
+        public int getMenuItemSelectedOverride() {
+            return getOverrideColor(OVERRIDES_MENU_ITEM_SELECTED);
+        }
+
         private int getOverrideColor(String name) {
             try {
-                return Color.parseColor(json.getJSONObject("color-overrides").getString(name));
+                return Color.parseColor(json.getJSONObject("overrides").getString(name));
             } catch (JSONException | IllegalArgumentException e) {
                 throw new KolibriException(e);
             }
@@ -425,6 +431,46 @@ public class RuntimeConfig {
         public String getComponent() {
             return component;
         }
+    }
+
+    public static final int THEME_COLOR_PRIMARY = 5;
+    public static final int THEME_COLOR_PRIMARY_LIGHT = 1;
+    public static final int THEME_COLOR_PRIMARY_DARK = 7;
+    public static final int THEME_COLOR_ACCENT = 11;
+
+    public static int[] getMaterialPalette(String color){
+        int[] result = new int[14];
+
+        result[0] = shadeColor(color, 0.9   ); //----> 50
+        result[1] = shadeColor(color, 0.7   ); //----> 100
+        result[2] = shadeColor(color, 0.5   ); //----> 200
+        result[3] = shadeColor(color, 0.333 ); //----> 300
+        result[4] = shadeColor(color, 0.166 ); //----> 400
+        result[5] = shadeColor(color, 0     ); //----> 500
+        result[6] = shadeColor(color, -0.125); //----> 600
+        result[7] = shadeColor(color, -0.25 ); //----> 700
+        result[8] = shadeColor(color, -0.375); //----> 800
+        result[9] = shadeColor(color, -0.5  ); //----> 900
+
+        result[10] = shadeColor(color, 0.7  ); //----> A100
+        result[11] = shadeColor(color, 0.5  ); //----> A200
+        result[12] = shadeColor(color, 0.166); //----> A400
+        result[13] = shadeColor(color, -0.25); //----> A700
+
+        return result;
+    }
+
+    private static int shadeColor(String color, double percent) {
+        long f = Long.parseLong(color.substring(1), 16);
+        double t = percent < 0 ? 0 : 255;
+        double p = percent < 0 ? percent * -1 : percent;
+        long R = f >> 16;
+        long G = f >> 8 & 0x00FF;
+        long B = f & 0x0000FF;
+        int red = (int) (Math.round((t - R) * p) + R);
+        int green = (int) (Math.round((t - G) * p) + G);
+        int blue = (int) (Math.round((t - B) * p) + B);
+        return Color.rgb(red, green, blue);
     }
 
 }

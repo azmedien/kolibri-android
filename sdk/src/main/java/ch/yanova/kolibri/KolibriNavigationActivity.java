@@ -1,8 +1,11 @@
 package ch.yanova.kolibri;
 
+import android.animation.Animator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -21,6 +24,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -58,6 +64,8 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     };
     private DrawerLayout drawer;
     private Toolbar toolbar;
+    private View headerImageContainer;
+    protected RuntimeConfig configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,10 +93,60 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         mLayoutLoading = navigationView.findViewById(R.id.progress);
         mLayoutOverlay = navigationView.findViewById(R.id.overlay);
 
+        headerImageContainer = navigationView.getHeaderView(0).findViewById(R.id.header_image_container);
+
         final Fragment fragment = onPostInitialize();
         startMainFragment(fragment);
 
         restarted = false;
+    }
+
+    private void setupStyling() {
+        if (configuration == null) {
+            return;
+        }
+
+        final RuntimeConfig.Styling styling = configuration.getStyling();
+
+        if (styling.hasOverridesFor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
+            final int toolbarBackgroud = styling.getToolbarBackgroundOverride();
+            final int[] palette = RuntimeConfig.getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
+
+            tintTheme(toolbar, palette[RuntimeConfig.THEME_COLOR_PRIMARY], palette[RuntimeConfig.THEME_COLOR_PRIMARY_DARK], true);
+            headerImageContainer.setBackgroundColor(palette[RuntimeConfig.THEME_COLOR_PRIMARY]);
+        }
+
+        if (styling.hasOverridesFor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_TEXT)) {
+            toolbar.setTitleTextColor(styling.getToolbarTextOverride());
+        }
+
+
+        if (styling.hasOverridesFor(RuntimeConfig.Styling.OVERRIDES_MENU_ITEM_SELECTED)) {
+            final int menuItemSelected = styling.getToolbarBackgroundOverride();
+            final int[] palette = RuntimeConfig.getMaterialPalette(String.format("#%06X", 0xFFFFFF & menuItemSelected));
+
+            // FOR NAVIGATION VIEW ITEM TEXT COLOR
+            int[][] states = new int[][]{
+                    new int[]{-android.R.attr.state_checked},  // unchecked
+                    new int[]{android.R.attr.state_checked},   // checked
+                    new int[]{}                                // default
+            };
+
+            // Fill in color corresponding to state defined in state
+            int[] colors = new int[]{
+                    Color.parseColor("#000000"),
+                    palette[RuntimeConfig.THEME_COLOR_PRIMARY],
+                    Color.parseColor("#000000"),
+            };
+
+            ColorStateList navigationViewColorStateList = new ColorStateList(states, colors);
+
+            // apply to text color
+            navigationView.setItemTextColor(navigationViewColorStateList);
+
+            // apply to icon color
+            navigationView.setItemIconTintList(navigationViewColorStateList);
+        }
     }
 
     @Override
@@ -203,10 +261,14 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     @Override
     public void onLoaded(@NonNull final RuntimeConfig runtime) {
 
+        this.configuration = runtime;
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 final RuntimeConfig.Navigation navigation = runtime.getNavigation();
+
+                setupStyling();
 
                 if (navigation != null) {
                     constructNavigation(navigation);
@@ -241,6 +303,31 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             footerView.addView(tv);
         }
 
+    }
+
+    private void tintTheme(View view, int colorPrimary, int colorPrimaryDark, boolean tint) {
+
+        Window window = getWindow();
+
+        // get the center for the clipping circle
+        int cx = view.getWidth() / 2;
+        int cy = view.getHeight() / 2;
+
+        // get the final radius for the clipping circle
+        float finalRadius = (float) Math.hypot(cx, cy);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0, finalRadius);
+            anim.start();
+
+            if (!tint) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                window.setStatusBarColor(colorPrimaryDark);
+            }
+        }
+        view.setBackgroundColor(colorPrimary);
     }
 
     private boolean isFooterConstructed() {
@@ -369,7 +456,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         navigationView.setVisibility(View.VISIBLE);
     }
 
-    Toolbar getToolbar() {
+    public Toolbar getToolbar() {
         return toolbar;
     }
 }

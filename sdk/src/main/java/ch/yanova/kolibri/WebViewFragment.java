@@ -25,8 +25,8 @@ import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
-import static ch.yanova.kolibri.coordinators.WebViewCoordinator.THEME_COLOR_PRIMARY;
-import static ch.yanova.kolibri.coordinators.WebViewCoordinator.THEME_COLOR_PRIMARY_DARK;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
 
 /**
  * Created by lekov on 4/2/17.
@@ -86,8 +86,12 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
 
-        final int primary = ContextCompat.getColor(getActivity(), R.color.colorPrimary);
-        final int primaryDark = ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark);
+        if (view == null) {
+            return;
+        }
+
+        final int primary = ContextCompat.getColor(webView.getContext(), R.color.colorPrimary);
+        final int primaryDark = ContextCompat.getColor(webView.getContext(), R.color.colorPrimaryDark);
 
         if (getActivity() instanceof KolibriNavigationActivity && isThemeTinted) {
             final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
@@ -121,7 +125,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
         }
 
         if (data.containsKey(WebViewCoordinator.META_THEME_COLOR)) {
-            final int[] palette = WebViewCoordinator.getMaterialPalette(data.get(WebViewCoordinator.META_THEME_COLOR));
+            final int[] palette = RuntimeConfig.getMaterialPalette(data.get(WebViewCoordinator.META_THEME_COLOR));
 
             if (isThemeTinted || palette.length == 0) {
                 return;
