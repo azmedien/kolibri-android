@@ -1,10 +1,12 @@
 package ch.yanova.kolibri;
 
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 /**
  * Created by mmironov on 6/16/17.
@@ -60,5 +62,9 @@ public abstract class KolibriSplashActivity extends AppCompatActivity
         }, minimumDisplayTime);
 
         return true;
+    }
+
+    public void setSplashImage(@DrawableRes int resId) {
+        ((ImageView)findViewById(R.id.splash)).setImageResource(resId);
     }
 }
