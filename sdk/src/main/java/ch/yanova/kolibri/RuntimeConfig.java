@@ -127,6 +127,10 @@ public class RuntimeConfig {
         return components.get(component);
     }
 
+    public String getString(String name) {
+        return runtime.optString(name);
+    }
+
     /**
      * Return application navigation
      *

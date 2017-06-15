@@ -106,13 +106,15 @@ public class KolibriApp extends Application {
 
     private void reportToNetmetrix(@Nullable String url) {
 
+        final String netmetrix = Kolibri.getInstance(this).getRuntime().getString("netmetrix");
+
         // Netmetrix not configured, skipping
-        if (Kolibri.getInstance(this).getNetmetrixUrl() == null
-                || "".equals(Kolibri.getInstance(this).getNetmetrixUrl())) {
+        if (netmetrix == null || "".equals(netmetrix)) {
             return;
         }
 
-        final StringBuilder sb = new StringBuilder(Kolibri.getInstance(this).getNetmetrixUrl() + "/" + "wildeisen");
+        final StringBuilder sb = new StringBuilder(netmetrix);
+        sb.append("/").append("android");
         sb.append("/").append("phone");
         sb.append("?d=").append(System.currentTimeMillis());
         sb.append("&x=").append(widthPixels).append("x").append(heightPixels);
@@ -121,15 +123,13 @@ public class KolibriApp extends Application {
             sb.append("&r=").append(url);
         }
 
-        final String netmetrixAgent = Kolibri.getInstance(this).getNetmetrixAgent();
-
         // TODO: check error if request is successful but the server return some error
         netmetrixClient.newCall(
                 new Request.Builder()
                         .url(sb.toString())
                         .get()
                         .header("Accept-Language", "de")
-                        .header("User-Agent", netmetrixAgent == null ? "Mozilla/5.0 (Linux; U; Android-phone)" : netmetrixAgent)
+                        .header("User-Agent", "Mozilla/5.0 (Linux; U; Android-phone)")
                         .build())
                 .enqueue(new Callback() {
                     @Override
