@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
@@ -27,6 +28,8 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -269,19 +272,61 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
                 final RuntimeConfig.Navigation navigation = runtime.getNavigation();
 
                 setupStyling();
+                setupHeader();
 
-                if (navigation != null) {
-                    constructNavigation(navigation);
-                    if (navigation.hasSetting("footer")) {
-                        try {
-                            constructFooter(navigation.getObject("footer"));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                constructNavigation(navigation);
+                if (navigation.hasSetting("footer")) {
+                    try {
+                        constructFooter(navigation.getObject("footer"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         });
+    }
+
+    private void setupHeader() {
+        final JSONObject header = configuration.getNavigation().getObject("header");
+        final View headerView = navigationView.getHeaderView(0);
+
+        if (header == null) {
+            return;
+        }
+
+        try {
+            final Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    final FrameLayout layout = (FrameLayout) headerView.findViewById(R.id.header_image_container);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        layout.setBackground(new BitmapDrawable(getResources(), bitmap));
+                    } else {
+                        layout.setBackgroundDrawable(new BitmapDrawable(bitmap));
+                    }
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                }
+            };
+            targets.add(target);
+            Picasso.with(this).load(header.getString("background")).into(target);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Picasso.with(this).load(header.getString("image")).into((ImageView) headerView.findViewById(R.id.header_image));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void constructFooter(JSONObject footer) throws JSONException {
