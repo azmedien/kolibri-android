@@ -305,38 +305,43 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             return;
         }
 
-        try {
-            final Target target = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    final FrameLayout layout = (FrameLayout) headerView.findViewById(R.id.header_image_container);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        layout.setBackground(new BitmapDrawable(getResources(), bitmap));
-                    } else {
-                        layout.setBackgroundDrawable(new BitmapDrawable(bitmap));
+        if (header.has("background")) {
+            try {
+                final Target target = new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        final FrameLayout layout = (FrameLayout) headerView.findViewById(R.id.header_image_container);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            layout.setBackground(new BitmapDrawable(getResources(), bitmap));
+                        } else {
+                            layout.setBackgroundDrawable(new BitmapDrawable(bitmap));
+                        }
                     }
-                }
 
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
 
-                }
+                    }
 
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
 
-                }
-            };
-            targets.add(target);
-            Picasso.with(this).load(header.getString("background")).into(target);
-        } catch (JSONException e) {
-            e.printStackTrace();
+                    }
+                };
+                targets.add(target);
+                Picasso.with(this).load(header.getString("background")).into(target);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
 
-        try {
-            Picasso.with(this).load(header.getString("image")).into((ImageView) headerView.findViewById(R.id.header_image));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (header.has("image")) {
+            try {
+                Picasso.with(this).load(header.getString("image")).into((ImageView) headerView.findViewById(R.id.header_image));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
