@@ -49,10 +49,24 @@ public class KolibriFirebasePushReceiver extends BroadcastReceiver {
 
         final Intent result;
 
-        if (msg.getData().containsKey("url")) {
+        if (msg.getData().containsKey("component")) {
 
-            final String resultUrl = msg.getData().get("url");
-            final Uri resultUri = Uri.parse(resultUrl);
+            String componentUri = msg.getData().get("component");
+
+            if (msg.getData().containsKey("url")) {
+                final String url = msg.getData().get("url");
+                componentUri += "?url=" + url;
+            }
+
+            final Uri uri = Uri.parse(componentUri);
+
+            result = Kolibri.createIntent(uri);
+
+            if (msg.getData().containsKey("id")) {
+                final String id = msg.getData().get("id");
+                result.putExtra(Kolibri.EXTRA_ID, id);
+            }
+
             final RuntimeConfig config = Kolibri.getInstance(context).getRuntime();
             final String scheme;
 
@@ -63,19 +77,14 @@ public class KolibriFirebasePushReceiver extends BroadcastReceiver {
             }
 
             // Check if url is custom component
-            if ("kolibri".equals(resultUri.getScheme()) || scheme.equals(resultUri.getScheme())) {
-                result = Kolibri.createIntent(resultUri);
+            if ("kolibri".equals(uri.getScheme()) || scheme.equals(uri.getScheme())) {
                 final PackageManager packageManager = context.getPackageManager();
                 if (intent.resolveActivity(packageManager) == null) {
                     Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
                     abortBroadcast();
                     return;
                 }
-            } else {
-                Uri uri = INTERNAL_WEBVIEW.buildUpon().appendQueryParameter("url", resultUrl).build();
-                result = Kolibri.createIntent(uri);
             }
-
         } else {
             result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
             result.putExtra(EXTRA_MESSAGE, msg);

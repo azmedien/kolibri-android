@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.GravityCompat;
 import android.util.Log;
 import android.view.View;
 
@@ -197,8 +198,20 @@ public class Kolibri {
     }
 
     @AnyThread
-    public static void notifyComponents(@NonNull Context context, @NonNull Intent intent) {
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    public static boolean notifyComponents(@NonNull Context context, @NonNull Intent intent) {
+        boolean handled = LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+        if (handled) {
+            return true;
+        }
+
+        final PackageManager packageManager = context.getPackageManager();
+        if (intent.resolveActivity(packageManager) != null) {
+            context.startActivity(intent);
+            return true;
+        }
+
+        return false;
     }
 
     public static String searchParamKey(Context context) {

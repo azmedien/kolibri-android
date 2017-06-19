@@ -66,13 +66,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
             Kolibri.setSelectedMenuItem(title);
 
-            final PackageManager packageManager = getPackageManager();
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent);
-                drawer.closeDrawer(GravityCompat.START);
-            }
-
-            Kolibri.notifyComponents(getApplicationContext(), intent);
+            Kolibri.notifyComponents(KolibriNavigationActivity.this, intent);
             drawer.closeDrawer(GravityCompat.START);
         }
     };
@@ -170,8 +164,8 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         showNavigationLoading();
         Kolibri kolibri = Kolibri.getInstance(this);
         kolibri.loadRuntimeConfiguration(this);
@@ -205,14 +199,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         Kolibri.setSelectedMenuItem(title);
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
-        final PackageManager packageManager = getPackageManager();
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent);
-            drawer.closeDrawer(GravityCompat.START);
-            return true;
-        }
-
-        Kolibri.notifyComponents(getApplicationContext(), intent);
+        Kolibri.notifyComponents(this, intent);
 
         for (int i = 0; i < navigationView.getMenu().size(); i++) {
             if (item.equals(navigationView.getMenu().getItem(i))) {
@@ -257,7 +244,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         onNavigationInitialize();
     }
 
-
     protected void loadDefaultItem() {
 
         final Menu menu = navigationView.getMenu();
@@ -268,6 +254,34 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
                 item.setChecked(true);
                 Kolibri.notifyComponents(this, item.getIntent());
                 break;
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+    }
+
+    @Override
+    public void onNavigationInitialize() {
+        final Intent intent = getIntent();
+
+        if (intent != null
+                && intent.hasExtra("id")) {
+
+            final Menu menu = navigationView.getMenu();
+
+            for (int i = 0; i < menu.size(); i++) {
+                final MenuItem item = menu.getItem(i);
+                final String idInMenu = item.getIntent().getStringExtra("id");
+                if (intent.getStringExtra("id").equals(idInMenu)) {
+                    item.setChecked(true);
+                    Kolibri.setSelectedMenuItem(item.getTitle().toString());
+                    Kolibri.notifyComponents(this, intent);
+                    setIntent(null);
+                    break;
+                }
             }
         }
     }
