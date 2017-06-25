@@ -19,6 +19,7 @@ public abstract class KolibriCoordinator<T extends View> {
     private BroadcastReceiver receiver;
     private LocalBroadcastManager manager;
     private Context context;
+    protected T view;
 
     final void setAttached(boolean attached) {
         this.attached = attached;
@@ -33,6 +34,7 @@ public abstract class KolibriCoordinator<T extends View> {
      */
     protected void attach(final T view) {
         context = view.getContext();
+        this.view = view;
         bindReceiver(view);
     }
 
