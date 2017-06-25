@@ -18,6 +18,19 @@ import java.util.Map;
  */
 
 public class RuntimeConfig {
+    public static final String ID = "id";
+    public static final String LABEL = "label";
+    public static final String COMPONENT = "component";
+    public static final String ITEMS = "items";
+    public static final String TYPE = "type";
+    public static final String NAVIGATION = "navigation";
+    public static final String KOLIBRI_VERSION = "kolibri-version";
+    public static final String DOMAIN = "domain";
+    public static final String SCHEME = "scheme";
+    public static final String STYLING = "styling";
+    public static final String COLOR_PALETTE = "color-palette";
+    public static final String ICON = "icon";
+
     private final JSONObject runtime;
     private Styling styling;
     private String version;
@@ -26,8 +39,17 @@ public class RuntimeConfig {
     private Map<String, Component> components;
     private Navigation navigation;
 
-    RuntimeConfig(@NonNull JSONObject json) {
+    private final String formattedAssetUrl;
+
+    RuntimeConfig(@NonNull JSONObject json, String url) {
         runtime = json;
+
+        final String applicationId = Uri.parse(url).getPathSegments().get(1);
+        final boolean isAssetsExternal = json.has("amazon");
+
+        formattedAssetUrl = isAssetsExternal ?
+                json.optString("amazon") + "/apps/" + applicationId + "/assets/%s.png" :
+                url.replace("runtime", "assets") + "/%s/download";
 
         if (json.length() == 0) {
             throw new KolibriException("Runtime config JSON is empty. Cannot construct the menu.");
@@ -42,19 +64,19 @@ public class RuntimeConfig {
                 continue;
 
             switch (current) {
-                case "navigation":
-                    navigation = new Navigation(runtime.optJSONObject(current));
+                case NAVIGATION:
+                    navigation = new Navigation(runtime.optJSONObject(current), formattedAssetUrl);
                     break;
-                case "kolibri-version":
+                case KOLIBRI_VERSION:
                     version = runtime.optString(current);
                     break;
-                case "domain":
+                case DOMAIN:
                     domain = runtime.optString(current);
                     break;
-                case "scheme":
+                case SCHEME:
                     scheme = runtime.optString(current);
                     break;
-                case "styling":
+                case STYLING:
                     styling = new Styling(runtime.optJSONObject(current));
                 default:
                     components.put(current, new Component(runtime.optJSONObject(current)));
@@ -66,6 +88,16 @@ public class RuntimeConfig {
         if (navigation == null || domain == null || scheme == null || styling == null) {
             throw new KolibriException("Runtime config JSON is not valid one.");
         }
+    }
+
+    @NonNull
+    String getAssetUrl(@NonNull String asset) {
+        return getAssetUrl(formattedAssetUrl, asset);
+    }
+
+    @NonNull
+    static String getAssetUrl(@NonNull String formattedAssetUrl, @NonNull String asset) {
+        return asset.startsWith("http") ? asset : String.format(formattedAssetUrl, asset);
     }
 
     /**
@@ -147,7 +179,7 @@ public class RuntimeConfig {
     public static class Component extends Settings {
 
         static final String KEY_SETTINGS = "settings";
-        static final String KEY_STYLING = "styling";
+        static final String KEY_STYLING = STYLING;
 
         Component(JSONObject json) {
             super(json);
@@ -267,11 +299,11 @@ public class RuntimeConfig {
         // ### PALETTE ###
 
         public boolean hasPalette() {
-            return json.has("color-palette");
+            return json.has(COLOR_PALETTE);
         }
 
         public boolean hasPaletteColor(String color) {
-            return hasPalette() && json.optJSONObject("color-palette").has(color);
+            return hasPalette() && json.optJSONObject(COLOR_PALETTE).has(color);
         }
 
         public int getPrimary() {
@@ -292,7 +324,7 @@ public class RuntimeConfig {
 
         private int getPaletteColor(String name) {
             try {
-                return Color.parseColor(json.getJSONObject("color-palette").getString(name));
+                return Color.parseColor(json.getJSONObject(COLOR_PALETTE).getString(name));
             } catch (JSONException | IllegalArgumentException e) {
                 throw new KolibriException(e);
             }
@@ -341,17 +373,17 @@ public class RuntimeConfig {
         private final Map<String, NavigationItem> items;
         private final String type;
 
-        Navigation(JSONObject json) {
+        Navigation(JSONObject json, String formattedAssetUrl) {
             super(json);
 
             items = new LinkedHashMap<>();
 
             try {
-                this.type = json.getString("type");
+                this.type = json.getString(TYPE);
 
-                final JSONArray jsonArray = json.getJSONArray("items");
+                final JSONArray jsonArray = json.getJSONArray(ITEMS);
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    final NavigationItem item = new NavigationItem(jsonArray.getJSONObject(i));
+                    final NavigationItem item = new NavigationItem(jsonArray.getJSONObject(i), formattedAssetUrl);
 
                     items.put(item.getId(), item);
                 }
@@ -390,22 +422,27 @@ public class RuntimeConfig {
         private final String id;
         private final String label;
         private final String component;
+        private final String icon;
         private Map<String, NavigationItem> subItems;
 
-        NavigationItem(JSONObject json) {
+        private final String formattedAssetUrl;
+
+        NavigationItem(JSONObject json, String formattedAssetUrl) {
             super(json);
 
             subItems = new LinkedHashMap<>();
+            this.formattedAssetUrl = formattedAssetUrl;
 
             try {
-                this.id = json.getString("id");
-                this.label = json.getString("label");
-                this.component = json.getString("component");
+                this.id = json.getString(ID);
+                this.label = json.getString(LABEL);
+                this.component = json.getString(COMPONENT);
+                this.icon = json.optString(ICON);
 
-                if (json.has("items")) {
-                    final JSONArray jsonArray = json.getJSONArray("items");
+                if (json.has(ITEMS)) {
+                    final JSONArray jsonArray = json.getJSONArray(ITEMS);
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        final NavigationItem item = new NavigationItem(jsonArray.getJSONObject(i));
+                        final NavigationItem item = new NavigationItem(jsonArray.getJSONObject(i), formattedAssetUrl);
 
                         subItems.put(item.getId(), item);
                     }
@@ -434,6 +471,24 @@ public class RuntimeConfig {
 
         public String getComponent() {
             return component;
+        }
+
+        public String getIcon() {
+            if (icon == null || icon.isEmpty()) {
+                return null;
+            }
+
+            String formattedIcon = icon;
+
+            if (icon.startsWith("http")) {
+                return getAssetUrl(formattedAssetUrl, icon);
+            } else if (formattedAssetUrl.contains("amazon")) {
+                formattedIcon = icon.split("-")[0];
+            } else if(!icon.contains("-png")) {
+                formattedIcon = icon + "-png";
+            }
+
+            return getAssetUrl(formattedAssetUrl, formattedIcon);
         }
     }
 
@@ -476,5 +531,4 @@ public class RuntimeConfig {
         int blue = (int) (Math.round((t - B) * p) + B);
         return Color.rgb(red, green, blue);
     }
-
 }
