@@ -223,8 +223,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             addNavigationItem(menu, item);
 
 
-            if (!item.hasSubItems())
+            if (!item.hasSubItems()) {
                 continue;
+            }
 
             final Map<String, RuntimeConfig.NavigationItem> subItems = item.getSubItems();
 
@@ -273,11 +274,27 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             final Menu menu = navigationView.getMenu();
 
             for (int i = 0; i < menu.size(); i++) {
+
                 final MenuItem item = menu.getItem(i);
                 final String idInMenu = item.getIntent().getStringExtra("id");
+
                 if (intent.getStringExtra("id").equals(idInMenu)) {
+
+                    final Uri data = intent.getData();
+                    final String urlToLoad = data.getQueryParameter("url");
+                    final Uri menuData = item.getIntent().getData();
+
+                    //There is a specific url that was pushed to the app
+                    if (urlToLoad != null) {
+                        intent.putExtra(Kolibri.EXTRA_GO_BACK_URL, menuData.getQueryParameter("url"));
+                    } else { //We will load the url for the navigation item having the id from the notification
+                        final String url = menuData.getQueryParameter("url");
+                        final Uri uriWithUrl = data.buildUpon().appendQueryParameter("url", url).build();
+                        intent.setData(uriWithUrl);
+                    }
+
                     item.setChecked(true);
-                    Kolibri.setSelectedMenuItem(item.getTitle().toString());
+                    intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
                     break;
                 }
             }

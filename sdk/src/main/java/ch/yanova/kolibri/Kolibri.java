@@ -38,6 +38,7 @@ public class Kolibri {
 
     public static final String EXTRA_ID = "id";
     public static final String EXTRA_QUERY = "query";
+    public static final String EXTRA_GO_BACK_URL = "go_back_url";
 
     public static boolean isPageSearchable(Context context, String pageId) {
 
