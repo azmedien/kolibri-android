@@ -13,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.GravityCompat;
 import android.util.Log;
 import android.view.View;
 
@@ -97,7 +96,7 @@ public class Kolibri {
 
     synchronized void loadRuntimeConfiguration(final RuntimeListener runtimeListener) {
 
-        final String url = getNavigationUrl();
+        final String url = getRuntimeUrl();
 
         if (url == null) {
             throw new IllegalAccessError("Kolibri navigation url must be set as meta-data in the Manifest.");
@@ -109,7 +108,7 @@ public class Kolibri {
         final OkHttpClient client = new OkHttpClient.Builder().cache(cache).build();
 
         final Request request = new Request.Builder()
-                .url(getNavigationUrl())
+                .url(getRuntimeUrl())
                 .header("Cache-Control", "public, max-age=604800")
                 .build();
 
@@ -120,7 +119,7 @@ public class Kolibri {
                     final boolean userDefined = runtimeListener.onFailed(e);
                     if (!userDefined) {
                         try { // Try to load saved one as a fallback configuratio
-                            runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
+                            runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")), getRuntimeUrl());
                             runtimeListener.onLoaded(runtime);
                         } catch (JSONException | KolibriException exception) {
                             runtimeListener.onFailed(exception);
@@ -140,12 +139,12 @@ public class Kolibri {
                     Log.i(TAG, "onResponse: network " + response.networkResponse());
 
                     JSONObject navigationJson = new JSONObject(json);
-                    runtime = new RuntimeConfig(navigationJson);
+                    runtime = new RuntimeConfig(navigationJson, getRuntimeUrl());
                     preferences.edit().putString("runtime", json).apply();
                 } catch (JSONException e) {
 
                     try { // Try to load saved one as a fallback configuratio
-                        runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
+                        runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")), getRuntimeUrl());
                     } catch (JSONException | KolibriException ignored) {
                         exception = ignored;
                     }
@@ -219,7 +218,7 @@ public class Kolibri {
         return Kolibri.getInstance(context).getRuntime().getComponent("search").getSettings().getString("search-param");
     }
 
-    String getNavigationUrl() {
+    String getRuntimeUrl() {
         try {
             final ApplicationInfo ai = fContext.getPackageManager().getApplicationInfo(fContext.getPackageName(), PackageManager.GET_META_DATA);
             final Bundle bundle = ai.metaData;
