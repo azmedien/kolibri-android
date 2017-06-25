@@ -255,4 +255,8 @@ public class Kolibri {
     public static String selectedMenuItem() {
         return mInstance.selectedMenuItem;
     }
+
+    public static Intent getErrorIntent(String errorMessage) {
+        return null;
+    }
 }

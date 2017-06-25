@@ -278,11 +278,12 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
                 if (intent.getStringExtra("id").equals(idInMenu)) {
                     item.setChecked(true);
                     Kolibri.setSelectedMenuItem(item.getTitle().toString());
-                    Kolibri.notifyComponents(this, intent);
-                    setIntent(null);
                     break;
                 }
             }
+
+            setIntent(null);
+            Kolibri.notifyComponents(this, intent);
         }
     }
 
