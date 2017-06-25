@@ -58,7 +58,7 @@ public class KolibriFirebasePushReceiver extends BroadcastReceiver {
 
             String componentUri = msg.getData().get("component");
 
-            result = getResultIntent(componentUri);
+            result = getResultIntent(context, componentUri);
         } else {
             result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
             result.putExtra(EXTRA_MESSAGE, msg);
@@ -89,12 +89,12 @@ public class KolibriFirebasePushReceiver extends BroadcastReceiver {
         abortBroadcast();
     }
 
-    private static Intent getResultIntent(String componentUri) {
+    private static Intent getResultIntent(Context context, String componentUri) {
 
         final Intent result;
 
         if (componentUri == null) {
-            return Kolibri.getErrorIntent("Error with component");
+            return Kolibri.getErrorIntent(context, "Error with component");
         }
 
         if (componentUri.startsWith("http")) {

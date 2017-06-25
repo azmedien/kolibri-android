@@ -54,15 +54,16 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         RuntimeListener, KolibriInitializeListener {
 
     public static final String TAG_MAIN_FRAGMENT = "mainFragment";
+    // this set prevents collecting targets by garbage collector
+    final Set<Target> targets = new HashSet<>();
+    protected RuntimeConfig configuration;
     private NavigationView navigationView;
     private FloatingActionButton floatingActionButton;
-
     private View mLayoutError;
     private View mLayoutLoading;
     private View mLayoutOverlay;
-
     private boolean restarted;
-
+    private DrawerLayout drawer;
     private final View.OnClickListener onFooterClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -75,10 +76,8 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         }
     };
-    private DrawerLayout drawer;
     private Toolbar toolbar;
     private View headerImageContainer;
-    protected RuntimeConfig configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,7 +203,11 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         Kolibri.setSelectedMenuItem(title);
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
-        Kolibri.notifyComponents(this, intent);
+        final boolean handled = Kolibri.notifyComponents(this, intent);
+
+        if (!handled) {
+            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, "No Such Component Exists!"));
+        }
 
         for (int i = 0; i < navigationView.getMenu().size(); i++) {
             if (item.equals(navigationView.getMenu().getItem(i))) {
@@ -273,9 +276,11 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     public void onNavigationInitialize() {
         final Intent intent = getIntent();
 
-        if (intent != null
-                && intent.hasExtra("id")) {
+        if (intent == null) {
+            return;
+        }
 
+        if (intent.hasExtra(ID)) {
             final Menu menu = navigationView.getMenu();
 
             for (int i = 0; i < menu.size(); i++) {
@@ -300,10 +305,19 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
                     item.setChecked(true);
                     intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
-                    break;
+
+                    setIntent(null);
+                    Kolibri.notifyComponents(this, intent);
+                    return;
                 }
             }
 
+            setIntent(null);
+            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, "No Such Component Exists!"));
+            return;
+        }
+
+        if (intent.getData() != null && intent.getData().getQueryParameter("url") != null) {
             setIntent(null);
             Kolibri.notifyComponents(this, intent);
         }
@@ -480,9 +494,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             loadMenuIcon(menuItem, iconUrl);
         }
     }
-
-    // this set prevents collecting targets by garbage collector
-    final Set<Target> targets = new HashSet<>();
 
     private void loadMenuIcon(final MenuItem menuItem, String url) {
 

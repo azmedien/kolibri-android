@@ -38,6 +38,7 @@ public class Kolibri {
     public static final String EXTRA_ID = "id";
     public static final String EXTRA_QUERY = "query";
     public static final String EXTRA_GO_BACK_URL = "go_back_url";
+    public static final String EXTRA_ERROR_MESSAGE = "error_message";
 
     public static boolean isPageSearchable(Context context, String pageId) {
 
@@ -256,7 +257,10 @@ public class Kolibri {
         return mInstance.selectedMenuItem;
     }
 
-    public static Intent getErrorIntent(String errorMessage) {
-        return null;
+    public static Intent getErrorIntent(Context context, String errorMessage) {
+
+        final Intent errorIntent = new Intent(context, ErrorActivity.class);
+        errorIntent.putExtra(EXTRA_ERROR_MESSAGE, errorMessage);
+        return errorIntent;
     }
 }

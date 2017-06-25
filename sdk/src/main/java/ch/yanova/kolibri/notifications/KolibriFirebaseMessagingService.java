@@ -56,7 +56,7 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
 
         if (componentUri != null) {
 
-            result = getResultIntent(componentUri);
+            result = getResultIntent(this, componentUri);
         } else {
             result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
         }
@@ -83,28 +83,26 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
         notificationManager.notify(Kolibri.getInstance(this).getNotificationIcon(), notificationBuilder.build());
     }
 
-    private static Intent getResultIntent(String componentUri) {
+    private static Intent getResultIntent(Context context, String componentUri) {
 
-        final Intent result;
+        final Intent result = new Intent(Intent.ACTION_VIEW);
 
         if (componentUri == null) {
-            return Kolibri.getErrorIntent("Error with component");
+            return Kolibri.getErrorIntent(context, "Error with component");
         }
 
+        Uri uri = null;
         if (componentUri.startsWith("http")) {
             componentUri = KOLIBRI_LINK_INTENT + "?url=" + componentUri;
-        }
-
-        final Uri uri = Uri.parse(componentUri);
-
-        result = new Intent(Intent.ACTION_VIEW);
-        result.setData(uri);
-
-        if (componentUri.startsWith(KOLIBRI_LINK_INTENT)) {
+            uri = Uri.parse(componentUri);
+        } else if (componentUri.startsWith(KOLIBRI_LINK_INTENT)) {
+            uri = Uri.parse(componentUri);
             final List<String> pathSegments = uri.getPathSegments();
             final String id = pathSegments.get(pathSegments.size() - 1);
             result.putExtra(Kolibri.EXTRA_ID, id);
         }
+
+        result.setData(uri);
 
         return result;
     }
