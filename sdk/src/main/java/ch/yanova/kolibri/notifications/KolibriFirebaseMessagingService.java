@@ -98,6 +98,10 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
         } else if (componentUri.startsWith(KOLIBRI_LINK_INTENT)) {
             uri = Uri.parse(componentUri);
             final List<String> pathSegments = uri.getPathSegments();
+
+            if (pathSegments == null || pathSegments.size() <= 0) {
+                return Kolibri.getErrorIntent(context, "No Such Component Exists!");
+            }
             final String id = pathSegments.get(pathSegments.size() - 1);
             result.putExtra(Kolibri.EXTRA_ID, id);
         }
