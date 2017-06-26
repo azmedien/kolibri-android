@@ -24,7 +24,7 @@ import ch.yanova.kolibri.Kolibri;
 
 public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String KOLIBRI_LINK_INTENT = "kolibri://content/link";
+    private static final String KOLIBRI_LINK_INTENT = "kolibri://notification";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
