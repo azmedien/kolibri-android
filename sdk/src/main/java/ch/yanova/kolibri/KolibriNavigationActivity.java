@@ -165,6 +165,10 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     protected void onRestart() {
         super.onRestart();
         restarted = true;
+        if (Kolibri.fromMenuItemClick() && Kolibri.previousMenuItem() != null) {
+            getSupportActionBar().setTitle(Kolibri.previousMenuItem());
+            Kolibri.setSelectedMenuItem(Kolibri.previousMenuItem());
+        }
     }
 
     @Override
@@ -199,8 +203,10 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final Intent intent = item.getIntent();
 
         final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-
+        Kolibri.setPreviousMenuItem(Kolibri.selectedMenuitem());
         Kolibri.setSelectedMenuItem(title);
+        Kolibri.setFromMenuItemClick(true);
+
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
         final boolean handled = Kolibri.notifyComponents(this, intent);
@@ -305,6 +311,8 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
                     item.setChecked(true);
                     intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
+                    Kolibri.setPreviousMenuItem(Kolibri.selectedMenuitem());
+                    Kolibri.setSelectedMenuItem(item.getTitle().toString());
 
                     setIntent(null);
                     Kolibri.notifyComponents(this, intent);

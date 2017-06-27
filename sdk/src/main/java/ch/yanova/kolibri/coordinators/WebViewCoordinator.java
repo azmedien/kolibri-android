@@ -154,7 +154,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
             Document content = Jsoup.parseBodyFragment(html);
             Elements links = content.getElementsByTag(TAG_META);
             Log.i("PARSING", "processHTML: " + links);
-            Map<String, String> metaData = new HashMap<>();
+            final Map<String, String> metaData = new HashMap<>();
 
             for (Element link : links) {
 
@@ -184,7 +184,13 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
             // There's no need to report if actually there's no data
             if (metaData.size() > 0) {
-                onFound(metaData);
+
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onFound(metaData);
+                    }
+                });
             }
         }
     }
@@ -201,7 +207,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        getHeaders(view, url);
+//        getHeaders(view, url);
     }
 
     @Override
