@@ -252,27 +252,27 @@ public class Kolibri {
         return runtime;
     }
 
-    public static String selectedMenuitem() {
+    public String selectedMenuitem() {
         return mInstance.selectedMenuItem;
     }
 
-    public static String previousMenuItem() {
+    public String previousMenuItem() {
         return mInstance.previousMenuItem;
     }
 
-    public static void setSelectedMenuItem(String selectedMenuItem) {
+    public void setSelectedMenuItem(String selectedMenuItem) {
         mInstance.selectedMenuItem = selectedMenuItem;
     }
 
-    public static void setPreviousMenuItem(String previousMenuItem) {
+    public void setPreviousMenuItem(String previousMenuItem) {
         mInstance.previousMenuItem = previousMenuItem;
     }
 
-    public static void setFromMenuItemClick(boolean fromMenuItemClick) {
+    public void setFromMenuItemClick(boolean fromMenuItemClick) {
         mInstance.fromMenuItemClick = fromMenuItemClick;
     }
 
-    public static boolean fromMenuItemClick() {
+    public boolean fromMenuItemClick() {
         return mInstance.fromMenuItemClick;
     }
 
