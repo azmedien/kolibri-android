@@ -117,7 +117,7 @@ public class KolibriApp extends Application {
         sb.append("/").append("android");
         sb.append("/").append("phone");
         sb.append("?d=").append(System.currentTimeMillis());
-        sb.append("&x=").append(widthPixels).append("x").append(heightPixels);
+//        sb.append("&x=").append(widthPixels).append("x").append(heightPixels);
 
         if (url != null) {
             sb.append("&r=").append(url);
