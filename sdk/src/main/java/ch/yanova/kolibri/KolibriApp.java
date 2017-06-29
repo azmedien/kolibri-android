@@ -20,6 +20,7 @@ import com.franmontiel.persistentcookiejar.PersistentCookieJar;
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -36,6 +37,8 @@ import okhttp3.Response;
  */
 
 public class KolibriApp extends Application {
+
+    private static final String TOPIC_MAIN = "main";
 
     private static KolibriApp instance;
 
@@ -61,6 +64,8 @@ public class KolibriApp extends Application {
         heightPixels = lDisplayMetrics.heightPixels;
 
         netmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
+
+        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC_MAIN);
     }
 
     public void logEvent(@Nullable String name, @Nullable String url) {

@@ -104,6 +104,8 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
             }
             final String id = pathSegments.get(pathSegments.size() - 1);
             result.putExtra(Kolibri.EXTRA_ID, id);
+        } else {
+            uri = Uri.parse(componentUri);
         }
 
         result.setData(uri);
