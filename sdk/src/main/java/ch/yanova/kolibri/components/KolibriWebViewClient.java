@@ -113,12 +113,12 @@ public class KolibriWebViewClient extends WebViewClient {
             String domain = Kolibri.getInstance(context).getRuntime().getDomain();
             String host = link.getHost();
 
-            if (domain.startsWith("www")) {
-                domain = domain.substring(3);
+            if (domain.startsWith("www.")) {
+                domain = domain.substring(4);
             }
 
-            if (host.startsWith("www")) {
-                host = host.substring(3);
+            if (host.startsWith("www.")) {
+                host = host.substring(4);
             }
 
             if (host.equals(domain)) {
