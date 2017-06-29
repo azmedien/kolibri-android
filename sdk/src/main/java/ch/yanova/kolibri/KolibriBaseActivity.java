@@ -41,10 +41,6 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
         });
     }
 
-    @Override
-    public void onNavigationInitialize() {
-    }
-
     public KolibriWebView getWebView() {
         final WebViewFragment webViewFragment = (WebViewFragment) getMainFragment();
         return webViewFragment.getWebView();

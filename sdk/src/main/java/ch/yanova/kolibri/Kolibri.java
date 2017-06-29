@@ -37,6 +37,8 @@ public class Kolibri {
 
     public static final String EXTRA_ID = "id";
     public static final String EXTRA_QUERY = "query";
+    public static final String EXTRA_GO_BACK_URL = "go_back_url";
+    public static final String EXTRA_ERROR_MESSAGE = "error_message";
 
     public static boolean isPageSearchable(Context context, String pageId) {
 
@@ -76,6 +78,9 @@ public class Kolibri {
     private static Context fContext;
 
     private String selectedMenuItem;
+    private String previousMenuItem;
+
+    private boolean fromMenuItemClick;
 
     private SharedPreferences preferences;
     private RuntimeConfig runtime;
@@ -95,7 +100,7 @@ public class Kolibri {
 
     synchronized void loadRuntimeConfiguration(final RuntimeListener runtimeListener) {
 
-        final String url = getNavigationUrl();
+        final String url = getRuntimeUrl();
 
         if (url == null) {
             throw new IllegalAccessError("Kolibri navigation url must be set as meta-data in the Manifest.");
@@ -107,7 +112,7 @@ public class Kolibri {
         final OkHttpClient client = new OkHttpClient.Builder().cache(cache).build();
 
         final Request request = new Request.Builder()
-                .url(getNavigationUrl())
+                .url(getRuntimeUrl())
                 .header("Cache-Control", "public, max-age=604800")
                 .build();
 
@@ -118,7 +123,7 @@ public class Kolibri {
                     final boolean userDefined = runtimeListener.onFailed(e);
                     if (!userDefined) {
                         try { // Try to load saved one as a fallback configuratio
-                            runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
+                            runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")), getRuntimeUrl());
                             runtimeListener.onLoaded(runtime);
                         } catch (JSONException | KolibriException exception) {
                             runtimeListener.onFailed(exception);
@@ -138,12 +143,12 @@ public class Kolibri {
                     Log.i(TAG, "onResponse: network " + response.networkResponse());
 
                     JSONObject navigationJson = new JSONObject(json);
-                    runtime = new RuntimeConfig(navigationJson);
+                    runtime = new RuntimeConfig(navigationJson, getRuntimeUrl());
                     preferences.edit().putString("runtime", json).apply();
                 } catch (JSONException e) {
 
                     try { // Try to load saved one as a fallback configuratio
-                        runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")));
+                        runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")), getRuntimeUrl());
                     } catch (JSONException | KolibriException ignored) {
                         exception = ignored;
                     }
@@ -197,15 +202,27 @@ public class Kolibri {
     }
 
     @AnyThread
-    public static void notifyComponents(@NonNull Context context, @NonNull Intent intent) {
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    public static boolean notifyComponents(@NonNull Context context, @NonNull Intent intent) {
+        boolean handled = LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+        if (handled) {
+            return true;
+        }
+
+        final PackageManager packageManager = context.getPackageManager();
+        if (intent.resolveActivity(packageManager) != null) {
+            context.startActivity(intent);
+            return true;
+        }
+
+        return false;
     }
 
     public static String searchParamKey(Context context) {
         return Kolibri.getInstance(context).getRuntime().getComponent("search").getSettings().getString("search-param");
     }
 
-    String getNavigationUrl() {
+    String getRuntimeUrl() {
         try {
             final ApplicationInfo ai = fContext.getPackageManager().getApplicationInfo(fContext.getPackageName(), PackageManager.GET_META_DATA);
             final Bundle bundle = ai.metaData;
@@ -235,11 +252,34 @@ public class Kolibri {
         return runtime;
     }
 
-    public static void setSelectedMenuItem(String selectedMenuItem) {
+    public String selectedMenuitem() {
+        return mInstance.selectedMenuItem;
+    }
+
+    public String previousMenuItem() {
+        return mInstance.previousMenuItem;
+    }
+
+    public void setSelectedMenuItem(String selectedMenuItem) {
         mInstance.selectedMenuItem = selectedMenuItem;
     }
 
-    public static String selectedMenuItem() {
-        return mInstance.selectedMenuItem;
+    public void setPreviousMenuItem(String previousMenuItem) {
+        mInstance.previousMenuItem = previousMenuItem;
+    }
+
+    public void setFromMenuItemClick(boolean fromMenuItemClick) {
+        mInstance.fromMenuItemClick = fromMenuItemClick;
+    }
+
+    public boolean fromMenuItemClick() {
+        return mInstance.fromMenuItemClick;
+    }
+
+    public static Intent getErrorIntent(Context context, String errorMessage) {
+
+        final Intent errorIntent = new Intent(context, ErrorActivity.class);
+        errorIntent.putExtra(EXTRA_ERROR_MESSAGE, errorMessage);
+        return errorIntent;
     }
 }

@@ -1,6 +1,7 @@
 package ch.yanova.kolibri.prototype;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import ch.yanova.kolibri.KolibriApp;
 import io.fabric.sdk.android.Fabric;
@@ -16,5 +17,7 @@ public class KolibriPrototypeApp extends KolibriApp {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
         setFirebaseEnabled(false);
+
+        FirebaseMessaging.getInstance().subscribeToTopic("main");
     }
 }

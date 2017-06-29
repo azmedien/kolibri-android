@@ -113,12 +113,12 @@ public class KolibriWebViewClient extends WebViewClient {
             String domain = Kolibri.getInstance(context).getRuntime().getDomain();
             String host = link.getHost();
 
-            if (domain.startsWith("www")) {
-                domain = domain.substring(3);
+            if (domain.startsWith("www.")) {
+                domain = domain.substring(4);
             }
 
-            if (host.startsWith("www")) {
-                host = host.substring(3);
+            if (host.startsWith("www.")) {
+                host = host.substring(4);
             }
 
             if (host.equals(domain)) {
@@ -136,6 +136,9 @@ public class KolibriWebViewClient extends WebViewClient {
         final boolean handleInNewView = handleInNewView(target);
 
         if (handleInNewView) {
+
+            Kolibri.getInstance(context).setFromMenuItemClick(false);
+
             Intent linkIntent = target.equals(TARGET_INTERNAL) ?
                     new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
                     new Intent(Intent.ACTION_VIEW, link);

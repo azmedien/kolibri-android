@@ -38,7 +38,7 @@ import okhttp3.Response;
 
 public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements KolibriWebViewClient.WebClientListener, OnAmpDataFoundListener {
 
-    private static final String[] sURIs = new String[]{"kolibri://content/link"};
+    private static final String[] sURIs = new String[]{"kolibri://content/link", "kolibri://notification"};
 
     public static final String HEADER_FAVORITES = "Kolibri-Favorizable";
 
@@ -48,14 +48,17 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     public static final String FAV_IMAGE = "og:image";
     public static final String FAV_LABEL = "og:title";
     public static final String META_CANONICAL_URL = "og:url";
+
+    public static final String META_CATEGORY = "kolibri-category";
+    public static final String META_FAVORIZABLE = "kolibri-favorizable";
+    public static final String META_SHAREABLE = "kolibri-shareable";
+
     public static final String ATTR_CONTENT = "content";
     public static final String TAG_META = "meta";
     public static final String ATTR_PROPERTY = "property";
     public static final String META_THEME_COLOR = "theme-color";
 
     private static final String TAG = "WebViewCoordinator";
-
-
 
     private final OnAmpDataFoundListener listener;
 
@@ -115,20 +118,24 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
                     Log.i(TAG, "getHeaders: " + response.headers());
 
-                    final String trueLiteral = String.valueOf(Boolean.TRUE);
                     final String headerFavorites = response.header(HEADER_FAVORITES);
-                    String uriString = trueLiteral.equals(headerFavorites) ?
-                            ActionButtonCoordinator.URI_SHOW :
-                            ActionButtonCoordinator.URI_HIDE;
-
-                    uriString += "?url=" + url;
-
-                    final Intent intent = Kolibri.createIntent(Uri.parse(uriString));
-
-                    Kolibri.notifyComponents(view.getContext(), intent);
+                    handleFavorizable(headerFavorites, url, view);
                 }
             }
         });
+    }
+
+    private void handleFavorizable(String favorizable, String url, WebView view) {
+        final String trueLiteral = String.valueOf(Boolean.TRUE);
+        String uriString = trueLiteral.equals(favorizable) ?
+                ActionButtonCoordinator.URI_SHOW :
+                ActionButtonCoordinator.URI_HIDE;
+
+        uriString += "?url=" + url;
+
+        final Intent intent = Kolibri.createIntent(Uri.parse(uriString));
+
+        Kolibri.notifyComponents(view.getContext(), intent);
     }
 
     @Override
@@ -136,6 +143,8 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         if (listener != null) {
             listener.onFound(data);
         }
+
+        handleFavorizable(data.get(META_FAVORIZABLE), view.getUrl(), view);
     }
 
     private class GetHtmlJsInterface {
@@ -145,7 +154,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
             Document content = Jsoup.parseBodyFragment(html);
             Elements links = content.getElementsByTag(TAG_META);
             Log.i("PARSING", "processHTML: " + links);
-            Map<String, String> metaData = new HashMap<>();
+            final Map<String, String> metaData = new HashMap<>();
 
             for (Element link : links) {
 
@@ -154,6 +163,15 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                     metaData.put(META_THEME_COLOR, link.attr(META_THEME_COLOR));
                     continue;
                 }
+
+                if (link.hasAttr("name")
+                        && (link.attr("name").equals(META_CATEGORY)
+                        || link.attr("name").equals(META_FAVORIZABLE)
+                        || link.attr("name").equals(META_SHAREABLE))) {
+                    metaData.put(link.attr("name"), link.attr(ATTR_CONTENT));
+                    continue;
+                }
+
 
                 if (!link.hasAttr(ATTR_PROPERTY))
                     continue;
@@ -166,7 +184,13 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
             // There's no need to report if actually there's no data
             if (metaData.size() > 0) {
-                onFound(metaData);
+
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onFound(metaData);
+                    }
+                });
             }
         }
     }
@@ -183,7 +207,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        getHeaders(view, url);
+//        getHeaders(view, url);
     }
 
     @Override
