@@ -64,8 +64,6 @@ public class KolibriApp extends Application {
         heightPixels = lDisplayMetrics.heightPixels;
 
         netmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
-
-        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC_MAIN);
     }
 
     public void logEvent(@Nullable String name, @Nullable String url) {
