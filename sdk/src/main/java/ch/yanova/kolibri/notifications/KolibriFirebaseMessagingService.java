@@ -28,20 +28,11 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-//        super.onMessageReceived(remoteMessage);
-//        Intent messageReceived = new Intent(KolibriFirebasePushReceiver.ACTION_RECEIVE);
-//        messageReceived.putExtra(KolibriFirebasePushReceiver.EXTRA_MESSAGE, remoteMessage);
-//
-//        getApplicationContext().sendOrderedBroadcast(messageReceived, null);
-    }
+        super.onMessageReceived(remoteMessage);
+        Intent messageReceived = new Intent(KolibriFirebasePushReceiver.ACTION_RECEIVE);
+        messageReceived.putExtra(KolibriFirebasePushReceiver.EXTRA_MESSAGE, remoteMessage);
 
-    @Override
-    public void handleIntent(Intent intent) {
-        super.handleIntent(intent);
-
-        handleNow(intent);
-
-        String token = FirebaseInstanceId.getInstance().getToken();
+        getApplicationContext().sendOrderedBroadcast(messageReceived, null);
     }
 
     private void handleNow(Intent intent) {
