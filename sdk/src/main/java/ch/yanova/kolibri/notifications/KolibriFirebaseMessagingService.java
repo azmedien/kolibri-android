@@ -52,7 +52,7 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
         final String title = intent.getStringExtra("title");
         final String body = intent.getStringExtra("body");
 
-        final Intent result;
+        Intent result;
 
         if (componentUri != null) {
 
@@ -64,7 +64,7 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
         final PackageManager packageManager = getPackageManager();
         if (result.resolveActivity(packageManager) == null) {
             Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
-            return;
+            result = Kolibri.getErrorIntent(this, "No Such Component Exists!");
         }
 
         result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
