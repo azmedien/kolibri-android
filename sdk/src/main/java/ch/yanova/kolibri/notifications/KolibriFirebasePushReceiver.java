@@ -25,17 +25,12 @@ import ch.yanova.kolibri.RuntimeConfig;
 
 public class KolibriFirebasePushReceiver extends BroadcastReceiver {
 
-    private static final String KOLIBRI_LINK_INTENT = "kolibri://content/link";
-
     public static final String ACTION_RECEIVE = "ch.azmedien.kolibri.MESSAGE_RECEIVED";
     public static final String EXTRA_MESSAGE = "ch.azmedien.kolibri.EXTRA_MESSAGE";
-    private final static Uri INTERNAL_WEBVIEW = Uri.parse("kolibri://internal/webview");
 
     @Override
     public void onReceive(Context context, Intent intent) {
         final RemoteMessage msg = intent.getParcelableExtra(EXTRA_MESSAGE);
-        final Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         String title;
         String body;
@@ -52,66 +47,8 @@ public class KolibriFirebasePushReceiver extends BroadcastReceiver {
             body = msg.getData().get("body");
         }
 
-        final Intent result;
+        String componentUri = msg.getData().get("component");
 
-        if (msg.getData().containsKey("component")) {
-
-            String componentUri = msg.getData().get("component");
-
-            result = getResultIntent(context, componentUri);
-        } else {
-            result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
-            result.putExtra(EXTRA_MESSAGE, msg);
-        }
-
-        final PackageManager packageManager = context.getPackageManager();
-        if (result.resolveActivity(packageManager) == null) {
-            Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
-            abortBroadcast();
-            return;
-        }
-
-        result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        final PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, result, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(Kolibri.getInstance(context).getNotificationIcon())
-                .setContentTitle(title)
-                .setContentText(body)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setTicker(String.format("%s: %s", title, body))
-                .setContentIntent(pendingIntent);
-
-        notificationManager.notify(Kolibri.getInstance(context).getNotificationIcon(), notificationBuilder.build());
-
-        abortBroadcast();
-    }
-
-    private static Intent getResultIntent(Context context, String componentUri) {
-
-        final Intent result;
-
-        if (componentUri == null) {
-            return Kolibri.getErrorIntent(context, "Error with component");
-        }
-
-        if (componentUri.startsWith("http")) {
-            componentUri = KOLIBRI_LINK_INTENT + "?url=" + componentUri;
-        }
-
-        final Uri uri = Uri.parse(componentUri);
-
-        result = new Intent(Intent.ACTION_VIEW);
-        result.setData(uri);
-
-        if (componentUri.startsWith(KOLIBRI_LINK_INTENT)) {
-            final List<String> pathSegments = uri.getPathSegments();
-            final String id = pathSegments.get(pathSegments.size() - 1);
-            result.putExtra(Kolibri.EXTRA_ID, id);
-        }
-
-        return result;
+        KolibriFirebaseMessagingService.handleNow(context, componentUri, title, body);
     }
 }

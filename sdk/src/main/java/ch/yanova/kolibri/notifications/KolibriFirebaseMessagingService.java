@@ -35,35 +35,42 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
         getApplicationContext().sendOrderedBroadcast(messageReceived, null);
     }
 
-    private void handleNow(Intent intent) {
-        final Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//    @Override
+//    public void handleIntent(Intent intent) {
+//        super.handleIntent(intent);
+//
+//        final String componentUri = intent.getStringExtra("component");
+//        final String title = intent.getStringExtra("title");
+//        final String body = intent.getStringExtra("body");
+//
+//        handleNow(this, componentUri, title, body);
+//    }
 
-        final String componentUri = intent.getStringExtra("component");
-        final String title = intent.getStringExtra("title");
-        final String body = intent.getStringExtra("body");
+    static void handleNow(Context context, String componentUri, String title, String body) {
+        final Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Intent result;
 
         if (componentUri != null) {
 
-            result = getResultIntent(this, componentUri);
+            result = getResultIntent(context, componentUri);
         } else {
             result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
         }
 
-        final PackageManager packageManager = getPackageManager();
+        final PackageManager packageManager = context.getPackageManager();
         if (result.resolveActivity(packageManager) == null) {
             Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
-            result = Kolibri.getErrorIntent(this, "No Such Component Exists!");
+            result = Kolibri.getErrorIntent(context, "No Such Component Exists!");
         }
 
         result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        final PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, result, PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, result, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(Kolibri.getInstance(this).getNotificationIcon())
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(Kolibri.getInstance(context).getNotificationIcon())
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)
@@ -71,7 +78,7 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
                 .setTicker(String.format("%s: %s", title, body))
                 .setContentIntent(pendingIntent);
 
-        notificationManager.notify(Kolibri.getInstance(this).getNotificationIcon(), notificationBuilder.build());
+        notificationManager.notify(Kolibri.getInstance(context).getNotificationIcon(), notificationBuilder.build());
     }
 
     private static Intent getResultIntent(Context context, String componentUri) {
