@@ -39,7 +39,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
     private Intent shareIntent;
     private boolean isThemeTinted;
-    private boolean showSearchOption;
+    private boolean showSearchOption = true;
     private boolean showShareOption;
 
     public KolibriWebView getWebView() {
