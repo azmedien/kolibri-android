@@ -9,6 +9,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -36,8 +39,10 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
     private Intent shareIntent;
     private boolean isThemeTinted;
+    private boolean showSearchOption;
+    private boolean showShareOption;
 
-    KolibriWebView getWebView() {
+    public KolibriWebView getWebView() {
         return webView;
     }
 
@@ -68,6 +73,8 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
             final String url = getArguments().getString("url");
             webView.loadUrl(url);
         }
+
+        setHasOptionsMenu(true);
     }
 
     @NonNull
@@ -85,6 +92,9 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
+
+        showShareOption = false;
+        shareIntent = null;
 
         if (view == null) {
             return;
@@ -114,14 +124,22 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
     @Override
     public void onFound(Map<String, String> data) {
-        if (data.size() > 0 && data.containsKey(WebViewCoordinator.FAV_LABEL)) {
+        if (data.size() > 0 && data.containsKey(WebViewCoordinator.META_SHAREABLE)) {
             final String url = data.get(WebViewCoordinator.META_CANONICAL_URL);
 
-            shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.setType("text/plain");
-            shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            shareIntent.putExtra(Intent.EXTRA_SUBJECT, data.get(WebViewCoordinator.FAV_LABEL));
-            shareIntent.putExtra(Intent.EXTRA_TEXT, url);
+            if (url != null) {
+                shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, data.get(WebViewCoordinator.META_TITLE));
+                shareIntent.putExtra(Intent.EXTRA_TEXT, url);
+
+                showShareOption = true;
+            } else {
+                showShareOption = false;
+                shareIntent = null;
+            }
+            getActivity().invalidateOptionsMenu();
         }
 
         if (data.containsKey(WebViewCoordinator.META_THEME_COLOR)) {
@@ -144,6 +162,37 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
                 }
             });
         }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        MenuItem search = menu.findItem(R.id.action_search);
+        MenuItem share = menu.findItem(R.id.action_share);
+
+
+        search.setVisible(showSearchOption);
+        share.setVisible(showShareOption && shareIntent != null);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_webview, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        final int i = item.getItemId();
+
+        if (i == R.id.action_share) {
+            startActivity(Intent.createChooser(shareIntent, "Share link!"));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void tintTheme(View view, int colorPrimary, int colorPrimaryDark, boolean tint) {
@@ -170,5 +219,13 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
         }
         view.setBackgroundColor(colorPrimary);
         setProgressColor(colorPrimary);
+    }
+
+    public void setShowShareOption(boolean showShareOption) {
+        this.showShareOption = showShareOption;
+    }
+
+    public void setShowSearchOption(boolean showSearchOption) {
+        this.showSearchOption = showSearchOption;
     }
 }

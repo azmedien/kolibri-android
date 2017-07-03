@@ -46,7 +46,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     private static final String JS_INTERFACE_NAME = "GetHtml";
 
     public static final String FAV_IMAGE = "og:image";
-    public static final String FAV_LABEL = "og:title";
+    public static final String META_TITLE = "og:title";
     public static final String META_CANONICAL_URL = "og:url";
 
     public static final String META_CATEGORY = "kolibri-category";

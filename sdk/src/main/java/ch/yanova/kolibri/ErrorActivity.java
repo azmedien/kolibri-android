@@ -9,19 +9,16 @@ import android.widget.TextView;
 
 public class ErrorActivity extends AppCompatActivity {
 
-    private TextView errorMessageTextView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_error);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        errorMessageTextView = (TextView) findViewById(R.id.error_text);
+        final TextView errorMessageTextView = (TextView) findViewById(R.id.error_text);
 
         final Intent intent = getIntent();
 
