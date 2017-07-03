@@ -160,7 +160,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
                 // Get current page theme color
                 if (link.hasAttr("name") && link.attr("name").equals(META_THEME_COLOR)) {
-                    metaData.put(META_THEME_COLOR, link.attr(META_THEME_COLOR));
+                    metaData.put(META_THEME_COLOR, link.attr(ATTR_CONTENT));
                     continue;
                 }
 

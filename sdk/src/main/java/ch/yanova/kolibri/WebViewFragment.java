@@ -142,7 +142,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
             getActivity().invalidateOptionsMenu();
         }
 
-        if (data.containsKey(WebViewCoordinator.META_THEME_COLOR)) {
+        if (data.containsKey(WebViewCoordinator.META_THEME_COLOR) && data.get(WebViewCoordinator.META_THEME_COLOR).length() > 0) {
             final int[] palette = RuntimeConfig.getMaterialPalette(data.get(WebViewCoordinator.META_THEME_COLOR));
 
             if (isThemeTinted || palette.length == 0) {
