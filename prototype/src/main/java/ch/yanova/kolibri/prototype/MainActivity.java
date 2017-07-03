@@ -31,7 +31,7 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        MenuItem searchItem = menu.findItem(R.id.action_search);
+        MenuItem searchItem = menu.findItem(R.id.action_search_show);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -53,4 +53,5 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
     private SearchWebviewCoordinator getWebViewCoordinator() {
         return ((SearchWebviewCoordinator) getWebView().getTag(R.id.coordinator));
     }
+
 }

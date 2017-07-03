@@ -2,7 +2,6 @@ package ch.yanova.kolibri.coordinators;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
 import android.util.Log;
@@ -22,7 +21,6 @@ import java.util.Map;
 
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriCoordinator;
-import ch.yanova.kolibri.RuntimeConfig;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;

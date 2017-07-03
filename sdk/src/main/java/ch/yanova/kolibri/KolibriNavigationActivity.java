@@ -1,8 +1,6 @@
 package ch.yanova.kolibri;
 
-import android.animation.Animator;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -25,9 +23,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -44,10 +39,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static ch.yanova.kolibri.RuntimeConfig.*;
+import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;
 import static ch.yanova.kolibri.RuntimeConfig.ICON;
 import static ch.yanova.kolibri.RuntimeConfig.ID;
 import static ch.yanova.kolibri.RuntimeConfig.ITEMS;
+import static ch.yanova.kolibri.RuntimeConfig.LABEL;
+import static ch.yanova.kolibri.RuntimeConfig.Navigation;
+import static ch.yanova.kolibri.RuntimeConfig.NavigationItem;
+import static ch.yanova.kolibri.RuntimeConfig.Styling;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
+import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
 
 public abstract class KolibriNavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -128,12 +130,13 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             final int toolbarBackgroud = styling.getToolbarBackgroundOverride();
             final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
 
-            tintTheme(toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
+            TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
             headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
         }
 
         if (styling.hasOverridesFor(Styling.OVERRIDES_TOOLBAR_TEXT)) {
             toolbar.setTitleTextColor(styling.getToolbarTextOverride());
+            toolbar.setSubtitle(styling.getToolbarTextOverride());
         }
 
 
@@ -450,31 +453,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             footerView.addView(tv);
         }
 
-    }
-
-    private void tintTheme(View view, int colorPrimary, int colorPrimaryDark, boolean tint) {
-
-        Window window = getWindow();
-
-        // get the center for the clipping circle
-        int cx = view.getWidth() / 2;
-        int cy = view.getHeight() / 2;
-
-        // get the final radius for the clipping circle
-        float finalRadius = (float) Math.hypot(cx, cy);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0, finalRadius);
-            anim.start();
-
-            if (!tint) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            } else {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                window.setStatusBarColor(colorPrimaryDark);
-            }
-        }
-        view.setBackgroundColor(colorPrimary);
     }
 
     private boolean isFooterConstructed() {

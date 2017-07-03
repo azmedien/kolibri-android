@@ -1,6 +1,5 @@
 package ch.yanova.kolibri;
 
-import android.animation.Animator;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -13,10 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -105,7 +101,8 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
         if (getActivity() instanceof KolibriNavigationActivity && isThemeTinted) {
             final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
-            tintTheme(toolbar, primary, primaryDark, false);
+            TintUtils.tintToolbar(getActivity(), toolbar, primary, primaryDark, true);
+            setProgressColor(primary);
             isThemeTinted = false;
         }
 
@@ -157,7 +154,8 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
                     if (getActivity() instanceof KolibriNavigationActivity) {
                         final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
-                        tintTheme(toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
+                        TintUtils.tintToolbar(getActivity(), toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
+                        setProgressColor(palette[THEME_COLOR_PRIMARY]);
                     }
                 }
             });
@@ -193,32 +191,6 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void tintTheme(View view, int colorPrimary, int colorPrimaryDark, boolean tint) {
-
-        Window window = getActivity().getWindow();
-
-        // get the center for the clipping circle
-        int cx = view.getWidth() / 2;
-        int cy = view.getHeight() / 2;
-
-        // get the final radius for the clipping circle
-        float finalRadius = (float) Math.hypot(cx, cy);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0, finalRadius);
-            anim.start();
-
-            if (!tint) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            } else {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                window.setStatusBarColor(colorPrimaryDark);
-            }
-        }
-        view.setBackgroundColor(colorPrimary);
-        setProgressColor(colorPrimary);
     }
 
     public void setShowShareOption(boolean showShareOption) {
