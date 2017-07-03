@@ -12,6 +12,7 @@ import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriBaseActivity;
 import ch.yanova.kolibri.KolibriCoordinator;
 import ch.yanova.kolibri.KolibriProvider;
+import ch.yanova.kolibri.WebViewFragment;
 import ch.yanova.kolibri.coordinators.SearchWebviewCoordinator;
 
 public class MainActivity extends KolibriBaseActivity implements View.OnClickListener {
@@ -28,8 +29,10 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        WebViewFragment fragment = getMainWebViewFragment();
+        fragment.setShowSearchOption(false);
 
         MenuItem searchItem = menu.findItem(R.id.action_search_show);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
@@ -46,7 +49,12 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
                 return false;
             }
         });
+        return super.onPrepareOptionsMenu(menu);
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
