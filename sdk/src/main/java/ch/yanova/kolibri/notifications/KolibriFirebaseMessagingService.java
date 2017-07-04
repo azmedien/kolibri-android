@@ -31,7 +31,26 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
         Intent messageReceived = new Intent(KolibriFirebasePushReceiver.ACTION_RECEIVE);
         messageReceived.putExtra(KolibriFirebasePushReceiver.EXTRA_MESSAGE, remoteMessage);
 
-        getApplicationContext().sendOrderedBroadcast(messageReceived, null);
+//        getApplicationContext().sendOrderedBroadcast(messageReceived, null);
+
+        String title;
+        String body;
+
+        if (remoteMessage == null) {
+            return;
+        }
+
+        if (remoteMessage.getNotification() != null) {
+            title = remoteMessage.getNotification().getTitle();
+            body = remoteMessage.getNotification().getBody();
+        } else {
+            title = remoteMessage.getData().get("title");
+            body = remoteMessage.getData().get("body");
+        }
+
+        String componentUri = remoteMessage.getData().get("component");
+
+        KolibriFirebaseMessagingService.handleNow(this, componentUri, title, body);
     }
 
 //    @Override
