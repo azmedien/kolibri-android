@@ -40,6 +40,8 @@ public class Kolibri {
     public static final String EXTRA_GO_BACK_URL = "go_back_url";
     public static final String EXTRA_ERROR_MESSAGE = "error_message";
 
+    private static final String KEY_SUBSCRIBED_FOR_PUSH = "subscribedForPush";
+
     public static boolean isPageSearchable(Context context, String pageId) {
 
         if (pageId == null) {
@@ -281,5 +283,20 @@ public class Kolibri {
         final Intent errorIntent = new Intent(context, ErrorActivity.class);
         errorIntent.putExtra(EXTRA_ERROR_MESSAGE, errorMessage);
         return errorIntent;
+    }
+
+    public void subscribeForPushNotifications() {
+        preferences.edit().putBoolean(KEY_SUBSCRIBED_FOR_PUSH, true).commit();
+    }
+
+    public void unsubscribeFromPushNotifications() {
+
+        if (preferences.contains(KEY_SUBSCRIBED_FOR_PUSH)) {
+            preferences.edit().remove(KEY_SUBSCRIBED_FOR_PUSH).commit();
+        }
+    }
+
+    public boolean isSubscribedForPushNotifications() {
+        return preferences.getBoolean(KEY_SUBSCRIBED_FOR_PUSH, false);
     }
 }
