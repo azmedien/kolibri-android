@@ -86,7 +86,19 @@ public class TintUtils {
             }
         }
 
-        Window window = activity.getWindow();
+        final Window window = activity.getWindow();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View decor = window.getDecorView();
+            if (!isDarkColor(color)) {
+                decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            } else {
+                // We want to change tint color to white again.
+                // You can also record the flags in advance so that you can turn UI back completely if
+                // you have set other flags before, such as translucent or full screen.
+                decor.setSystemUiVisibility(0);
+            }
+        }
 
         // get the center for the clipping circle
         int cx = toolbar.getWidth() / 2;
@@ -149,7 +161,7 @@ public class TintUtils {
         return hsl[2];
     }
 
-    private static boolean isDarkColor(int color) {
+    static boolean isDarkColor(int color) {
         return getLightness(color) < 0.5f;
     }
 

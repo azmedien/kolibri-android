@@ -119,6 +119,35 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         restarted = false;
     }
 
+    public void applyColorPalette(int[] palette) {
+        TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
+        headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
+
+        final int tintColor = TintUtils.isDarkColor(palette[THEME_COLOR_PRIMARY]) ? palette[THEME_COLOR_PRIMARY] : palette[THEME_COLOR_PRIMARY_DARK];
+
+        // FOR NAVIGATION VIEW ITEM TEXT COLOR
+        int[][] states = new int[][]{
+                new int[]{-android.R.attr.state_checked},  // unchecked
+                new int[]{android.R.attr.state_checked},   // checked
+                new int[]{}                                // default
+        };
+
+        // Fill in color corresponding to state defined in state
+        int[] colors = new int[]{
+                Color.parseColor("#000000"),
+                tintColor,
+                Color.parseColor("#000000"),
+        };
+
+        ColorStateList navigationViewColorStateList = new ColorStateList(states, colors);
+
+        // apply to text color
+        navigationView.setItemTextColor(navigationViewColorStateList);
+
+        // apply to icon color
+        navigationView.setItemIconTintList(navigationViewColorStateList);
+    }
+
     private void setupStyling() {
         if (configuration == null) {
             return;
