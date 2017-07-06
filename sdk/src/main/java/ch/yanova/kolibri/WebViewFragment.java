@@ -156,6 +156,9 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
                         final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
                         TintUtils.tintToolbar(getActivity(), toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
                         setProgressColor(palette[THEME_COLOR_PRIMARY]);
+
+                        final KolibriNavigationActivity kna = (KolibriNavigationActivity) getActivity();
+                        kna.applyColorPalette(palette);
                     }
                 }
             });
@@ -166,9 +169,8 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        MenuItem search = menu.findItem(R.id.action_search);
-        MenuItem share = menu.findItem(R.id.action_share);
-
+        final MenuItem search = menu.findItem(R.id.action_search);
+        final MenuItem share = menu.findItem(R.id.action_share);
 
         search.setVisible(showSearchOption);
         share.setVisible(showShareOption && shareIntent != null);
