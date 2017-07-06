@@ -299,4 +299,8 @@ public class Kolibri {
     public boolean isSubscribedForPushNotifications() {
         return preferences.getBoolean(KEY_SUBSCRIBED_FOR_PUSH, false);
     }
+
+    public boolean hasUnsubscribedFromPushExplicitly() {
+        return preferences.contains(KEY_SUBSCRIBED_FOR_PUSH);
+    }
 }
