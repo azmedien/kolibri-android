@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -23,7 +25,8 @@ import ch.yanova.kolibri.Kolibri;
 
 public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String KOLIBRI_LINK_INTENT = "kolibri://notification";
+    private static final String KOLIBRI_NOTIFICATION_INTENT = "kolibri://notification";
+    private static final String KOLIBRI_ID_INTENT = "kolibri://navigation";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -79,8 +82,27 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
 
         final PackageManager packageManager = context.getPackageManager();
         if (result.resolveActivity(packageManager) == null) {
-            Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
-            result = Kolibri.getErrorIntent(context, "No Such Component Exists!");
+
+            if (result.hasExtra(Kolibri.EXTRA_ID)) {
+
+                final String id = result.getStringExtra(Kolibri.EXTRA_ID);
+
+                if (Kolibri.getInstance(context).getRuntime().getNavigation().hasItem(id)) {
+                    final String query = result.getData().getQuery();
+
+                    String modifiedUri = KOLIBRI_NOTIFICATION_INTENT;
+                    if (query != null) {
+                        modifiedUri += "?" + query;
+                    }
+
+                    result = Kolibri.createIntent(Uri.parse(modifiedUri));
+                    result.putExtra(Kolibri.EXTRA_ID, id);
+                }
+            } else {
+                Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
+                result = Kolibri.getErrorIntent(context, "No Such Component Exists!");
+            }
+
         }
 
         result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -109,9 +131,9 @@ public class KolibriFirebaseMessagingService extends FirebaseMessagingService {
 
         Uri uri = null;
         if (componentUri.startsWith("http")) {
-            componentUri = KOLIBRI_LINK_INTENT + "?url=" + componentUri;
+            componentUri = KOLIBRI_NOTIFICATION_INTENT + "?url=" + componentUri;
             uri = Uri.parse(componentUri);
-        } else if (componentUri.startsWith(KOLIBRI_LINK_INTENT)) {
+        } else if (componentUri.startsWith(KOLIBRI_ID_INTENT)) {
             uri = Uri.parse(componentUri);
             final List<String> pathSegments = uri.getPathSegments();
 
