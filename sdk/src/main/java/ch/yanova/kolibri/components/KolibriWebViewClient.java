@@ -85,13 +85,13 @@ public class KolibriWebViewClient extends WebViewClient {
         }
     }
 
-    @Override
-    public void onPageFinished(WebView view, String url) {
-        super.onPageFinished(view, url);
-        if (listener != null) {
-            listener.onPageFinished(view, url);
-        }
-    }
+//    @Override
+//    public void onPageFinished(WebView view, String url) {
+//        super.onPageFinished(view, url);
+//        if (listener != null) {
+//            listener.onPageFinished(view, url);
+//        }
+//    }
 
     public boolean handleInNewView(String target) {
         if (target == null) {
@@ -154,5 +154,9 @@ public class KolibriWebViewClient extends WebViewClient {
         }
 
         return handleInNewView;
+    }
+
+    public WebClientListener getWebClientListener() {
+        return listener;
     }
 }

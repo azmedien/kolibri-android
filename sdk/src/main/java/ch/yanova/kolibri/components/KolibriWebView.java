@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -55,6 +56,17 @@ public class KolibriWebView extends WebView {
             getSettings().setAppCacheEnabled(true);
             getSettings().setDomStorageEnabled(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
+
+            setWebChromeClient(new WebChromeClient() {
+                @Override
+                public void onProgressChanged(WebView view, int newProgress) {
+                    super.onProgressChanged(view, newProgress);
+
+                    if (newProgress == 100) {
+                        client.getWebClientListener().onPageFinished(view, "");
+                    }
+                }
+            });
         }
     }
 
