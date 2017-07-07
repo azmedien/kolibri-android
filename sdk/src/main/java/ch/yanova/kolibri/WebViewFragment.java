@@ -101,7 +101,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
         if (getActivity() instanceof KolibriNavigationActivity && isThemeTinted) {
             final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
-            TintUtils.tintToolbar(getActivity(), toolbar, primary, primaryDark, true);
+            TintUtils.tintToolbar(getActivity(), toolbar, primary, primaryDark, false);
             setProgressColor(primary);
             isThemeTinted = false;
         }
@@ -154,7 +154,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
                     if (getActivity() instanceof KolibriNavigationActivity) {
                         final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
-                        TintUtils.tintToolbar(getActivity(), toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
+                        TintUtils.tintToolbar(getActivity(), toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
                         setProgressColor(palette[THEME_COLOR_PRIMARY]);
 
                         final KolibriNavigationActivity kna = (KolibriNavigationActivity) getActivity();
