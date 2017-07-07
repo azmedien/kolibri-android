@@ -2,11 +2,13 @@ package ch.yanova.kolibri;
 
 import android.animation.Animator;
 import android.app.Activity;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.design.widget.NavigationView;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.view.menu.ActionMenuItemView;
@@ -29,11 +31,35 @@ import static android.support.v4.graphics.ColorUtils.RGBToHSL;
  * Created by lekov on 7/3/17.
  */
 
-public class TintUtils {
+class TintUtils {
 
-    public static void tintSearchView(SearchView searchView, int color) {
+    static void tintNavigationView(NavigationView navigation, int color) {
+        // FOR NAVIGATION VIEW ITEM TEXT COLOR
+        final int[][] states = new int[][]{
+                new int[]{-android.R.attr.state_checked},  // unchecked
+                new int[]{android.R.attr.state_checked},   // checked
+                new int[]{}                                // default
+        };
 
-        ImageView searchBtnClose = (ImageView) searchView.findViewById(R.id.search_close_btn);
+        // Fill in color corresponding to state defined in state
+        final int[] colors = new int[]{
+                Color.BLACK,
+                color,
+                Color.BLACK,
+        };
+
+        final ColorStateList navigationViewColorStateList = new ColorStateList(states, colors);
+
+        // apply to text color
+        navigation.setItemTextColor(navigationViewColorStateList);
+
+        // apply to icon color
+        navigation.setItemIconTintList(navigationViewColorStateList);
+    }
+
+    private static void tintSearchView(SearchView searchView, int color) {
+
+        final ImageView searchBtnClose = (ImageView) searchView.findViewById(R.id.search_close_btn);
         final Drawable searchDrawable = searchBtnClose.getDrawable();
         if (searchDrawable != null) {
             final Drawable wrapped = DrawableCompat.wrap(searchDrawable);
@@ -47,7 +73,7 @@ public class TintUtils {
         searchText.setHintTextColor(color);
     }
 
-    public static void tintToolbar(final Activity activity, final Toolbar toolbar, final int color, final int colorDark, boolean animated) {
+    static void tintToolbar(final Activity activity, final Toolbar toolbar, final int color, final int colorDark, boolean animated) {
         final int textColor = getTextColor(color);
         final PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(textColor, PorterDuff.Mode.MULTIPLY);
 
@@ -166,7 +192,7 @@ public class TintUtils {
     }
 
 
-    public static int getTextColor(int background) {
+    private static int getTextColor(int background) {
         return isDarkColor(background) ? Color.WHITE : Color.BLACK;
     }
 

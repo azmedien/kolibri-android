@@ -57,6 +57,7 @@ public class RuntimeConfig {
 
         components = new HashMap<>();
         final JSONArray names = runtime.names();
+
         for (int i = 0; i < names.length(); i++) {
             final String current = names.optString(i);
 
@@ -81,7 +82,6 @@ public class RuntimeConfig {
                 default:
                     components.put(current, new Component(runtime.optJSONObject(current)));
                     break;
-
             }
         }
 
@@ -96,7 +96,7 @@ public class RuntimeConfig {
     }
 
     @NonNull
-    static String getAssetUrl(@NonNull String formattedAssetUrl, @NonNull String asset) {
+    private static String getAssetUrl(@NonNull String formattedAssetUrl, @NonNull String asset) {
         return asset.startsWith("http") ? asset : String.format(formattedAssetUrl, asset);
     }
 
@@ -155,10 +155,22 @@ public class RuntimeConfig {
         return runtime.has(component);
     }
 
+    /**
+     * Get component from the runtime configuration
+     *
+     * @param component Name of the desired component
+     * @return Returns component if any, null if component not persist in the runtime configuration
+     */
     public Component getComponent(String component) {
         return components.get(component);
     }
 
+    /**
+     * Get string value from the runtime configuration
+     *
+     * @param name Name of the required field
+     * @return Returns value for the field with given name, null otherwise
+     */
     public String getString(String name) {
         return runtime.optString(name);
     }
@@ -280,7 +292,8 @@ public class RuntimeConfig {
         public static final String OVERRIDES_TOOLBAR_BACKGROUND = "toolbarBackground";
         public static final String OVERRIDES_TOOLBAR_TEXT = "toolbarText";
 
-        public static final String OVERRIDES_MENU_ITEM_SELECTED = "menuItemSelectedColor";
+        public static final String OVERRIDES_NAVIGATION_HEADER_BACKGROUND = "navigationHeaderBackground";
+        public static final String OVERRIDES_NAVIGATION_ITEM_SELECTED = "navigationItemSelectedColor";
 
         private final JSONObject json;
 
@@ -322,39 +335,9 @@ public class RuntimeConfig {
             return getPaletteColor(COLOR_ACCENT);
         }
 
-        private int getPaletteColor(String name) {
+        public int getPaletteColor(String name) {
             try {
                 return Color.parseColor(json.getJSONObject(COLOR_PALETTE).getString(name));
-            } catch (JSONException | IllegalArgumentException e) {
-                throw new KolibriException(e);
-            }
-        }
-
-        // ### OVERRIDES ###
-
-        public boolean hasOverrides() {
-            return json.has("overrides");
-        }
-
-        public boolean hasOverridesFor(String name) {
-            return hasOverrides() && json.optJSONObject("overrides").has(name);
-        }
-
-        public int getToolbarBackgroundOverride() {
-            return getOverrideColor(OVERRIDES_TOOLBAR_BACKGROUND);
-        }
-
-        public int getToolbarTextOverride() {
-            return getOverrideColor(OVERRIDES_TOOLBAR_TEXT);
-        }
-
-        public int getMenuItemSelectedOverride() {
-            return getOverrideColor(OVERRIDES_MENU_ITEM_SELECTED);
-        }
-
-        private int getOverrideColor(String name) {
-            try {
-                return Color.parseColor(json.getJSONObject("overrides").getString(name));
             } catch (JSONException | IllegalArgumentException e) {
                 throw new KolibriException(e);
             }
@@ -484,7 +467,7 @@ public class RuntimeConfig {
                 return getAssetUrl(formattedAssetUrl, icon);
             } else if (formattedAssetUrl.contains("amazon")) {
                 formattedIcon = icon.split("-")[0];
-            } else if(!icon.contains("-png")) {
+            } else if (!icon.contains("-png")) {
                 formattedIcon = icon + "-png";
             }
 
@@ -497,22 +480,22 @@ public class RuntimeConfig {
     public static final int THEME_COLOR_PRIMARY_DARK = 7;
     public static final int THEME_COLOR_ACCENT = 11;
 
-    public static int[] getMaterialPalette(String color){
+    public static int[] getMaterialPalette(String color) {
         int[] result = new int[14];
 
-        result[0] = shadeColor(color, 0.9   ); //----> 50
-        result[1] = shadeColor(color, 0.7   ); //----> 100
-        result[2] = shadeColor(color, 0.5   ); //----> 200
-        result[3] = shadeColor(color, 0.333 ); //----> 300
-        result[4] = shadeColor(color, 0.166 ); //----> 400
-        result[5] = shadeColor(color, 0     ); //----> 500
+        result[0] = shadeColor(color, 0.9); //----> 50
+        result[1] = shadeColor(color, 0.7); //----> 100
+        result[2] = shadeColor(color, 0.5); //----> 200
+        result[3] = shadeColor(color, 0.333); //----> 300
+        result[4] = shadeColor(color, 0.166); //----> 400
+        result[5] = shadeColor(color, 0); //----> 500
         result[6] = shadeColor(color, -0.125); //----> 600
-        result[7] = shadeColor(color, -0.25 ); //----> 700
+        result[7] = shadeColor(color, -0.25); //----> 700
         result[8] = shadeColor(color, -0.375); //----> 800
-        result[9] = shadeColor(color, -0.5  ); //----> 900
+        result[9] = shadeColor(color, -0.5); //----> 900
 
-        result[10] = shadeColor(color, 0.7  ); //----> A100
-        result[11] = shadeColor(color, 0.5  ); //----> A200
+        result[10] = shadeColor(color, 0.7); //----> A100
+        result[11] = shadeColor(color, 0.5); //----> A200
         result[12] = shadeColor(color, 0.166); //----> A400
         result[13] = shadeColor(color, -0.25); //----> A700
 

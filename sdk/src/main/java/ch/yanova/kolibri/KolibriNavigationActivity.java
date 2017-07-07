@@ -124,28 +124,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
 
         final int tintColor = TintUtils.isDarkColor(palette[THEME_COLOR_PRIMARY]) ? palette[THEME_COLOR_PRIMARY] : palette[THEME_COLOR_PRIMARY_DARK];
-
-        // FOR NAVIGATION VIEW ITEM TEXT COLOR
-        int[][] states = new int[][]{
-                new int[]{-android.R.attr.state_checked},  // unchecked
-                new int[]{android.R.attr.state_checked},   // checked
-                new int[]{}                                // default
-        };
-
-        // Fill in color corresponding to state defined in state
-        int[] colors = new int[]{
-                Color.parseColor("#000000"),
-                tintColor,
-                Color.parseColor("#000000"),
-        };
-
-        ColorStateList navigationViewColorStateList = new ColorStateList(states, colors);
-
-        // apply to text color
-        navigationView.setItemTextColor(navigationViewColorStateList);
-
-        // apply to icon color
-        navigationView.setItemIconTintList(navigationViewColorStateList);
+        TintUtils.tintNavigationView(navigationView, tintColor);
     }
 
     private void setupStyling() {
@@ -155,45 +134,34 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         final Styling styling = configuration.getStyling();
 
-        if (styling.hasOverridesFor(Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
-            final int toolbarBackgroud = styling.getToolbarBackgroundOverride();
+        if (styling.hasPaletteColor(Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
+            final int toolbarBackgroud = styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_BACKGROUND);
             final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
 
             TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
             headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
+        } else {
+            TintUtils.tintToolbar(this, toolbar, styling.getPrimary(), styling.getPrimaryDark(), false);
+            headerImageContainer.setBackgroundColor(styling.getPrimary());
         }
 
-        if (styling.hasOverridesFor(Styling.OVERRIDES_TOOLBAR_TEXT)) {
-            toolbar.setTitleTextColor(styling.getToolbarTextOverride());
-            toolbar.setSubtitle(styling.getToolbarTextOverride());
+        if (styling.hasPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT)) {
+            toolbar.setTitleTextColor(styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT));
+            toolbar.setSubtitle(styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT));
         }
 
 
-        if (styling.hasOverridesFor(Styling.OVERRIDES_MENU_ITEM_SELECTED)) {
-            final int menuItemSelected = styling.getToolbarBackgroundOverride();
-            final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & menuItemSelected));
+        if (styling.hasPaletteColor(Styling.OVERRIDES_NAVIGATION_ITEM_SELECTED)) {
+            final int menuItemSelected = styling.getPaletteColor(Styling.OVERRIDES_NAVIGATION_ITEM_SELECTED);
+            TintUtils.tintNavigationView(navigationView, menuItemSelected);
+        } else {
+            TintUtils.tintNavigationView(navigationView, styling.getPrimary());
+        }
 
-            // FOR NAVIGATION VIEW ITEM TEXT COLOR
-            int[][] states = new int[][]{
-                    new int[]{-android.R.attr.state_checked},  // unchecked
-                    new int[]{android.R.attr.state_checked},   // checked
-                    new int[]{}                                // default
-            };
-
-            // Fill in color corresponding to state defined in state
-            int[] colors = new int[]{
-                    Color.parseColor("#000000"),
-                    palette[THEME_COLOR_PRIMARY],
-                    Color.parseColor("#000000"),
-            };
-
-            ColorStateList navigationViewColorStateList = new ColorStateList(states, colors);
-
-            // apply to text color
-            navigationView.setItemTextColor(navigationViewColorStateList);
-
-            // apply to icon color
-            navigationView.setItemIconTintList(navigationViewColorStateList);
+        if (styling.hasPaletteColor(Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND)) {
+            headerImageContainer.setBackgroundColor(styling.getPaletteColor(Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND));
+        } else {
+            headerImageContainer.setBackgroundColor(styling.getPrimary());
         }
     }
 
