@@ -120,7 +120,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     }
 
     public void applyColorPalette(int[] palette) {
-        TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
+        TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
         headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
 
         final int tintColor = TintUtils.isDarkColor(palette[THEME_COLOR_PRIMARY]) ? palette[THEME_COLOR_PRIMARY] : palette[THEME_COLOR_PRIMARY_DARK];
@@ -159,7 +159,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             final int toolbarBackgroud = styling.getToolbarBackgroundOverride();
             final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
 
-            TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], true);
+            TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
             headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
         }
 
