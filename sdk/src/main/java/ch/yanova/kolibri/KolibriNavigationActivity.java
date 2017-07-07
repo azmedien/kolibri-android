@@ -119,6 +119,15 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         restarted = false;
     }
 
+    public void applyDefaultPalette() {
+
+        final RuntimeConfig.Styling styling = configuration.getStyling();
+        final int primary = styling.getPrimary();
+        final int[] materialPalette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & primary));
+
+        applyColorPalette(materialPalette);
+    }
+
     public void applyColorPalette(int[] palette) {
         TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
         headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);

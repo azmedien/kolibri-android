@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
+import android.widget.ProgressBar;
 
 import java.util.Map;
 
@@ -62,9 +63,6 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
         webView.setTag(KolibriWebView.class);
         webView.setWebClientListener(this);
 
-        int color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
-        setProgressColor(color);
-
         if (getArguments().containsKey("url")) {
             final String url = getArguments().getString("url");
             webView.loadUrl(url);
@@ -96,13 +94,12 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
             return;
         }
 
-        final int primary = ContextCompat.getColor(webView.getContext(), R.color.colorPrimary);
-        final int primaryDark = ContextCompat.getColor(webView.getContext(), R.color.colorPrimaryDark);
-
         if (getActivity() instanceof KolibriNavigationActivity && isThemeTinted) {
-            final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
-            TintUtils.tintToolbar(getActivity(), toolbar, primary, primaryDark, false);
-            setProgressColor(primary);
+            final KolibriNavigationActivity kna = (KolibriNavigationActivity) getActivity();
+            kna.applyDefaultPalette();
+
+            TintUtils.tintProgressBar((ProgressBar) mLayoutLoading);
+
             isThemeTinted = false;
         }
 
@@ -155,7 +152,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
                     if (getActivity() instanceof KolibriNavigationActivity) {
                         final Toolbar toolbar = ((KolibriNavigationActivity) getActivity()).getToolbar();
                         TintUtils.tintToolbar(getActivity(), toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
-                        setProgressColor(palette[THEME_COLOR_PRIMARY]);
+                        TintUtils.tintProgressBar((ProgressBar) mLayoutLoading, palette[THEME_COLOR_PRIMARY]);
 
                         final KolibriNavigationActivity kna = (KolibriNavigationActivity) getActivity();
                         kna.applyColorPalette(palette);

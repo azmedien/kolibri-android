@@ -38,6 +38,7 @@ import okhttp3.Response;
 public class KolibriApp extends Application {
 
     private static final String TOPIC_MAIN = "main";
+    private static final String TAG = "KolibriApp";
 
     private static KolibriApp instance;
 
@@ -45,22 +46,17 @@ public class KolibriApp extends Application {
 
     private static String lastUrlLogged;
 
-    private static int widthPixels;
-    private static int heightPixels;
-
     private static boolean firebaseEnabled = true;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        final DisplayMetrics lDisplayMetrics = getResources().getDisplayMetrics();
+        Log.i(TAG, String.format("Using Kolibri %s version", BuildConfig.VERSION_NAME));
+
         final ClearableCookieJar cookieJar = new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(this));
 
         instance = this;
-
-        widthPixels = lDisplayMetrics.widthPixels;
-        heightPixels = lDisplayMetrics.heightPixels;
 
         netmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
     }
@@ -68,13 +64,13 @@ public class KolibriApp extends Application {
     public void logEvent(@Nullable String name, @Nullable String url) {
 
         if (lastUrlLogged != null && lastUrlLogged.equals(url)) {
-            Log.i("KolibriApp", String.format("Trying to log again event for %s. Skipped.", url));
+            Log.i(TAG, String.format("Trying to log again event for %s. Skipped.", url));
             return;
         }
 
         lastUrlLogged = url;
 
-        Log.d("KolibriApp", "logEvent() called with: name = [" + name + "], url = [" + url + "]");
+        Log.d(TAG, "logEvent() called with: name = [" + name + "], url = [" + url + "]");
 
         if (url != null) {
             reportToFirebase(name, url);
@@ -89,7 +85,7 @@ public class KolibriApp extends Application {
             final Intent intent = item.getIntent();
 
             if (intent == null) {
-                Log.i("KolibriApp", "logMenuItemToFirebase: Invalid menu item. Intent must be supplied!");
+                Log.i(TAG, "logMenuItemToFirebase: Invalid menu item. Intent must be supplied!");
                 return;
             }
 
@@ -119,7 +115,6 @@ public class KolibriApp extends Application {
         sb.append("/").append("android");
         sb.append("/").append("phone");
         sb.append("?d=").append(System.currentTimeMillis());
-//        sb.append("&x=").append(widthPixels).append("x").append(heightPixels);
 
         if (url != null) {
             sb.append("&r=").append(url);
@@ -136,20 +131,20 @@ public class KolibriApp extends Application {
                 .enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-                        Log.e("KolibriApp", "Report to Netmetrix failed: ", e);
+                        Log.e(TAG, "Report to Netmetrix failed: ", e);
                     }
 
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (response.isSuccessful()) {
-                            Log.i("KolibriApp", "Successfully reported to Netmetrix");
+                            Log.i(TAG, "Successfully reported to Netmetrix");
                         } else {
-                            Log.e("KolibriApp", "Report to Netmetrix failed ");
+                            Log.e(TAG, "Report to Netmetrix failed ");
                         }
                     }
                 });
 
-        Log.d("KolibriApp", "reportToNetmetrix() called with: url = [" + sb.toString() + "]");
+        Log.d(TAG, "reportToNetmetrix() called with: url = [" + sb.toString() + "]");
     }
 
     private void reportToFirebase(@Nullable String name, @NonNull String url) {

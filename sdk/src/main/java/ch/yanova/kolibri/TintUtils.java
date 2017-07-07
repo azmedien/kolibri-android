@@ -24,8 +24,12 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import static android.support.v4.graphics.ColorUtils.RGBToHSL;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
+import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
 
 /**
  * Created by lekov on 7/3/17.
@@ -71,6 +75,25 @@ class TintUtils {
         SearchView.SearchAutoComplete searchText = (SearchView.SearchAutoComplete) searchView.findViewById(R.id.search_src_text);
         searchText.setTextColor(color);
         searchText.setHintTextColor(color);
+    }
+
+    static void tintProgressBar(ProgressBar progress, int color) {
+        progress.getIndeterminateDrawable().setColorFilter(color,
+                android.graphics.PorterDuff.Mode.MULTIPLY);
+    }
+
+    static void tintProgressBar(ProgressBar progress) {
+        final RuntimeConfig.Styling styling = Kolibri.getInstance(progress.getContext()).getRuntime().getStyling();
+        final int primary = styling.getPrimary();
+
+        tintProgressBar(progress, primary);
+    }
+
+    static void tintToolbar(final Activity activity, final Toolbar toolbar, boolean animated) {
+        final RuntimeConfig.Styling styling = Kolibri.getInstance(activity).getRuntime().getStyling();
+        final int primary = styling.getPrimary();
+        final int[] materialPalette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & primary));
+        tintToolbar(activity, toolbar, materialPalette[THEME_COLOR_PRIMARY], materialPalette[THEME_COLOR_PRIMARY_DARK], animated);
     }
 
     static void tintToolbar(final Activity activity, final Toolbar toolbar, final int color, final int colorDark, boolean animated) {
@@ -188,7 +211,7 @@ class TintUtils {
     }
 
     static boolean isDarkColor(int color) {
-        return getLightness(color) < 0.5f;
+        return getLightness(color) < 0.6f;
     }
 
 

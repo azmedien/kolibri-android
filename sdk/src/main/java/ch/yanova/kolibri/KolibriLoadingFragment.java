@@ -18,7 +18,7 @@ import android.widget.TextView;
 public abstract class KolibriLoadingFragment extends KolibriFragment {
 
     private View mLayoutError;
-    private View mLayoutLoading;
+    protected View mLayoutLoading;
     private View mLayoutOverlay;
 
     private View mainContentView;
