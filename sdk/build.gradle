@@ -4,7 +4,7 @@ apply plugin: "com.jfrog.artifactory"
 apply plugin: 'maven-publish'
 
 group = 'ch.yanova.kolibri'
-version = "0.5.4-SNAPSHOT"
+version = "0.5.5-SNAPSHOT"
 
 android {
     compileSdkVersion 25
@@ -40,8 +40,6 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-
-
 
 
     compile 'com.squareup.okhttp3:okhttp:3.6.0'
