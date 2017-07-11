@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ch.yanova.kolibri.Kolibri;
+import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriCoordinator;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
@@ -143,6 +144,8 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         }
 
         handleFavorizable(data.get(META_FAVORIZABLE), view.getUrl(), view);
+
+        KolibriApp.getInstance().reportToFirebase(data.get(META_CATEGORY), view.getUrl());
     }
 
     private class GetHtmlJsInterface {

@@ -37,7 +37,6 @@ import okhttp3.Response;
 
 public class KolibriApp extends Application {
 
-    private static final String TOPIC_MAIN = "main";
     private static final String TAG = "KolibriApp";
 
     private static KolibriApp instance;
@@ -45,7 +44,6 @@ public class KolibriApp extends Application {
     private OkHttpClient netmetrixClient;
 
     private static String lastUrlLogged;
-
     private static boolean firebaseEnabled = true;
 
     @Override
@@ -71,10 +69,6 @@ public class KolibriApp extends Application {
         lastUrlLogged = url;
 
         Log.d(TAG, "logEvent() called with: name = [" + name + "], url = [" + url + "]");
-
-        if (url != null) {
-            reportToFirebase(name, url);
-        }
 
         reportToNetmetrix(url);
     }
@@ -147,7 +141,7 @@ public class KolibriApp extends Application {
         Log.d(TAG, "reportToNetmetrix() called with: url = [" + sb.toString() + "]");
     }
 
-    private void reportToFirebase(@Nullable String name, @NonNull String url) {
+    public void reportToFirebase(@Nullable String name, @NonNull String url) {
         if (firebaseEnabled) {
 
             final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -155,10 +149,13 @@ public class KolibriApp extends Application {
             final Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.ITEM_ID, url);
 
-            if (name != null)
+            if (name != null) {
                 bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
+                bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, name);
+            } else {
+                bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "application/amp+html");
+            }
 
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "application/amp+html");
             firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
         }
     }
