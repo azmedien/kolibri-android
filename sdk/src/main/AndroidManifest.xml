@@ -21,9 +21,9 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".notifications.KolibriFirebasePushReceiver">
+        <receiver android:name=".notifications.InternalNotificationsReceiver">
             <intent-filter>
-                <action android:name="ch.azmedien.kolibri.MESSAGE_RECEIVED" />
+                <action android:name="ch.azmedien.kolibri.action.MESSAGE_RECEIVED" />
             </intent-filter>
         </receiver>
 
