@@ -44,20 +44,30 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
     private static final String JS_INTERFACE_NAME = "GetHtml";
 
-    public static final String FAV_IMAGE = "og:image";
+    public static final String META_IMAGE = "og:image";
     public static final String META_TITLE = "og:title";
-    public static final String META_CANONICAL_URL = "og:url";
+    public static final String META_URL = "og:url";
+
+    public static final String META_CANONICAL = "canonical";
 
     public static final String META_CATEGORY = "kolibri-category";
     public static final String META_FAVORIZABLE = "kolibri-favorizable";
     public static final String META_SHAREABLE = "kolibri-shareable";
 
-    public static final String ATTR_CONTENT = "content";
     public static final String TAG_META = "meta";
+    public static final String TAG_LINK = "link";
+
+    public static final String ATTR_CONTENT = "content";
     public static final String ATTR_PROPERTY = "property";
+    public static final String ATTR_REL = "rel";
+    public static final String ATTR_HREF = "href";
+
     public static final String META_THEME_COLOR = "theme-color";
 
+    //    <link rel="canonical" href="http://www.telezueri.staging.azmedien.ch/live">
+
     private static final String TAG = "WebViewCoordinator";
+    public static final String NAME = "name";
 
     private final OnAmpDataFoundListener listener;
 
@@ -153,23 +163,23 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         @SuppressWarnings("unused")
         public void processHTML(String html) {
             Document content = Jsoup.parseBodyFragment(html);
-            Elements links = content.getElementsByTag(TAG_META);
-            Log.i("PARSING", "processHTML: " + links);
+            Elements elements = content.getElementsByTag(TAG_META);
+            Log.i("PARSING", "processHTML meta: " + elements);
             final Map<String, String> metaData = new HashMap<>();
 
-            for (Element link : links) {
+            for (Element link : elements) {
 
                 // Get current page theme color
-                if (link.hasAttr("name") && link.attr("name").equals(META_THEME_COLOR)) {
+                if (link.hasAttr(NAME) && link.attr(NAME).equals(META_THEME_COLOR)) {
                     metaData.put(META_THEME_COLOR, link.attr(ATTR_CONTENT));
                     continue;
                 }
 
-                if (link.hasAttr("name")
-                        && (link.attr("name").equals(META_CATEGORY)
-                        || link.attr("name").equals(META_FAVORIZABLE)
-                        || link.attr("name").equals(META_SHAREABLE))) {
-                    metaData.put(link.attr("name"), link.attr(ATTR_CONTENT));
+                if (link.hasAttr(NAME)
+                        && (link.attr(NAME).equals(META_CATEGORY)
+                        || link.attr(NAME).equals(META_FAVORIZABLE)
+                        || link.attr(NAME).equals(META_SHAREABLE))) {
+                    metaData.put(link.attr(NAME), link.attr(ATTR_CONTENT));
                     continue;
                 }
 
@@ -181,6 +191,15 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                 final String key = link.attr(ATTR_PROPERTY);
 
                 metaData.put(key, contentData);
+            }
+
+            elements = content.getElementsByTag(TAG_LINK);
+            Log.i("PARSING", "processHTML link: " + elements);
+
+            for (Element element : elements) {
+                if (element.hasAttr(ATTR_REL) && element.attr(ATTR_REL).equals(META_CANONICAL)) {
+                    metaData.put(element.attr(ATTR_REL), element.attr(ATTR_HREF));
+                }
             }
 
             // There's no need to report if actually there's no data
