@@ -118,7 +118,10 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
     @Override
     public void onFound(Map<String, String> data) {
         if (data.size() > 0 && data.containsKey(WebViewCoordinator.META_SHAREABLE)) {
-            final String url = data.get(WebViewCoordinator.META_CANONICAL);
+
+            final String url = data.containsKey(WebViewCoordinator.META_CANONICAL)
+                    ? data.get(WebViewCoordinator.META_CANONICAL)
+                    : data.get(WebViewCoordinator.META_URL);
 
             if (url != null) {
                 shareIntent = new Intent(Intent.ACTION_SEND);
@@ -132,6 +135,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
                 showShareOption = false;
                 shareIntent = null;
             }
+
             getActivity().invalidateOptionsMenu();
         }
 
