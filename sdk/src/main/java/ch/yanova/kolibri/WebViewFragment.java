@@ -2,6 +2,7 @@ package ch.yanova.kolibri;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -113,6 +114,11 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
     @Override
     public boolean shouldHandleInternal() {
         return true;
+    }
+
+    @Override
+    public boolean onCustomTarget(Uri link, String target) {
+        return false;
     }
 
     @Override

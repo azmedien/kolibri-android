@@ -240,4 +240,9 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         return false;
     }
 
+    @Override
+    public boolean onCustomTarget(Uri link, String target) {
+        return false;
+    }
+
 }
