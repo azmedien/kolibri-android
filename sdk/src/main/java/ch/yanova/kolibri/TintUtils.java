@@ -35,7 +35,7 @@ import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
  * Created by lekov on 7/3/17.
  */
 
-class TintUtils {
+public class TintUtils {
 
     static void tintNavigationView(NavigationView navigation, int color) {
         // FOR NAVIGATION VIEW ITEM TEXT COLOR
@@ -82,7 +82,7 @@ class TintUtils {
                 android.graphics.PorterDuff.Mode.MULTIPLY);
     }
 
-    static void tintProgressBar(ProgressBar progress) {
+    public static void tintProgressBar(ProgressBar progress) {
         final RuntimeConfig.Styling styling = Kolibri.getInstance(progress.getContext()).getRuntime().getStyling();
         final int primary = styling.getPrimary();
 
@@ -96,7 +96,7 @@ class TintUtils {
         tintToolbar(activity, toolbar, materialPalette[THEME_COLOR_PRIMARY], materialPalette[THEME_COLOR_PRIMARY_DARK], animated);
     }
 
-    static void tintToolbar(final Activity activity, final Toolbar toolbar, final int color, final int colorDark, boolean animated) {
+    public static void tintToolbar(final Activity activity, final Toolbar toolbar, final int color, final int colorDark, boolean animated) {
         final int textColor = getTextColor(color);
         final PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(textColor, PorterDuff.Mode.MULTIPLY);
 

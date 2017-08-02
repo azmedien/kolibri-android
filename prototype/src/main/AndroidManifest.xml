@@ -29,7 +29,10 @@
             android:name="kolibri_navigation_url"
             android:value="https://kolibri.herokuapp.com/apps/hFxsFLsMXZyvAddBGXWCcxQf/runtime" />
 
-        <activity android:name=".CardboardActivity"></activity>
+        <activity
+            android:name=".CardboardActivity"
+            android:label="360Player"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

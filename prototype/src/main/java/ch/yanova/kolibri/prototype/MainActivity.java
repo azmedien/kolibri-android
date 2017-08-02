@@ -30,7 +30,6 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
                     public boolean onCustomTarget(Uri link, String target) {
 
                         if ("360player".equals(target)) {
-
                             startActivity(CardboardActivity.createIntent(MainActivity.this, link));
                             return true;
                         }

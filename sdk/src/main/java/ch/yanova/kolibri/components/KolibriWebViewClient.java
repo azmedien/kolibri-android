@@ -17,7 +17,6 @@ import ch.yanova.kolibri.KolibriApp;
 /**
  * Created by mmironov on 3/3/17.
  */
-
 public class KolibriWebViewClient extends WebViewClient {
 
     public static final String PARAM_TARGET = "kolibri-target";
@@ -150,7 +149,6 @@ public class KolibriWebViewClient extends WebViewClient {
 
                 final String scheme = link.getScheme();
 
-                //TODO: Fix me. This is still experimental.
                 if (scheme.equals(Kolibri.getInstance(context).getRuntime().getScheme())) {
                     Kolibri.notifyComponents(context, Kolibri.createIntent(link));
                 }
