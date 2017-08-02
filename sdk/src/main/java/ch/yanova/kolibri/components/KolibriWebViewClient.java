@@ -17,7 +17,6 @@ import ch.yanova.kolibri.KolibriApp;
 /**
  * Created by mmironov on 3/3/17.
  */
-
 public class KolibriWebViewClient extends WebViewClient {
 
     public static final String PARAM_TARGET = "kolibri-target";
@@ -37,6 +36,8 @@ public class KolibriWebViewClient extends WebViewClient {
         void onPageFinished(WebView view, String url);
 
         boolean shouldHandleInternal();
+
+        boolean onCustomTarget(Uri link, String target);
     }
 
     private WebClientListener listener;
@@ -139,17 +140,18 @@ public class KolibriWebViewClient extends WebViewClient {
 
             Kolibri.getInstance(context).setFromMenuItemClick(false);
 
-            Intent linkIntent = target.equals(TARGET_INTERNAL) ?
-                    new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
-                    new Intent(Intent.ACTION_VIEW, link);
+            if (!listener.onCustomTarget(link, target)) {
+                Intent linkIntent = target.equals(TARGET_INTERNAL) ?
+                        new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
+                        new Intent(Intent.ACTION_VIEW, link);
 
-            context.startActivity(linkIntent);
+                context.startActivity(linkIntent);
 
-            final String scheme = link.getScheme();
+                final String scheme = link.getScheme();
 
-            //TODO: Fix me. This is still experimental.
-            if (scheme.equals(Kolibri.getInstance(context).getRuntime().getScheme())) {
-                Kolibri.notifyComponents(context, Kolibri.createIntent(link));
+                if (scheme.equals(Kolibri.getInstance(context).getRuntime().getScheme())) {
+                    Kolibri.notifyComponents(context, Kolibri.createIntent(link));
+                }
             }
         }
 

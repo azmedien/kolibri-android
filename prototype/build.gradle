@@ -20,7 +20,7 @@ android {
     buildToolsVersion "25.0.3"
     defaultConfig {
         applicationId "ch.yanova.kolibri.prototype"
-        minSdkVersion 14
+        minSdkVersion 19
         targetSdkVersion 25
         versionCode 60
         versionName "0.6.0-SNAPSHOT"
@@ -47,13 +47,15 @@ dependencies {
         transitive = true;
     }
 
-    testCompile 'junit:junit:4.12'
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+
     compile 'com.google.firebase:firebase-core:10.2.4'
     compile 'com.google.firebase:firebase-messaging:10.2.4'
+    compile 'com.google.vr:sdk-videowidget:1.70.0'
+    testCompile 'junit:junit:4.12'
 }
 
 apply plugin: 'com.google.gms.google-services'
