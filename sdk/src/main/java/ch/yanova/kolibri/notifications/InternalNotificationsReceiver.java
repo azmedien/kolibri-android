@@ -64,17 +64,15 @@ public final class InternalNotificationsReceiver extends KolibriNotificationsRec
             if (result.hasExtra(Kolibri.EXTRA_ID)) {
                 final String id = result.getStringExtra(Kolibri.EXTRA_ID);
 
-                if (Kolibri.getInstance(context).getRuntime().getNavigation().hasItem(id)) {
-                    final String query = result.getData().getQuery();
+                final String query = result.getData().getQuery();
 
-                    String modifiedUri = KOLIBRI_NOTIFICATION_INTENT;
-                    if (query != null) {
-                        modifiedUri += "?" + query;
-                    }
-
-                    result = Kolibri.createIntent(Uri.parse(modifiedUri));
-                    result.putExtra(Kolibri.EXTRA_ID, id);
+                String modifiedUri = KOLIBRI_NOTIFICATION_INTENT;
+                if (query != null) {
+                    modifiedUri += "?" + query;
                 }
+
+                result = Kolibri.createIntent(Uri.parse(modifiedUri));
+                result.putExtra(Kolibri.EXTRA_ID, id);
             } else {
                 Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
                 result = Kolibri.getErrorIntent(context, "Content of this type cannot be open.");
