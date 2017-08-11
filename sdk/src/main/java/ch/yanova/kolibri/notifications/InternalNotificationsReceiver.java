@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.firebase.messaging.RemoteMessage;
@@ -15,6 +16,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.List;
 
 import ch.yanova.kolibri.Kolibri;
+import ch.yanova.kolibri.R;
 
 /**
  * Created by lekov on 7/12/17.
@@ -24,8 +26,8 @@ public final class InternalNotificationsReceiver extends KolibriNotificationsRec
 
     private static final String TAG = "KolibriNotifications";
 
-    private static final String KOLIBRI_NOTIFICATION_INTENT = "kolibri://notification";
-    private static final String KOLIBRI_ID_INTENT = "kolibri://navigation";
+    public static final String KOLIBRI_NOTIFICATION_INTENT = "kolibri://notification";
+    public static final String KOLIBRI_ID_INTENT = "kolibri://navigation";
 
     @Override
     protected void onMessageReceived(Context context, RemoteMessage message) {
@@ -90,13 +92,14 @@ public final class InternalNotificationsReceiver extends KolibriNotificationsRec
                 .setContentText(body)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
+                .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                 .setTicker(String.format("%s: %s", title, body))
                 .setContentIntent(pendingIntent);
 
         notificationManager.notify(Kolibri.getInstance(context).getNotificationIcon(), notificationBuilder.build());
     }
 
-    private static Intent getResultIntent(Context context, String componentUri) {
+    public static Intent getResultIntent(Context context, String componentUri) {
 
         final Intent result = new Intent(Intent.ACTION_VIEW);
 

@@ -1,6 +1,7 @@
 package ch.yanova.kolibri;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,6 +18,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,8 +36,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import ch.yanova.kolibri.notifications.InternalNotificationsReceiver;
 
 import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;
 import static ch.yanova.kolibri.RuntimeConfig.ICON;
@@ -48,6 +53,8 @@ import static ch.yanova.kolibri.RuntimeConfig.Styling;
 import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
 import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
 import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
+import static ch.yanova.kolibri.notifications.InternalNotificationsReceiver.KOLIBRI_ID_INTENT;
+import static ch.yanova.kolibri.notifications.InternalNotificationsReceiver.KOLIBRI_NOTIFICATION_INTENT;
 
 public abstract class KolibriNavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -294,11 +301,13 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     @Override
     public void onNavigationInitialize() {
-        final Intent intent = getIntent();
+        Intent intent = getIntent();
 
         if (intent == null) {
             return;
         }
+
+        intent = prepareIntentFromNotification(intent);
 
         if (intent.hasExtra(ID)) {
             final Menu menu = navigationView.getMenu();
@@ -323,7 +332,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
                         intent.setData(uriWithUrl);
                     }
 
-                    item.setChecked(true);
+                    unselectAllMenuItemsExcept(item);
                     intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
 
                     final Kolibri kolibri = Kolibri.getInstance(this);
@@ -345,6 +354,58 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             setIntent(null);
             Kolibri.notifyComponents(this, intent);
         }
+    }
+
+    private void unselectAllMenuItemsExcept(MenuItem item) {
+        final Menu menu = navigationView.getMenu();
+
+        for (int m = 0; m < menu.size(); m++) {
+            if (!menu.getItem(m).equals(item)) {
+                menu.getItem(m).setChecked(false);
+            }
+        }
+
+        item.setChecked(true);
+    }
+
+    private Intent prepareIntentFromNotification(Intent intent) {
+
+        Intent result = intent;
+
+        if (intent.hasExtra("component")) {
+            String componentUri = intent.getStringExtra("component");
+
+            if (componentUri != null) {
+                result = InternalNotificationsReceiver.getResultIntent(this, componentUri);
+            } else {
+                result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
+            }
+
+            final PackageManager packageManager = getPackageManager();
+            if (result.resolveActivity(packageManager) == null) {
+
+                if (result.hasExtra(Kolibri.EXTRA_ID)) {
+                    final String id = result.getStringExtra(Kolibri.EXTRA_ID);
+
+                    if (Kolibri.getInstance(this).getRuntime().getNavigation().hasItem(id)) {
+                        final String query = result.getData().getQuery();
+
+                        String modifiedUri = KOLIBRI_NOTIFICATION_INTENT;
+                        if (query != null) {
+                            modifiedUri += "?" + query;
+                        }
+
+                        result = Kolibri.createIntent(Uri.parse(modifiedUri));
+                        result.putExtra(Kolibri.EXTRA_ID, id);
+                    }
+                } else {
+                    Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
+                    result = Kolibri.getErrorIntent(this, "Content of this type cannot be open.");
+                }
+
+            }
+        }
+        return result;
     }
 
     @Override
