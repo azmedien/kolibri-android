@@ -36,11 +36,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ch.yanova.kolibri.notifications.InternalNotificationsReceiver;
+import ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService;
 
 import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;
 import static ch.yanova.kolibri.RuntimeConfig.ICON;
@@ -53,8 +52,7 @@ import static ch.yanova.kolibri.RuntimeConfig.Styling;
 import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
 import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
 import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
-import static ch.yanova.kolibri.notifications.InternalNotificationsReceiver.KOLIBRI_ID_INTENT;
-import static ch.yanova.kolibri.notifications.InternalNotificationsReceiver.KOLIBRI_NOTIFICATION_INTENT;
+import static ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService.KOLIBRI_NOTIFICATION_INTENT;
 
 public abstract class KolibriNavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -376,7 +374,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             String componentUri = intent.getStringExtra("component");
 
             if (componentUri != null) {
-                result = InternalNotificationsReceiver.getResultIntent(this, componentUri);
+                result = KolibriFirebaseMessagingService.getResultIntent(this, componentUri);
             } else {
                 result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
             }

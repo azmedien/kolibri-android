@@ -21,12 +21,6 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".notifications.InternalNotificationsReceiver">
-            <intent-filter>
-                <action android:name="ch.azmedien.kolibri.action.MESSAGE_RECEIVED" />
-            </intent-filter>
-        </receiver>
-
         <activity
             android:name=".ErrorActivity"
             android:theme="@style/AppTheme.NoActionBar" />
