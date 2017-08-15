@@ -9,6 +9,7 @@ import android.support.annotation.AnyThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
 import android.webkit.WebSettings;
@@ -45,11 +46,19 @@ public class KolibriApp extends Application {
     private static String lastUrlLogged;
     private static boolean firebaseEnabled = true;
 
+    private static int widthPixels;
+    private static int heightPixels;
+
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         Log.i(TAG, String.format("Using Kolibri %s version", BuildConfig.VERSION_NAME));
+
+        final DisplayMetrics lDisplayMetrics = getResources().getDisplayMetrics();
+        widthPixels = lDisplayMetrics.widthPixels;
+        heightPixels = lDisplayMetrics.heightPixels;
 
         final ClearableCookieJar cookieJar = new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(this));
 
@@ -106,8 +115,9 @@ public class KolibriApp extends Application {
 
         final StringBuilder sb = new StringBuilder(netmetrix);
         sb.append("/").append("android");
-        sb.append("/").append("phone");
+        sb.append("/").append("universal");
         sb.append("?d=").append(System.currentTimeMillis());
+        sb.append("&x=").append(widthPixels).append("x").append(heightPixels);
 
         if (url != null) {
             sb.append("&r=").append(url);
@@ -119,7 +129,7 @@ public class KolibriApp extends Application {
                         .url(sb.toString())
                         .get()
                         .header("Accept-Language", "de")
-                        .header("User-Agent", "Mozilla/5.0 (Linux; U; Android-phone)")
+                        .header("User-Agent", "Mozilla/5.0 (Linux; U; Android-universal)")
                         .build())
                 .enqueue(new Callback() {
                     @Override
