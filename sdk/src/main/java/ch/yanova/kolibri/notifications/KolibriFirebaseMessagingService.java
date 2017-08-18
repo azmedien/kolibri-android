@@ -49,7 +49,7 @@ public final class KolibriFirebaseMessagingService extends FirebaseMessagingServ
 
         final String title = message.getData().get("title");
         final String body = message.getData().get("body");
-        final String componentUri = message.getData().get("component");
+        final String componentUri = message.getData().get("url");
 
         handleNow(context, componentUri, title, body);
     }
