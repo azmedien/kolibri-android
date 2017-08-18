@@ -46,8 +46,8 @@ public class KolibriApp extends Application {
     private static String lastUrlLogged;
     private static boolean firebaseEnabled = true;
 
-    private static int widthPixels;
-    private static int heightPixels;
+    private static int viewportWidthPixels;
+    private static int viewportHeightPixels;
 
 
     @Override
@@ -57,8 +57,8 @@ public class KolibriApp extends Application {
         Log.i(TAG, String.format("Using Kolibri %s version", BuildConfig.VERSION_NAME));
 
         final DisplayMetrics lDisplayMetrics = getResources().getDisplayMetrics();
-        widthPixels = lDisplayMetrics.widthPixels;
-        heightPixels = lDisplayMetrics.heightPixels;
+        viewportWidthPixels = Math.round(lDisplayMetrics.widthPixels / lDisplayMetrics.density);
+        viewportHeightPixels = Math.round(lDisplayMetrics.heightPixels / lDisplayMetrics.density);
 
         final ClearableCookieJar cookieJar = new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(this));
 
@@ -117,7 +117,7 @@ public class KolibriApp extends Application {
         sb.append("/").append("android");
         sb.append("/").append("universal");
         sb.append("?d=").append(System.currentTimeMillis());
-        sb.append("&x=").append(widthPixels).append("x").append(heightPixels);
+        sb.append("&x=").append(viewportWidthPixels).append("x").append(viewportHeightPixels);
 
         if (url != null) {
             sb.append("&r=").append(url);
