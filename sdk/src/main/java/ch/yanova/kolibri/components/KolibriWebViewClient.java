@@ -12,7 +12,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import ch.yanova.kolibri.Kolibri;
-import ch.yanova.kolibri.KolibriApp;
 
 /**
  * Created by mmironov on 3/3/17.
@@ -86,13 +85,13 @@ public class KolibriWebViewClient extends WebViewClient {
         }
     }
 
-//    @Override
-//    public void onPageFinished(WebView view, String url) {
-//        super.onPageFinished(view, url);
-//        if (listener != null) {
-//            listener.onPageFinished(view, url);
-//        }
-//    }
+    @Override
+    public void onPageFinished(WebView view, String url) {
+        super.onPageFinished(view, url);
+        if (listener != null) {
+            listener.onPageFinished(view, url);
+        }
+    }
 
     public boolean handleInNewView(String target) {
         if (target == null) {
@@ -127,11 +126,6 @@ public class KolibriWebViewClient extends WebViewClient {
             } else {
                 target = TARGET_EXTERNAL;
             }
-        }
-
-        // Skip external targets when reporting to netmetrix
-        if (!TARGET_EXTERNAL.equals(target)) {
-            KolibriApp.getInstance().logEvent(null, link.toString());
         }
 
         final boolean handleInNewView = handleInNewView(target);
