@@ -113,9 +113,15 @@ public class KolibriApp extends Application {
             return;
         }
 
+        String variant = Kolibri.getInstance(this).getRuntime().getString("nemetrix-type");
+
+        if (variant == null) {
+            variant = "universal";
+        }
+
         final StringBuilder sb = new StringBuilder(netmetrix);
         sb.append("/").append("android");
-        sb.append("/").append("universal");
+        sb.append("/").append(variant);
         sb.append("?d=").append(System.currentTimeMillis());
         sb.append("&x=").append(viewportWidthPixels).append("x").append(viewportHeightPixels);
 
@@ -124,12 +130,13 @@ public class KolibriApp extends Application {
         }
 
         // TODO: check error if request is successful but the server return some error
+
         netmetrixClient.newCall(
                 new Request.Builder()
                         .url(sb.toString())
                         .get()
                         .header("Accept-Language", "de")
-                        .header("User-Agent", "Mozilla/5.0 (Linux; U; Android-universal)")
+                        .header("User-Agent", "Mozilla/5.0 (Linux; U; Android-"+ variant +")")
                         .build())
                 .enqueue(new Callback() {
                     @Override
