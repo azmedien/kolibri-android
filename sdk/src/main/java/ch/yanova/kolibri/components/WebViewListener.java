@@ -2,7 +2,6 @@ package ch.yanova.kolibri.components;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.view.View;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -16,11 +15,9 @@ public interface WebViewListener {
 
     void onPageStarted(WebView view, String url, Bitmap favicon);
 
-    void onPageVisible(View view, String url);
+    void onPageVisible(WebView view, String url);
 
     void onPageFinished(WebView view, String url);
-
-    void onPageProgress(WebView view, int progress);
 
     boolean shouldHandleInternal();
 

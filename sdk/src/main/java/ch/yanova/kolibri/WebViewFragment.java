@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -109,18 +108,13 @@ public class WebViewFragment extends KolibriLoadingFragment implements WebViewLi
     }
 
     @Override
-    public void onPageVisible(View view, String url) {
-        Log.d(TAG, "onPageVisible()");
+    public void onPageVisible(WebView view, String url) {
         showPage();
     }
 
     @Override
     public void onPageFinished(WebView view, String url) {
-        Log.d(TAG, "onPageFinished()");
     }
-
-    @Override
-    public void onPageProgress(WebView view, int progress) {}
 
     @Override
     public boolean shouldHandleInternal() {

@@ -7,7 +7,6 @@ import android.net.UrlQuerySanitizer;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebResourceError;
@@ -187,11 +186,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     }
 
     @Override
-    public void onPageVisible(View view, String url) {
-    }
-
-    @Override
-    public void onPageFinished(final WebView view, String url) {
+    public void onPageVisible(WebView view, String url) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             view.evaluateJavascript(
                     "(function() { return ('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>'); })();",
@@ -207,7 +202,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     }
 
     @Override
-    public void onPageProgress(WebView view, int progress) {}
+    public void onPageFinished(final WebView view, String url) {}
 
     @Override
     public boolean shouldHandleInternal() {
