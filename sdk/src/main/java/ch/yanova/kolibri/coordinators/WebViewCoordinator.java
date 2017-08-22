@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
-import android.webkit.ValueCallback;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -187,18 +185,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
     @Override
     public void onPageVisible(WebView view, String url) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            view.evaluateJavascript(
-                    "(function() { return ('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>'); })();",
-                    new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String html) {
-                            new GetHtmlJsInterface().processHTML(html);
-                        }
-                    });
-        } else {
-            view.loadUrl(GET_HTML_STRING);
-        }
+        view.loadUrl(GET_HTML_STRING);
     }
 
     @Override
