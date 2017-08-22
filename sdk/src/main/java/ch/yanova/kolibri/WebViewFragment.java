@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,8 +22,8 @@ import android.widget.ProgressBar;
 import java.util.Map;
 
 import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
+import ch.yanova.kolibri.components.WebViewListener;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
 import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
@@ -32,8 +33,9 @@ import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
  * Created by lekov on 4/2/17.
  */
 
-public class WebViewFragment extends KolibriLoadingFragment implements KolibriWebViewClient.WebClientListener, OnAmpDataFoundListener {
+public class WebViewFragment extends KolibriLoadingFragment implements WebViewListener, OnAmpDataFoundListener {
 
+    private static final String TAG = "WebViewFragment";
     private Intent shareIntent;
     private boolean isThemeTinted;
     private boolean showSearchOption = true;
@@ -61,7 +63,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
         super.onViewCreated(view, savedInstanceState);
         webView = (KolibriWebView) view.findViewById(R.id.webview);
         webView.setTag(KolibriWebView.class);
-        webView.setWebClientListener(this);
+        webView.setWebViewListener(this);
 
         if (getArguments().containsKey("url")) {
             final String url = getArguments().getString("url");
@@ -108,7 +110,16 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
 
     @Override
     public void onPageFinished(WebView view, String url) {
+        Log.d(TAG, "onPageFinished() called with: view = [" + view + "], url = [" + url + "]");
         showPage();
+    }
+
+    @Override
+    public void onPageProgress(WebView view, int progress) {
+        Log.d(TAG, "onPageProgress() called with: view = [" + view + "], progress = [" + progress + "]");
+        if (progress == 100) {
+            showPage();
+        }
     }
 
     @Override

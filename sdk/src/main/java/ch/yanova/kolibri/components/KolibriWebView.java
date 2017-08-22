@@ -19,8 +19,8 @@ public class KolibriWebView extends WebView {
 
     public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
 
-    private KolibriWebViewClient client;
-
+    private KolibriWebViewClient webClient;
+    private KolibriWebChromeClient chromeClient;
 
     public KolibriWebView(Context context) {
         super(context);
@@ -43,8 +43,9 @@ public class KolibriWebView extends WebView {
         init();
     }
 
-    public void setWebClientListener(KolibriWebViewClient.WebClientListener listener) {
-        client.setWebClientListener(listener);
+    public void setWebViewListener(WebViewListener listener) {
+        webClient.setWebViewListener(listener);
+        chromeClient.setWebViewListener(listener);
     }
 
     private void init() {
@@ -52,36 +53,38 @@ public class KolibriWebView extends WebView {
         if (!isInEditMode()) {
             setLayerType(View.LAYER_TYPE_NONE, null);
             setWebViewClient(new KolibriWebViewClient());
+            setWebChromeClient(new KolibriWebChromeClient());
+
             getSettings().setJavaScriptEnabled(true);
             getSettings().setAppCacheEnabled(true);
             getSettings().setDomStorageEnabled(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
-
-            setWebChromeClient(new WebChromeClient() {
-                @Override
-                public void onProgressChanged(WebView view, int newProgress) {
-                    super.onProgressChanged(view, newProgress);
-
-                    if (newProgress == 100) {
-                        client.getWebClientListener().onPageFinished(view, "");
-                    }
-                }
-            });
         }
     }
 
     @Override
     public void setWebViewClient(WebViewClient client) {
 
-        if (this.client != null) {
-            throw new IllegalAccessError("Cannot override kolibri's webview client");
+        if (this.webClient != null) {
+            throw new IllegalAccessError("Cannot override kolibri's webview webClient");
         } else {
             super.setWebViewClient(client);
-            this.client = (KolibriWebViewClient) client;
+            this.webClient = (KolibriWebViewClient) client;
         }
     }
 
-    public KolibriWebViewClient getClient() {
-        return client;
+    @Override
+    public void setWebChromeClient(WebChromeClient client) {
+
+        if (this.chromeClient != null) {
+            throw new IllegalAccessError("Cannot override kolibri's webview chrome client");
+        } else {
+            super.setWebChromeClient(client);
+            this.chromeClient = (KolibriWebChromeClient) client;
+        }
+    }
+
+    public KolibriWebViewClient getWebClient() {
+        return webClient;
     }
 }

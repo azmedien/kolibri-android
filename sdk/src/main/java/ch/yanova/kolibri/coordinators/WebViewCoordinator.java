@@ -23,8 +23,8 @@ import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriCoordinator;
 import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
+import ch.yanova.kolibri.components.WebViewListener;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -35,7 +35,7 @@ import okhttp3.Response;
  * Created by lekov on 3/28/17.
  */
 
-public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements KolibriWebViewClient.WebClientListener, OnAmpDataFoundListener {
+public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements WebViewListener, OnAmpDataFoundListener {
 
     private static final String[] sURIs = new String[]{"kolibri://content/link", "kolibri://notification"};
 
@@ -82,7 +82,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     @Override
     protected void attach(KolibriWebView view) {
         super.attach(view);
-        view.setWebClientListener(this);
+        view.setWebViewListener(this);
         view.addJavascriptInterface(new GetHtmlJsInterface(), JS_INTERFACE_NAME);
     }
 
@@ -96,7 +96,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
             //FIX ME: Not passing the intent extras, lose TITLE for example in case the client
             // starts internal webview activity
-            final boolean handled = view.getClient().handleUri(view.getContext(), url);
+            final boolean handled = view.getWebClient().handleUri(view.getContext(), url);
 
             if (!handled) {
                 view.loadUrl(url.toString());
@@ -226,14 +226,15 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     }
 
     @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-//        getHeaders(view, url);
-    }
+    public void onPageStarted(WebView view, String url, Bitmap favicon) {}
 
     @Override
     public void onPageFinished(WebView view, String url) {
         view.loadUrl(GET_HTML_STRING);
     }
+
+    @Override
+    public void onPageProgress(WebView view, int progress) {}
 
     @Override
     public boolean shouldHandleInternal() {
