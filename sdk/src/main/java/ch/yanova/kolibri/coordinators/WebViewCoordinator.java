@@ -113,7 +113,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         KolibriApp.getInstance().reportToFirebase(data.get(META_CATEGORY), view.getUrl());
     }
 
-    private class GetHtmlJsInterface {
+    public class GetHtmlJsInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         void processHTML(String html) {
