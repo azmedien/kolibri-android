@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.AnyThread;
@@ -286,13 +288,13 @@ public class Kolibri {
     }
 
     public void subscribeForPushNotifications() {
-        preferences.edit().putBoolean(KEY_SUBSCRIBED_FOR_PUSH, true).commit();
+        preferences.edit().putBoolean(KEY_SUBSCRIBED_FOR_PUSH, true).apply();
     }
 
     public void unsubscribeFromPushNotifications() {
 
         if (preferences.contains(KEY_SUBSCRIBED_FOR_PUSH)) {
-            preferences.edit().remove(KEY_SUBSCRIBED_FOR_PUSH).commit();
+            preferences.edit().remove(KEY_SUBSCRIBED_FOR_PUSH).apply();
         }
     }
 

@@ -4,8 +4,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
+import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -15,7 +19,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,11 +28,6 @@ import ch.yanova.kolibri.KolibriCoordinator;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
 import ch.yanova.kolibri.components.WebViewListener;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Created by lekov on 3/28/17.
@@ -38,8 +36,6 @@ import okhttp3.Response;
 public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements WebViewListener, OnAmpDataFoundListener {
 
     private static final String[] sURIs = new String[]{"kolibri://content/link", "kolibri://notification"};
-
-    public static final String HEADER_FAVORITES = "Kolibri-Favorizable";
 
     private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
     private static final String JS_INTERFACE_NAME = "GetHtml";
@@ -64,19 +60,13 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
     public static final String META_THEME_COLOR = "theme-color";
 
-    //    <link rel="canonical" href="http://www.telezueri.staging.azmedien.ch/live">
-
     private static final String TAG = "WebViewCoordinator";
     public static final String NAME = "name";
 
     private final OnAmpDataFoundListener listener;
 
-    public WebViewCoordinator(OnAmpDataFoundListener listener) {
+    public WebViewCoordinator(@NonNull OnAmpDataFoundListener listener) {
         this.listener = listener;
-    }
-
-    public WebViewCoordinator() {
-        this(null);
     }
 
     @Override
@@ -104,36 +94,6 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         }
     }
 
-    private void getHeaders(final WebView view, final String url) {
-        final OkHttpClient client = new OkHttpClient();
-
-        final Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Content-Type", "text/html")
-                .addHeader("Content-Encoding", "UTF-8")
-                .addHeader("User-Agent", view.getSettings().getUserAgentString())
-                .get()
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response != null && response.isSuccessful()) {
-
-                    Log.i(TAG, "getHeaders: " + response.headers());
-
-                    final String headerFavorites = response.header(HEADER_FAVORITES);
-                    handleFavorizable(headerFavorites, url, view);
-                }
-            }
-        });
-    }
-
     private void handleFavorizable(String favorizable, String url, WebView view) {
         final String trueLiteral = String.valueOf(Boolean.TRUE);
         String uriString = trueLiteral.equals(favorizable) ?
@@ -149,9 +109,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
     @Override
     public void onFound(Map<String, String> data) {
-        if (listener != null) {
-            listener.onFound(data);
-        }
+        listener.onFound(data);
 
         handleFavorizable(data.get(META_FAVORIZABLE), view.getUrl(), view);
 
@@ -161,7 +119,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     private class GetHtmlJsInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
-        public void processHTML(String html) {
+        void processHTML(String html) {
             Document content = Jsoup.parseBodyFragment(html);
             Elements elements = content.getElementsByTag(TAG_META);
             Log.i("PARSING", "processHTML meta: " + elements);
@@ -204,7 +162,6 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
             // There's no need to report if actually there's no data
             if (metaData.size() > 0) {
-
                 view.post(new Runnable() {
                     @Override
                     public void run() {
@@ -226,11 +183,27 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     }
 
     @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {}
+    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+    }
 
     @Override
-    public void onPageFinished(WebView view, String url) {
-        view.loadUrl(GET_HTML_STRING);
+    public void onPageVisible(View view, String url) {
+    }
+
+    @Override
+    public void onPageFinished(final WebView view, String url) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            view.evaluateJavascript(
+                    "(function() { return ('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>'); })();",
+                    new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String html) {
+                            new GetHtmlJsInterface().processHTML(html);
+                        }
+                    });
+        } else {
+            view.loadUrl(GET_HTML_STRING);
+        }
     }
 
     @Override

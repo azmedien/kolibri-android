@@ -109,18 +109,18 @@ public class WebViewFragment extends KolibriLoadingFragment implements WebViewLi
     }
 
     @Override
-    public void onPageFinished(WebView view, String url) {
-        Log.d(TAG, "onPageFinished() called with: view = [" + view + "], url = [" + url + "]");
+    public void onPageVisible(View view, String url) {
+        Log.d(TAG, "onPageVisible()");
         showPage();
     }
 
     @Override
-    public void onPageProgress(WebView view, int progress) {
-        Log.d(TAG, "onPageProgress() called with: view = [" + view + "], progress = [" + progress + "]");
-        if (progress == 100) {
-            showPage();
-        }
+    public void onPageFinished(WebView view, String url) {
+        Log.d(TAG, "onPageFinished()");
     }
+
+    @Override
+    public void onPageProgress(WebView view, int progress) {}
 
     @Override
     public boolean shouldHandleInternal() {

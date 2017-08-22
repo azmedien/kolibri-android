@@ -2,6 +2,7 @@ package ch.yanova.kolibri.coordinators;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.view.View;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -38,6 +39,13 @@ public class ClientWebViewCoordinator extends WebViewCoordinator {
 
         hasReceivedError = false;
         listener.onPageStarted(view, url, favicon);
+    }
+
+    @Override
+    public void onPageVisible(View view, String url) {
+        super.onPageVisible(view, url);
+
+        listener.onPageVisible(view, url);
     }
 
     @Override
