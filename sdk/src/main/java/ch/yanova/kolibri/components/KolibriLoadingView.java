@@ -69,22 +69,21 @@ public class KolibriLoadingView extends FrameLayout {
         mLayoutError = mLayoutOverlay.findViewById(R.id.error);
 
         if (errorMessage != null) {
-            ((TextView)mLayoutError.findViewById(R.id.error_text)).setText(errorMessage);
+            ((TextView) mLayoutError.findViewById(R.id.error_text)).setText(errorMessage);
         }
 
         if (buttonText != null) {
-            ((Button)mLayoutError.findViewById(R.id.error_button)).setText(buttonText);
+            ((Button) mLayoutError.findViewById(R.id.error_button)).setText(buttonText);
         }
 
         if (drawable != null) {
-            ((TextView)mLayoutError.findViewById(R.id.error_text)).setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
+            ((TextView) mLayoutError.findViewById(R.id.error_text)).setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
         }
 
         addView(mLayoutOverlay);
     }
 
     public void showLoading() {
-
         mLayoutOverlay.setVisibility(View.VISIBLE);
         mLayoutError.setVisibility(View.GONE);
         mainContentView.setVisibility(View.GONE);
@@ -92,7 +91,6 @@ public class KolibriLoadingView extends FrameLayout {
     }
 
     public void showError(String text, String buttonText, @DrawableRes Integer resDrawable) {
-
         mLayoutOverlay.setVisibility(View.VISIBLE);
         mLayoutLoading.setVisibility(View.GONE);
         mainContentView.setVisibility(View.GONE);
@@ -106,7 +104,7 @@ public class KolibriLoadingView extends FrameLayout {
         }
 
         if (resDrawable != null) {
-            ((TextView)mLayoutError.findViewById(R.id.error_text)).setCompoundDrawablesWithIntrinsicBounds(0, resDrawable, 0, 0);
+            ((TextView) mLayoutError.findViewById(R.id.error_text)).setCompoundDrawablesWithIntrinsicBounds(0, resDrawable, 0, 0);
         }
 
         mLayoutError.setVisibility(View.VISIBLE);

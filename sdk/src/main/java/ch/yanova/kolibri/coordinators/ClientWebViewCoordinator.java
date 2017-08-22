@@ -1,12 +1,13 @@
 package ch.yanova.kolibri.coordinators;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 
-import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
+import ch.yanova.kolibri.components.WebViewListener;
 
 /**
  * Created by lekov on 3/28/17.
@@ -14,11 +15,11 @@ import ch.yanova.kolibri.components.OnAmpDataFoundListener;
 
 public class ClientWebViewCoordinator extends WebViewCoordinator {
 
-    private final KolibriWebViewClient.WebClientListener listener;
+    private final WebViewListener listener;
 
     private boolean hasReceivedError;
 
-    public ClientWebViewCoordinator(OnAmpDataFoundListener ampDataFoundListener, KolibriWebViewClient.WebClientListener listener) {
+    public ClientWebViewCoordinator(OnAmpDataFoundListener ampDataFoundListener, @NonNull WebViewListener listener) {
         super(ampDataFoundListener);
         this.listener = listener;
     }
@@ -28,10 +29,7 @@ public class ClientWebViewCoordinator extends WebViewCoordinator {
         super.onReceivedError(view, request, error);
 
         hasReceivedError = true;
-
-        if (listener != null) {
-            listener.onReceivedError(view, request, error);
-        }
+        listener.onReceivedError(view, request, error);
     }
 
     @Override
@@ -39,22 +37,24 @@ public class ClientWebViewCoordinator extends WebViewCoordinator {
         super.onPageStarted(view, url, favicon);
 
         hasReceivedError = false;
+        listener.onPageStarted(view, url, favicon);
+    }
 
-        if (listener != null) {
-            listener.onPageStarted(view, url, favicon);
-        }
+    @Override
+    public void onPageVisible(WebView view, String url) {
+        super.onPageVisible(view, url);
+
+        listener.onPageVisible(view, url);
     }
 
     @Override
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
-        if (listener != null) {
 
-            if (hasReceivedError) {
-                listener.onReceivedError(view, null, null);
-            } else {
-                listener.onPageFinished(view, url);
-            }
+        if (hasReceivedError) {
+            listener.onReceivedError(view, null, null);
+        } else {
+            listener.onPageFinished(view, url);
         }
     }
 

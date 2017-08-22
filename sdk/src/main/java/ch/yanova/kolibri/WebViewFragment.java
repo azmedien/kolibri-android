@@ -21,8 +21,8 @@ import android.widget.ProgressBar;
 import java.util.Map;
 
 import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
+import ch.yanova.kolibri.components.WebViewListener;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
 import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
@@ -32,8 +32,9 @@ import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
  * Created by lekov on 4/2/17.
  */
 
-public class WebViewFragment extends KolibriLoadingFragment implements KolibriWebViewClient.WebClientListener, OnAmpDataFoundListener {
+public class WebViewFragment extends KolibriLoadingFragment implements WebViewListener, OnAmpDataFoundListener {
 
+    private static final String TAG = "WebViewFragment";
     private Intent shareIntent;
     private boolean isThemeTinted;
     private boolean showSearchOption = true;
@@ -61,7 +62,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
         super.onViewCreated(view, savedInstanceState);
         webView = (KolibriWebView) view.findViewById(R.id.webview);
         webView.setTag(KolibriWebView.class);
-        webView.setWebClientListener(this);
+        webView.setWebViewListener(this);
 
         if (getArguments().containsKey("url")) {
             final String url = getArguments().getString("url");
@@ -107,8 +108,12 @@ public class WebViewFragment extends KolibriLoadingFragment implements KolibriWe
     }
 
     @Override
-    public void onPageFinished(WebView view, String url) {
+    public void onPageVisible(WebView view, String url) {
         showPage();
+    }
+
+    @Override
+    public void onPageFinished(WebView view, String url) {
     }
 
     @Override
