@@ -113,10 +113,10 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         KolibriApp.getInstance().reportToFirebase(data.get(META_CATEGORY), view.getUrl());
     }
 
-    public class GetHtmlJsInterface {
+    private class GetHtmlJsInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
-        void processHTML(String html) {
+        public void processHTML(String html) {
             Document content = Jsoup.parseBodyFragment(html);
             Elements elements = content.getElementsByTag(TAG_META);
             Log.i("PARSING", "processHTML meta: " + elements);
