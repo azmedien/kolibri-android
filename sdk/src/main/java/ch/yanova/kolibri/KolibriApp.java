@@ -76,8 +76,6 @@ public class KolibriApp extends Application {
 
         lastUrlLogged = url;
 
-        Log.d(TAG, "logEvent() called with: name = [" + name + "], url = [" + url + "]");
-
         reportToNetmetrix(url);
     }
 

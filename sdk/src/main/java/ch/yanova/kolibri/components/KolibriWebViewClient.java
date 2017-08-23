@@ -140,7 +140,7 @@ public class KolibriWebViewClient extends WebViewClient {
     }
 
     @NonNull
-    private String getTarget(Context context, Uri link) {
+    static String getTarget(Context context, Uri link) {
         String target = link.getQueryParameter(PARAM_TARGET);
 
         if (target == null) {

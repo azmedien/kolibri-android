@@ -1,5 +1,6 @@
 package ch.yanova.kolibri.components;
 
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.webkit.WebChromeClient;
@@ -8,6 +9,8 @@ import android.webkit.WebViewClient;
 
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
+
+import static ch.yanova.kolibri.components.KolibriWebViewClient.TARGET_EXTERNAL;
 
 /**
  * Created by mmironov on 8/23/17.
@@ -30,7 +33,18 @@ public class KolibriWebChromeClient extends WebChromeClient {
                 listener.onPageVisible(view, view.getUrl());
             }
 
-            KolibriApp.getInstance().logEvent(null, view.getUrl());
+            final String url = view.getUrl();
+            if ("about:blank".equals(url)) {
+                return;
+            }
+
+            final Uri link = Uri.parse(url);
+            final String target = KolibriWebViewClient.getTarget(view.getContext(), link);
+
+            // Skip external targets when reporting to netmetrix
+            if (!TARGET_EXTERNAL.equals(target)) {
+                KolibriApp.getInstance().logEvent(null, link.toString());
+            }
         }
     }
 }
