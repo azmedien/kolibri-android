@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -19,6 +20,7 @@ public class KolibriWebView extends WebView {
     public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
 
     private KolibriWebViewClient webClient;
+    private KolibriWebChromeClient chromeClient;
 
     public KolibriWebView(Context context) {
         super(context);
@@ -43,6 +45,7 @@ public class KolibriWebView extends WebView {
 
     public void setWebViewListener(WebViewListener listener) {
         webClient.setWebViewListener(listener);
+        chromeClient.setWebViewListener(listener);
     }
 
     private void init() {
@@ -50,6 +53,7 @@ public class KolibriWebView extends WebView {
         if (!isInEditMode()) {
             setLayerType(View.LAYER_TYPE_NONE, null);
             setWebViewClient(new KolibriWebViewClient());
+            setWebChromeClient(new KolibriWebChromeClient());
 
             getSettings().setJavaScriptEnabled(true);
             getSettings().setAppCacheEnabled(true);
@@ -67,6 +71,17 @@ public class KolibriWebView extends WebView {
             super.setWebViewClient(client);
             this.webClient = (KolibriWebViewClient) client;
         }
+    }
+
+    @Override
+    public void setWebChromeClient(WebChromeClient client) {
+
+        super.setWebChromeClient(client);
+
+        if (client instanceof KolibriWebChromeClient) {
+            this.chromeClient = (KolibriWebChromeClient) client;
+        }
+
     }
 
     public KolibriWebViewClient getWebClient() {
