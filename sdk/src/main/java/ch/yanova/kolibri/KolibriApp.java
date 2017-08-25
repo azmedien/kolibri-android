@@ -111,9 +111,9 @@ public class KolibriApp extends Application {
             return;
         }
 
-        String variant = Kolibri.getInstance(this).getRuntime().getString("nemetrix-type");
+        String variant = Kolibri.getInstance(this).getRuntime().getString("netmetrix-type");
 
-        if (variant == null) {
+        if (variant == null || variant.isEmpty()) {
             variant = "universal";
         }
 
