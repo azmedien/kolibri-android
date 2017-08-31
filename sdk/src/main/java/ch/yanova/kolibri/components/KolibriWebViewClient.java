@@ -119,8 +119,6 @@ public class KolibriWebViewClient extends WebViewClient {
 
         if (handleInNewView) {
 
-            Kolibri.getInstance(context).setFromMenuItemClick(false);
-
             if (!listener.onCustomTarget(link, target)) {
                 Intent linkIntent = target.equals(TARGET_INTERNAL) ?
                         new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :

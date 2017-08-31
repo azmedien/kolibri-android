@@ -74,13 +74,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         public void onClick(View v) {
             final Intent intent = (Intent) v.getTag();
 
-            final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-
-            final Kolibri kolibri = Kolibri.getInstance(KolibriNavigationActivity.this);
-            kolibri.setPreviousMenuItem(kolibri.selectedMenuitem());
-            kolibri.setSelectedMenuItem(title);
-            kolibri.setFromMenuItemClick(true);
-
             Kolibri.notifyComponents(KolibriNavigationActivity.this, intent);
             drawer.closeDrawer(GravityCompat.START);
         }
@@ -181,11 +174,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     protected void onRestart() {
         super.onRestart();
         restarted = true;
-        final Kolibri kolibri = Kolibri.getInstance(this);
-        if (kolibri.fromMenuItemClick() && kolibri.previousMenuItem() != null) {
-            getSupportActionBar().setTitle(kolibri.previousMenuItem());
-            kolibri.setSelectedMenuItem(kolibri.previousMenuItem());
-        }
     }
 
     @Override
@@ -220,11 +208,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final Intent intent = item.getIntent();
 
         final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-
-        final Kolibri kolibri = Kolibri.getInstance(this);
-        kolibri.setPreviousMenuItem(kolibri.selectedMenuitem());
-        kolibri.setSelectedMenuItem(title);
-        kolibri.setFromMenuItemClick(true);
 
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
@@ -332,10 +315,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
                     unselectAllMenuItemsExcept(item);
                     intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
-
-                    final Kolibri kolibri = Kolibri.getInstance(this);
-                    kolibri.setPreviousMenuItem(kolibri.selectedMenuitem());
-                    kolibri.setSelectedMenuItem(item.getTitle().toString());
 
                     setIntent(null);
                     Kolibri.notifyComponents(this, intent);

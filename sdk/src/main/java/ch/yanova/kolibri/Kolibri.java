@@ -81,11 +81,6 @@ public class Kolibri {
     private static Kolibri mInstance;
     private static Context fContext;
 
-    private String selectedMenuItem;
-    private String previousMenuItem;
-
-    private boolean fromMenuItemClick;
-
     private SharedPreferences preferences;
     private RuntimeConfig runtime;
 
@@ -254,30 +249,6 @@ public class Kolibri {
     @AnyThread
     public synchronized RuntimeConfig getRuntime() {
         return runtime;
-    }
-
-    public String selectedMenuitem() {
-        return mInstance.selectedMenuItem;
-    }
-
-    public String previousMenuItem() {
-        return mInstance.previousMenuItem;
-    }
-
-    public void setSelectedMenuItem(String selectedMenuItem) {
-        mInstance.selectedMenuItem = selectedMenuItem;
-    }
-
-    public void setPreviousMenuItem(String previousMenuItem) {
-        mInstance.previousMenuItem = previousMenuItem;
-    }
-
-    public void setFromMenuItemClick(boolean fromMenuItemClick) {
-        mInstance.fromMenuItemClick = fromMenuItemClick;
-    }
-
-    public boolean fromMenuItemClick() {
-        return mInstance.fromMenuItemClick;
     }
 
     public static Intent getErrorIntent(Context context, String errorMessage) {
