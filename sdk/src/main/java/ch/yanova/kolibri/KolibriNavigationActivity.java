@@ -15,6 +15,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -73,6 +74,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         @Override
         public void onClick(View v) {
             final Intent intent = (Intent) v.getTag();
+
+            final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
+            setActionBarTitle(title);
 
             Kolibri.notifyComponents(KolibriNavigationActivity.this, intent);
             drawer.closeDrawer(GravityCompat.START);
@@ -209,6 +213,8 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
 
+        setActionBarTitle(title);
+
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
         final boolean handled = Kolibri.notifyComponents(this, intent);
@@ -227,6 +233,13 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void setActionBarTitle(String title) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null && title != null) {
+            actionBar.setTitle(title);
+        }
     }
 
     private void constructNavigation(Navigation navigation) {
