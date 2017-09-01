@@ -77,13 +77,15 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     protected void handleIntent(KolibriWebView view, Intent intent) {
         final UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(intent.getData().toString());
 
+        view.setIntent(intent);
+
         if (sanitizer.hasParameter("url")) {
 
             final Uri url = Uri.parse(intent.getData().getQueryParameter("url"));
 
             //FIX ME: Not passing the intent extras, lose TITLE for example in case the client
             // starts internal webview activity
-            final boolean handled = view.getWebClient().handleUri(view.getContext(), url);
+            final boolean handled = view.getWebClient().handleUri(view, url);
 
             if (!handled) {
                 view.loadUrl(url.toString());

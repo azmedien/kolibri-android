@@ -2,6 +2,7 @@ package ch.yanova.kolibri.components;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
@@ -21,6 +22,8 @@ public class KolibriWebView extends WebView {
 
     private KolibriWebViewClient webClient;
     private KolibriWebChromeClient chromeClient;
+
+    private Intent intent;
 
     public KolibriWebView(Context context) {
         super(context);
@@ -86,5 +89,13 @@ public class KolibriWebView extends WebView {
 
     public KolibriWebViewClient getWebClient() {
         return webClient;
+    }
+
+    public Intent getIntent() {
+        return intent;
+    }
+
+    public void setIntent(Intent intent) {
+        this.intent = intent;
     }
 }

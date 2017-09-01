@@ -201,20 +201,20 @@ public class Kolibri {
     }
 
     @AnyThread
-    public static boolean notifyComponents(@NonNull Context context, @NonNull Intent intent) {
+    public static HandlerType notifyComponents(@NonNull Context context, @NonNull Intent intent) {
         boolean handled = LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
         if (handled) {
-            return true;
+            return HandlerType.COMPONENT;
         }
 
         final PackageManager packageManager = context.getPackageManager();
         if (intent.resolveActivity(packageManager) != null) {
             context.startActivity(intent);
-            return true;
+            return HandlerType.ACTIVITY;
         }
 
-        return false;
+        return HandlerType.NONE;
     }
 
     public static String searchParamKey(Context context) {
@@ -275,5 +275,9 @@ public class Kolibri {
 
     public boolean hasUnsubscribedFromPushExplicitly() {
         return preferences.contains(KEY_SUBSCRIBED_FOR_PUSH);
+    }
+
+    public enum HandlerType {
+        COMPONENT, ACTIVITY, NONE
     }
 }

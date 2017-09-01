@@ -45,14 +45,14 @@ public class KolibriWebViewClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         Uri link = Uri.parse(url);
-        return handleUri(view.getContext(), link);
+        return handleUri(view, link);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         Uri link = request.getUrl();
-        return handleUri(view.getContext(), link);
+        return handleUri(view, link);
     }
 
     @Override
@@ -112,7 +112,8 @@ public class KolibriWebViewClient extends WebViewClient {
         listener.onPageVisible(view, url);
     }
 
-    public final boolean handleUri(Context context, Uri link) {
+    public final boolean handleUri(WebView view, Uri link) {
+        final Context context = view.getContext();
         final String target = getTarget(context, link);
 
         final boolean handleInNewView = handleInNewView(target);
@@ -123,6 +124,14 @@ public class KolibriWebViewClient extends WebViewClient {
                 Intent linkIntent = target.equals(TARGET_INTERNAL) ?
                         new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
                         new Intent(Intent.ACTION_VIEW, link);
+
+                if (view instanceof KolibriWebView) {
+                    final Intent kolibriIntent = ((KolibriWebView)view).getIntent();
+
+                    if (kolibriIntent != null) {
+                        linkIntent.putExtras(kolibriIntent);
+                    }
+                }
 
                 context.startActivity(linkIntent);
 

@@ -211,15 +211,16 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         final Intent intent = item.getIntent();
 
-        final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-
-        setActionBarTitle(title);
-
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
-        final boolean handled = Kolibri.notifyComponents(this, intent);
+        final Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
 
-        if (!handled) {
+        if (type == Kolibri.HandlerType.COMPONENT) {
+            final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
+            setActionBarTitle(title);
+        }
+
+        if (type == Kolibri.HandlerType.NONE) {
             Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, "No Such Component Exists!"));
         }
 
