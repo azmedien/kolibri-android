@@ -40,6 +40,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import ch.yanova.kolibri.components.KolibriWebView;
+import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService;
 
 import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;
@@ -75,13 +77,33 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         public void onClick(View v) {
             final Intent intent = (Intent) v.getTag();
 
-            final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-            setActionBarTitle(title);
+            notifyComponenets(intent);
 
-            Kolibri.notifyComponents(KolibriNavigationActivity.this, intent);
             drawer.closeDrawer(GravityCompat.START);
         }
     };
+
+    private void notifyComponenets(Intent intent) {
+        final Kolibri.HandlerType type = Kolibri.notifyComponents(KolibriNavigationActivity.this, intent);
+
+        if (type == Kolibri.HandlerType.COMPONENT) {
+
+            final String url = intent.getData().getQueryParameter("url");
+            if (url != null) {
+                final Uri uri = Uri.parse(url);
+                final String target = uri.getQueryParameter("kolibri-target");
+                if (KolibriWebViewClient.TARGET_SELF.equals(target)) {
+                    final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
+                    setActionBarTitle(title);
+                }
+            }
+        }
+
+        if (type == Kolibri.HandlerType.NONE) {
+            Kolibri.notifyComponents(KolibriNavigationActivity.this, Kolibri.getErrorIntent(KolibriNavigationActivity.this, "No Such Component Exists!"));
+        }
+    }
+
     private Toolbar toolbar;
     private View headerImageContainer;
 
@@ -209,20 +231,11 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-        final Intent intent = item.getIntent();
-
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
-        final Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
+        final Intent intent = item.getIntent();
 
-        if (type == Kolibri.HandlerType.COMPONENT) {
-            final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-            setActionBarTitle(title);
-        }
-
-        if (type == Kolibri.HandlerType.NONE) {
-            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, "No Such Component Exists!"));
-        }
+        notifyComponenets(intent);
 
         for (int i = 0; i < navigationView.getMenu().size(); i++) {
             if (item.equals(navigationView.getMenu().getItem(i))) {
