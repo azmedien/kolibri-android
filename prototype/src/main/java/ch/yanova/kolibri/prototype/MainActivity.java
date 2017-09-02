@@ -1,6 +1,5 @@
 package ch.yanova.kolibri.prototype;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
@@ -24,18 +23,7 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
             @Nullable
             @Override
             public KolibriCoordinator provideCoordinator(@NonNull View view) {
-                return new SearchWebviewCoordinator(getMainWebViewFragment(), getMainWebViewFragment()) {
-                    @Override
-                    public boolean onCustomTarget(Uri link, String target) {
-
-                        if ("360player".equals(target)) {
-                            startActivity(CardboardActivity.createIntent(MainActivity.this, link));
-                            return true;
-                        }
-
-                        return super.onCustomTarget(link, target);
-                    }
-                };
+                return new SearchWebviewCoordinator(getMainWebViewFragment());
             }
         });
     }

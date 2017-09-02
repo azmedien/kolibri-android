@@ -2,10 +2,11 @@ package ch.yanova.kolibri;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,8 +22,8 @@ import android.widget.ProgressBar;
 import java.util.Map;
 
 import ch.yanova.kolibri.components.KolibriWebView;
+import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
-import ch.yanova.kolibri.components.WebViewListener;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
 import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
@@ -32,7 +33,7 @@ import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
  * Created by lekov on 4/2/17.
  */
 
-public class WebViewFragment extends KolibriLoadingFragment implements WebViewListener, OnAmpDataFoundListener {
+public class WebViewFragment extends KolibriLoadingFragment implements OnAmpDataFoundListener {
 
     private static final String TAG = "WebViewFragment";
     private Intent shareIntent;
@@ -60,9 +61,53 @@ public class WebViewFragment extends KolibriLoadingFragment implements WebViewLi
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webView = (KolibriWebView) view.findViewById(R.id.webview);
+        webView = view.findViewById(R.id.webview);
         webView.setTag(KolibriWebView.class);
-        webView.setWebViewListener(this);
+        webView.setKolibriWebViewClient(new KolibriWebViewClient() {
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                showShareOption = false;
+                shareIntent = null;
+
+                if (view == null) {
+                    return;
+                }
+
+                if (getActivity() instanceof KolibriNavigationActivity && isThemeTinted) {
+                    final KolibriNavigationActivity kna = (KolibriNavigationActivity) getActivity();
+                    kna.applyDefaultPalette();
+
+                    TintUtils.tintProgressBar((ProgressBar) mLayoutLoading);
+
+                    isThemeTinted = false;
+                }
+
+                showPageLoading();
+            }
+
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onPageCommitVisible(WebView view, String url) {
+                super.onPageCommitVisible(view, url);
+                showPage();
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                showPage();
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                final String errorMessage = error != null ? error.toString() : null;
+
+                showPageError(errorMessage, "Click", null);
+            }
+        });
 
         if (getArguments().containsKey("url")) {
             final String url = getArguments().getString("url");
@@ -78,53 +123,6 @@ public class WebViewFragment extends KolibriLoadingFragment implements WebViewLi
         return inflater.inflate(R.layout.kolibri_web_fragment, container, false);
     }
 
-    @Override
-    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-        final String errorMessage = error != null ? error.toString() : null;
-
-        showPageError(errorMessage, "Click", null);
-    }
-
-    @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-
-        showShareOption = false;
-        shareIntent = null;
-
-        if (view == null) {
-            return;
-        }
-
-        if (getActivity() instanceof KolibriNavigationActivity && isThemeTinted) {
-            final KolibriNavigationActivity kna = (KolibriNavigationActivity) getActivity();
-            kna.applyDefaultPalette();
-
-            TintUtils.tintProgressBar((ProgressBar) mLayoutLoading);
-
-            isThemeTinted = false;
-        }
-
-        showPageLoading();
-    }
-
-    @Override
-    public void onPageVisible(WebView view, String url) {
-        showPage();
-    }
-
-    @Override
-    public void onPageFinished(WebView view, String url) {
-    }
-
-    @Override
-    public boolean shouldHandleInternal() {
-        return true;
-    }
-
-    @Override
-    public boolean onCustomTarget(Uri link, String target) {
-        return false;
-    }
 
     @Override
     public void onFound(Map<String, String> data) {

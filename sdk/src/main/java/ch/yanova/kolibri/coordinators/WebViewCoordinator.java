@@ -1,14 +1,11 @@
 package ch.yanova.kolibri.coordinators;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 
 import org.jsoup.Jsoup;
@@ -24,13 +21,12 @@ import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriCoordinator;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
-import ch.yanova.kolibri.components.WebViewListener;
 
 /**
  * Created by lekov on 3/28/17.
  */
 
-public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements WebViewListener, OnAmpDataFoundListener {
+public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements OnAmpDataFoundListener {
 
     private static final String[] sURIs = new String[]{"kolibri://content/link", "kolibri://notification"};
 
@@ -69,7 +65,6 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     @Override
     protected void attach(KolibriWebView view) {
         super.attach(view);
-        view.setWebViewListener(this);
         view.addJavascriptInterface(new GetHtmlJsInterface(), JS_INTERFACE_NAME);
     }
 
@@ -83,9 +78,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
             final Uri url = Uri.parse(intent.getData().getQueryParameter("url"));
 
-            //FIX ME: Not passing the intent extras, lose TITLE for example in case the client
-            // starts internal webview activity
-            final boolean handled = view.getWebClient().handleUri(view, url);
+            final boolean handled = view.handleUri(url);
 
             if (!handled) {
                 view.loadUrl(url.toString());
@@ -175,32 +168,4 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     protected String[] kolibriUris() {
         return sURIs;
     }
-
-    @Override
-    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-
-    }
-
-    @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-    }
-
-    @Override
-    public void onPageVisible(WebView view, String url) {
-        view.loadUrl(GET_HTML_STRING);
-    }
-
-    @Override
-    public void onPageFinished(final WebView view, String url) {}
-
-    @Override
-    public boolean shouldHandleInternal() {
-        return false;
-    }
-
-    @Override
-    public boolean onCustomTarget(Uri link, String target) {
-        return false;
-    }
-
 }

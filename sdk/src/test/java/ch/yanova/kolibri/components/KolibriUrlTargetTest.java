@@ -9,9 +9,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static ch.yanova.kolibri.components.KolibriWebViewClient.TARGET_EXTERNAL;
-import static ch.yanova.kolibri.components.KolibriWebViewClient.TARGET_INTERNAL;
-import static ch.yanova.kolibri.components.KolibriWebViewClient.TARGET_SELF;
+import static ch.yanova.kolibri.components.InternalWebViewClient.TARGET_EXTERNAL;
+import static ch.yanova.kolibri.components.InternalWebViewClient.TARGET_INTERNAL;
+import static ch.yanova.kolibri.components.InternalWebViewClient.TARGET_SELF;
 import static org.mockito.Mockito.doReturn;
 
 /**
@@ -28,7 +28,7 @@ public class KolibriUrlTargetTest {
     KolibriWebView webView;
 
     @Spy
-    KolibriWebViewClient webViewClient = new KolibriWebViewClient();
+    InternalWebViewClient webViewClient = new InternalWebViewClient();
 
     @Test
     public void selfTargetTest() {

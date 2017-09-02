@@ -40,9 +40,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import ch.yanova.kolibri.components.KolibriWebChromeClient;
-import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService;
 
 import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;

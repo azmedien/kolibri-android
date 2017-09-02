@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 
 import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.coordinators.ClientWebViewCoordinator;
+import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
 
 public abstract class KolibriBaseActivity extends KolibriNavigationActivity implements View.OnClickListener {
@@ -36,7 +36,7 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
             @Nullable
             @Override
             public KolibriCoordinator provideCoordinator(View view) {
-                return new ClientWebViewCoordinator(getMainWebViewFragment(), getMainWebViewFragment());
+                return new WebViewCoordinator(getMainWebViewFragment());
             }
         });
     }
