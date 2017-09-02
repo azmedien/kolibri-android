@@ -1,6 +1,7 @@
 package ch.yanova.kolibri;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
@@ -32,6 +33,7 @@ public class RuntimeConfig {
     public static final String ICON = "icon";
 
     private final JSONObject runtime;
+
     private Styling styling;
     private String version;
     private String scheme;
@@ -47,14 +49,22 @@ public class RuntimeConfig {
         final String applicationId = Uri.parse(url).getPathSegments().get(1);
         final boolean isAssetsExternal = json.has("amazon");
 
-        formattedAssetUrl = isAssetsExternal ?
-                json.optString("amazon") + "/apps/" + applicationId + "/assets/%s.png" :
-                url.replace("runtime", "assets") + "/%s/download";
+        formattedAssetUrl = isAssetsExternal
+                ? json.optString("amazon") + "/apps/" + applicationId + "/assets/%s.png"
+                : url.replace("runtime", "assets") + "/%s/download";
 
         if (json.length() == 0) {
-            throw new KolibriException("Runtime config JSON is empty. Cannot construct the menu.");
+            throw new KolibriException("Runtime config JSON is empty. Cannot construct configuration.");
         }
 
+        parseStructure();
+
+        if (navigation == null || domain == null || scheme == null || styling == null) {
+            throw new KolibriException("Runtime config JSON is not valid one.");
+        }
+    }
+
+    private void parseStructure() {
         components = new HashMap<>();
         final JSONArray names = runtime.names();
 
@@ -83,10 +93,6 @@ public class RuntimeConfig {
                     components.put(current, new Component(runtime.optJSONObject(current)));
                     break;
             }
-        }
-
-        if (navigation == null || domain == null || scheme == null || styling == null) {
-            throw new KolibriException("Runtime config JSON is not valid one.");
         }
     }
 
@@ -309,8 +315,6 @@ public class RuntimeConfig {
             }
         }
 
-        // ### PALETTE ###
-
         public boolean hasPalette() {
             return json.has(COLOR_PALETTE);
         }
@@ -408,6 +412,8 @@ public class RuntimeConfig {
         private final String icon;
         private Map<String, NavigationItem> subItems;
 
+        private Drawable iconDrawable;
+
         private final String formattedAssetUrl;
 
         NavigationItem(JSONObject json, String formattedAssetUrl) {
@@ -435,11 +441,6 @@ public class RuntimeConfig {
             }
         }
 
-
-        public boolean hasSubItems() {
-            return subItems.size() > 0;
-        }
-
         public Map<String, NavigationItem> getSubItems() {
             return Collections.unmodifiableMap(subItems);
         }
@@ -454,6 +455,16 @@ public class RuntimeConfig {
 
         public String getComponent() {
             return component;
+        }
+
+        public Uri getUri() {
+            StringBuilder sb = new StringBuilder(component);
+
+            if (json.has("url")) {
+                sb.append("?url=").append(json.opt("url"));
+            }
+
+            return Uri.parse(sb.toString());
         }
 
         public String getIcon() {
@@ -472,6 +483,10 @@ public class RuntimeConfig {
             }
 
             return getAssetUrl(formattedAssetUrl, formattedIcon);
+        }
+
+        public boolean hasSubItems() {
+            return subItems.size() > 0;
         }
     }
 
