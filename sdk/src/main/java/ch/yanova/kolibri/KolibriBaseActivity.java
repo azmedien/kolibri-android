@@ -49,4 +49,13 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
     public WebViewFragment getMainWebViewFragment() {
         return (WebViewFragment) getMainFragment();
     }
+
+    @Override
+    public void onBackPressed() {
+        if (getWebView().canGoBack()) {
+            getWebView().goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }
