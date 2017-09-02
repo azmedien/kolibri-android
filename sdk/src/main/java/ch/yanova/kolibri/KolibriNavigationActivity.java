@@ -539,15 +539,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     private void addNavigationItem(Menu menu, NavigationItem item) {
         final String label = item.getLabel();
-        String componentUri = item.getComponent();
+        Uri componentUri = item.getUri();
 
-        if (item.hasSetting("url")) {
-            final String url = item.getString("url");
-            componentUri += "?url=" + url;
-        }
-
-        final Uri uri = Uri.parse(componentUri);
-        final Intent intent = Kolibri.createIntent(uri);
+        final Intent intent = Kolibri.createIntent(componentUri);
         intent.putExtra(Intent.EXTRA_TITLE, label);
 
         final String id = item.getId();
