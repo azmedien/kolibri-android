@@ -44,6 +44,11 @@ public class Kolibri {
 
     private static final String KEY_SUBSCRIBED_FOR_PUSH = "subscribedForPush";
 
+    public static final String PARAM_TARGET = "kolibri-target";
+    public static final String TARGET_INTERNAL = "_internal";
+    public static final String TARGET_EXTERNAL = "_external";
+    public static final String TARGET_SELF = "_self";
+
     public static boolean isPageSearchable(Context context, String pageId) {
 
         if (pageId == null) {
@@ -279,5 +284,30 @@ public class Kolibri {
 
     public enum HandlerType {
         COMPONENT, ACTIVITY, NONE
+    }
+
+    @NonNull
+    public String getTarget(Uri link) {
+        String target = link.getQueryParameter(PARAM_TARGET);
+
+        if (target == null) {
+            String domain = getRuntime().getDomain();
+            String host = link.getHost();
+
+            if (domain.startsWith("www.")) {
+                domain = domain.substring(4);
+            }
+
+            if (host.startsWith("www.")) {
+                host = host.substring(4);
+            }
+
+            if (host.equals(domain)) {
+                target = TARGET_INTERNAL;
+            } else {
+                target = TARGET_EXTERNAL;
+            }
+        }
+        return target;
     }
 }

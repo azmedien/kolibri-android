@@ -15,15 +15,15 @@ import android.webkit.WebViewClient;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 
+import static ch.yanova.kolibri.Kolibri.TARGET_EXTERNAL;
+import static ch.yanova.kolibri.Kolibri.TARGET_INTERNAL;
+import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
+
 /**
  * Created by mmironov on 3/3/17.
  */
 public class KolibriWebViewClient extends WebViewClient {
 
-    public static final String PARAM_TARGET = "kolibri-target";
-    public static final String TARGET_INTERNAL = "_internal";
-    public static final String TARGET_EXTERNAL = "_external";
-    public static final String TARGET_SELF = "_self";
     private static final String TAG = "KolibriWebClient";
 
     private WebViewListener listener;
@@ -102,7 +102,7 @@ public class KolibriWebViewClient extends WebViewClient {
         }
 
         final Uri link = Uri.parse(url);
-        final String target = getTarget(view.getContext(), link);
+        final String target = Kolibri.getInstance(view.getContext()).getTarget(link);
 
         // Skip external targets when reporting to netmetrix
         if (!TARGET_EXTERNAL.equals(target)) {
@@ -114,7 +114,7 @@ public class KolibriWebViewClient extends WebViewClient {
 
     public final boolean handleUri(WebView view, Uri link) {
         final Context context = view.getContext();
-        final String target = getTarget(context, link);
+        final String target = Kolibri.getInstance(view.getContext()).getTarget(link);
 
         final boolean handleInNewView = handleInNewView(target);
 
@@ -144,30 +144,5 @@ public class KolibriWebViewClient extends WebViewClient {
         }
 
         return handleInNewView;
-    }
-
-    @NonNull
-    static String getTarget(Context context, Uri link) {
-        String target = link.getQueryParameter(PARAM_TARGET);
-
-        if (target == null) {
-            String domain = Kolibri.getInstance(context).getRuntime().getDomain();
-            String host = link.getHost();
-
-            if (domain.startsWith("www.")) {
-                domain = domain.substring(4);
-            }
-
-            if (host.startsWith("www.")) {
-                host = host.substring(4);
-            }
-
-            if (host.equals(domain)) {
-                target = TARGET_INTERNAL;
-            } else {
-                target = TARGET_EXTERNAL;
-            }
-        }
-        return target;
     }
 }

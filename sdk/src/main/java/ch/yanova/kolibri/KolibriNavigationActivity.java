@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import ch.yanova.kolibri.components.KolibriWebChromeClient;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService;
@@ -88,14 +89,11 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         if (type == Kolibri.HandlerType.COMPONENT) {
 
-            final String url = intent.getData().getQueryParameter("url");
-            if (url != null) {
-                final Uri uri = Uri.parse(url);
-                final String target = uri.getQueryParameter("kolibri-target");
-                if (KolibriWebViewClient.TARGET_SELF.equals(target)) {
-                    final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-                    setActionBarTitle(title);
-                }
+            final Uri uri = intent.getData();
+            final String target = Kolibri.getInstance(this).getTarget(uri);
+            if (Kolibri.TARGET_SELF.equals(target)) {
+                final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
+                setActionBarTitle(title);
             }
         }
 

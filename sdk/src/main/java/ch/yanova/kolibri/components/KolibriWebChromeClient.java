@@ -5,12 +5,11 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 
-import static ch.yanova.kolibri.components.KolibriWebViewClient.TARGET_EXTERNAL;
+import static ch.yanova.kolibri.Kolibri.TARGET_EXTERNAL;
 
 /**
  * Created by mmironov on 8/23/17.
@@ -39,7 +38,7 @@ public class KolibriWebChromeClient extends WebChromeClient {
             }
 
             final Uri link = Uri.parse(url);
-            final String target = KolibriWebViewClient.getTarget(view.getContext(), link);
+            final String target = Kolibri.getInstance(view.getContext()).getTarget(link);
 
             // Skip external targets when reporting to netmetrix
             if (!TARGET_EXTERNAL.equals(target)) {
