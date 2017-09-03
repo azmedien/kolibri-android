@@ -318,6 +318,17 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final String notificationUrl = getIntent().getStringExtra("url");
         final Uri notificationUri = Uri.parse(notificationUrl);
 
+        if (notificationUri.getScheme().startsWith("http")) {
+            Uri uri = Uri.parse(WebViewCoordinator.webViewUri);
+
+            Uri.Builder builder = uri.buildUpon();
+            builder.appendQueryParameter("url", notificationUrl);
+
+            Intent intent = Kolibri.createIntent(builder.build());
+            Kolibri.notifyComponents(this, intent);
+            return;
+        }
+
         if ("navigation".equals(notificationUri.getAuthority())) {
 
             final List<String> segments = notificationUri.getPathSegments();
