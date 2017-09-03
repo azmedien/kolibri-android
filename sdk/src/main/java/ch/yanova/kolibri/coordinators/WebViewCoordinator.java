@@ -32,7 +32,8 @@ import ch.yanova.kolibri.components.WebViewListener;
 
 public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements WebViewListener, OnAmpDataFoundListener {
 
-    private static final String[] sURIs = new String[]{"kolibri://content/link", "kolibri://notification"};
+    public static final String webViewUri = "kolibri://content/link";
+    private static final String[] sURIs = new String[]{ webViewUri };
 
     private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
     private static final String JS_INTERFACE_NAME = "GetHtml";

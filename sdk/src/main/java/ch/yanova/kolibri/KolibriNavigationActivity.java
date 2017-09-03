@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -37,12 +38,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import ch.yanova.kolibri.components.KolibriWebChromeClient;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
+import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 import ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService;
 
 import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;
@@ -307,54 +310,70 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     @Override
     public void onNavigationInitialize() {
-        Intent intent = getIntent();
 
-        if (intent == null) {
+        if (getIntent() == null || !getIntent().hasCategory("notification")) {
             return;
         }
 
-        intent = prepareIntentFromNotification(intent);
+        final String notificationUrl = getIntent().getStringExtra("url");
+        final Uri notificationUri = Uri.parse(notificationUrl);
 
-        if (intent.hasExtra(ID)) {
-            final Menu menu = navigationView.getMenu();
+        if ("navigation".equals(notificationUri.getAuthority())) {
 
-            for (int i = 0; i < menu.size(); i++) {
+            final List<String> segments = notificationUri.getPathSegments();
 
-                final MenuItem item = menu.getItem(i);
-                final String idInMenu = item.getIntent().getStringExtra(ID);
+            if (segments != null && !segments.isEmpty()) {
+                final String id = segments.get(0);
 
-                if (intent.getStringExtra(ID).equals(idInMenu)) {
+                final Menu menu = navigationView.getMenu();
 
-                    final Uri data = intent.getData();
-                    final String urlToLoad = data.getQueryParameter("url");
-                    final Uri menuData = item.getIntent().getData();
+                for (int i = 0; i < menu.size(); i++) {
 
-                    //There is a specific url that was pushed to the app
-                    if (urlToLoad != null) {
-                        intent.putExtra(Kolibri.EXTRA_GO_BACK_URL, menuData.getQueryParameter("url"));
-                    } else { //We will load the url for the navigation item having the id from the notification
-                        final String url = menuData.getQueryParameter("url");
-                        final Uri uriWithUrl = data.buildUpon().appendQueryParameter("url", url).build();
-                        intent.setData(uriWithUrl);
+                    final MenuItem item = menu.getItem(i);
+                    final String idInMenu = item.getIntent().getStringExtra(ID);
+
+                    if (id.equals(idInMenu)) {
+
+                        final String urlToLoad = notificationUri.getQueryParameter("url");
+                        final Uri menuData = item.getIntent().getData();
+
+                        Intent intent = Kolibri.createIntent(menuData);
+
+                        //There is a specific url that was pushed to the app
+                        if (urlToLoad != null) {
+                            Uri intentData = Uri.parse(WebViewCoordinator.webViewUri);
+                            Uri.Builder builder = intentData.buildUpon();
+                            builder.appendQueryParameter("url", urlToLoad);
+                            intentData = builder.build();
+                            intent.setData(intentData);
+                            intent.putExtra(Kolibri.EXTRA_GO_BACK_URL, menuData.getQueryParameter("url"));
+                        }
+
+                        unselectAllMenuItemsExcept(item);
+                        intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
+
+                        setIntent(null);
+                        Kolibri.notifyComponents(this, intent);
+                        return;
                     }
-
-                    unselectAllMenuItemsExcept(item);
-                    intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
-
-                    setIntent(null);
-                    Kolibri.notifyComponents(this, intent);
-                    return;
                 }
             }
 
+            //If the was no id
+            final Menu menu = navigationView.getMenu();
+            final Intent intent = menu.getItem(0).getIntent();
+            Kolibri.notifyComponents(this, intent);
             setIntent(null);
-            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, "No Such Component Exists!"));
             return;
         }
 
-        if (intent.getData() != null && intent.getData().getQueryParameter("url") != null) {
+        //If the host is not navigation
+        final Intent intent = Kolibri.createIntent(notificationUri);
+        Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
+
+        if (type == Kolibri.HandlerType.NONE) {
             setIntent(null);
-            Kolibri.notifyComponents(this, intent);
+            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, "No Such Component Exists!"));
         }
     }
 
@@ -368,46 +387,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
 
         item.setChecked(true);
-    }
-
-    private Intent prepareIntentFromNotification(Intent intent) {
-
-        Intent result = intent;
-
-        if (intent.hasExtra("component")) {
-            String componentUri = intent.getStringExtra("component");
-
-            if (componentUri != null) {
-                result = KolibriFirebaseMessagingService.getResultIntent(this, componentUri);
-            } else {
-                result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
-            }
-
-            final PackageManager packageManager = getPackageManager();
-            if (result.resolveActivity(packageManager) == null) {
-
-                if (result.hasExtra(Kolibri.EXTRA_ID)) {
-                    final String id = result.getStringExtra(Kolibri.EXTRA_ID);
-
-                    if (Kolibri.getInstance(this).getRuntime().getNavigation().hasItem(id)) {
-                        final String query = result.getData().getQuery();
-
-                        String modifiedUri = KOLIBRI_NOTIFICATION_INTENT;
-                        if (query != null) {
-                            modifiedUri += "?" + query;
-                        }
-
-                        result = Kolibri.createIntent(Uri.parse(modifiedUri));
-                        result.putExtra(Kolibri.EXTRA_ID, id);
-                    }
-                } else {
-                    Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
-                    result = Kolibri.getErrorIntent(this, "Content of this type cannot be open.");
-                }
-
-            }
-        }
-        return result;
     }
 
     @Override
