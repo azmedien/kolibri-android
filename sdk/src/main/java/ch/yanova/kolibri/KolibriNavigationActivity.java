@@ -326,6 +326,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
             Intent intent = Kolibri.createIntent(builder.build());
             Kolibri.notifyComponents(this, intent);
+            setIntent(null);
             return;
         }
 
