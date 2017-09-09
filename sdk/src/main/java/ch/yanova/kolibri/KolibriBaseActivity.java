@@ -3,7 +3,10 @@ package ch.yanova.kolibri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebBackForwardList;
+import android.webkit.WebHistoryItem;
 
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.coordinators.ClientWebViewCoordinator;
@@ -53,7 +56,24 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
     @Override
     public void onBackPressed() {
         if (getWebView().canGoBack()) {
-            getWebView().goBack();
+
+            final MenuItem item = getMenu().getItem(0);
+
+            final String url = item.getIntent().getData().getQueryParameter("url");
+
+            //If there is url on item with index 0, then we load this url and clear that history
+            //so that the next time the user presses back they are redirected out
+            //of the app
+            if (url != null) {
+                getWebView().setClearHistory(true);
+                getWebView().loadUrl(url);
+                setActionBarTitle(item.getTitle().toString());
+                unselectAllMenuItemsExcept(item);
+
+            } else {
+                super.onBackPressed();
+            }
+
         } else {
             super.onBackPressed();
         }

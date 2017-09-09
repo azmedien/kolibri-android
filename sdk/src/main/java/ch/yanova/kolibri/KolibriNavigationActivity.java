@@ -250,7 +250,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         return true;
     }
 
-    private void setActionBarTitle(String title) {
+    protected void setActionBarTitle(String title) {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null && title != null) {
             actionBar.setTitle(title);
@@ -389,7 +389,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
     }
 
-    private void unselectAllMenuItemsExcept(MenuItem item) {
+    public void unselectAllMenuItemsExcept(MenuItem item) {
         final Menu menu = navigationView.getMenu();
 
         for (int m = 0; m < menu.size(); m++) {
@@ -632,5 +632,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     public Toolbar getToolbar() {
         return toolbar;
+    }
+
+    public Menu getMenu() {
+        return navigationView.getMenu();
     }
 }

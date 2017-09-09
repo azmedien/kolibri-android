@@ -64,7 +64,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements WebViewLi
         webView.setTag(KolibriWebView.class);
         webView.setWebViewListener(this);
 
-        if (getArguments().containsKey("url")) {
+        if (getArguments() != null && getArguments().containsKey("url")) {
             final String url = getArguments().getString("url");
             webView.loadUrl(url);
         }

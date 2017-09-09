@@ -77,6 +77,16 @@ public class KolibriWebViewClient extends WebViewClient {
 
     @Override
     public void onPageFinished(WebView view, String url) {
+
+        if (view instanceof KolibriWebView) {
+            final KolibriWebView webView = (KolibriWebView)view;
+
+            if (webView.shouldClearHistory()) {
+                webView.setClearHistory(false);
+                webView.clearHistory();
+            }
+        }
+
         super.onPageFinished(view, url);
         listener.onPageFinished(view, url);
     }
