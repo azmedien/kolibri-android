@@ -87,7 +87,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
     };
 
-    private void notifyComponenets(Intent intent) {
+    private Kolibri.HandlerType notifyComponenets(Intent intent) {
         final Kolibri.HandlerType type = Kolibri.notifyComponents(KolibriNavigationActivity.this, intent);
 
         if (type == Kolibri.HandlerType.COMPONENT) {
@@ -103,6 +103,8 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         if (type == Kolibri.HandlerType.NONE) {
             Kolibri.notifyComponents(KolibriNavigationActivity.this, Kolibri.getErrorIntent(KolibriNavigationActivity.this, "No Such Component Exists!"));
         }
+
+        return type;
     }
 
     private Toolbar toolbar;
@@ -236,14 +238,10 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         final Intent intent = item.getIntent();
 
-        notifyComponenets(intent);
+        Kolibri.HandlerType type = notifyComponenets(intent);
 
-        for (int i = 0; i < navigationView.getMenu().size(); i++) {
-            if (item.equals(navigationView.getMenu().getItem(i))) {
-                item.setChecked(true);
-            } else {
-                navigationView.getMenu().getItem(i).setChecked(false);
-            }
+        if (type.equals(Kolibri.HandlerType.COMPONENT)) {
+            unselectAllMenuItemsExcept(item);
         }
 
         drawer.closeDrawer(GravityCompat.START);
@@ -259,6 +257,11 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     private void constructNavigation(Navigation navigation) {
         final Menu menu = navigationView.getMenu();
+
+        final MenuItem selectedMenuItem = getSelectedMenuItem();
+        final String selectedMenuItemId = selectedMenuItem == null ?
+                null : selectedMenuItem.getIntent().getStringExtra(ID);
+
         menu.clear();
 
         final Map<String, RuntimeConfig.NavigationItem> items = navigation.getItems();
@@ -284,6 +287,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         if (!restarted) {
             loadDefaultItem();
+        } else if (selectedMenuItemId != null) {
+            final MenuItem itemByid = findMenuItem(selectedMenuItemId);
+            unselectAllMenuItemsExcept(itemByid);
         }
 
         onNavigationInitialize();
@@ -291,16 +297,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     protected void loadDefaultItem() {
 
-        final Menu menu = navigationView.getMenu();
-
-        for (int i = 0; i < menu.size(); i++) {
-            final MenuItem item = menu.getItem(i);
-            if (item.getIntent().getCategories().contains(Intent.CATEGORY_DEFAULT)) {
-                item.setChecked(true);
-                Kolibri.notifyComponents(this, item.getIntent());
-                break;
-            }
-        }
+        final MenuItem defaultItem = getDefaultItem();
+        defaultItem.setChecked(true);
+        Kolibri.notifyComponents(this, defaultItem.getIntent());
     }
 
     @Override
@@ -648,5 +647,23 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
 
         return null;
+    }
+
+    public MenuItem findMenuItem(String id) {
+
+        for(int i=0; i < getMenu().size(); ++i) {
+
+            if (getMenu().getItem(i).getIntent().getStringExtra(ID).equals(id)) {
+                return getMenu().getItem(i);
+            }
+        }
+
+        return null;
+    }
+
+    protected MenuItem getDefaultItem() {
+        final int defaultItemIndex = configuration.getNavigation().getSettings().getInt("default-item");
+
+        return getMenu().getItem(defaultItemIndex);
     }
 }

@@ -55,37 +55,44 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
 
     @Override
     public void onBackPressed() {
+
+        final MenuItem selectedItem = getSelectedMenuItem();
+        final MenuItem defaultItem = getDefaultItem();
+
+        // Default cannot be null, it's mandatory
+        if (defaultItem.equals(selectedItem)) {
+            super.onBackPressed();
+            return;
+        }
+
         if (getWebView().canGoBack()) {
 
-            final MenuItem selectedItem = getSelectedMenuItem();
-            final String selectedItemurl = selectedItem.getIntent()
+            final String selectedItemUrl = selectedItem.getIntent()
                     .getData().getQueryParameter("url");
             final String currentUrl = getWebView().getOriginalUrl();
 
             //If the url we are going back from
             //came from a menu item click, we clear the history
             //and go back home
-            if (currentUrl.equals(selectedItemurl)) {
-                final MenuItem item = getMenu().getItem(0);
-                final String url = item.getIntent().getData().getQueryParameter("url");
+            if (currentUrl.equals(selectedItemUrl)) {
+                final String url = defaultItem.getIntent().getData().getQueryParameter("url");
 
-                //If there is url on item with index 0, then we load this url and clear that history
+                //If there is url on default item, then we load this url and clear that history
                 //so that the next time the user presses back they are redirected out
                 //of the app
                 if (url != null) {
                     getWebView().setClearHistory(true);
                     getWebView().loadUrl(url);
-                    setActionBarTitle(item.getTitle().toString());
-                    unselectAllMenuItemsExcept(item);
-
-                } else {
-                    super.onBackPressed();
+                    setActionBarTitle(defaultItem.getTitle().toString());
+                    unselectAllMenuItemsExcept(defaultItem);
+                    return;
                 }
             } else {
                 getWebView().goBack();
+                return;
             }
-        } else {
-            super.onBackPressed();
         }
+
+        super.onBackPressed();
     }
 }
