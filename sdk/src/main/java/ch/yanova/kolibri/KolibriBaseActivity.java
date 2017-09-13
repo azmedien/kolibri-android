@@ -57,23 +57,33 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
     public void onBackPressed() {
         if (getWebView().canGoBack()) {
 
-            final MenuItem item = getMenu().getItem(0);
+            final MenuItem selectedItem = getSelectedMenuItem();
+            final String selectedItemurl = selectedItem.getIntent()
+                    .getData().getQueryParameter("url");
+            final String currentUrl = getWebView().getOriginalUrl();
 
-            final String url = item.getIntent().getData().getQueryParameter("url");
+            //If the url we are going back from
+            //came from a menu item click, we clear the history
+            //and go back home
+            if (currentUrl.equals(selectedItemurl)) {
+                final MenuItem item = getMenu().getItem(0);
+                final String url = item.getIntent().getData().getQueryParameter("url");
 
-            //If there is url on item with index 0, then we load this url and clear that history
-            //so that the next time the user presses back they are redirected out
-            //of the app
-            if (url != null) {
-                getWebView().setClearHistory(true);
-                getWebView().loadUrl(url);
-                setActionBarTitle(item.getTitle().toString());
-                unselectAllMenuItemsExcept(item);
+                //If there is url on item with index 0, then we load this url and clear that history
+                //so that the next time the user presses back they are redirected out
+                //of the app
+                if (url != null) {
+                    getWebView().setClearHistory(true);
+                    getWebView().loadUrl(url);
+                    setActionBarTitle(item.getTitle().toString());
+                    unselectAllMenuItemsExcept(item);
 
+                } else {
+                    super.onBackPressed();
+                }
             } else {
-                super.onBackPressed();
+                getWebView().goBack();
             }
-
         } else {
             super.onBackPressed();
         }

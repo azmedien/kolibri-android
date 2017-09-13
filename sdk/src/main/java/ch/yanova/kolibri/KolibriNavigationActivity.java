@@ -637,4 +637,16 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     public Menu getMenu() {
         return navigationView.getMenu();
     }
+
+    public MenuItem getSelectedMenuItem() {
+
+        for(int i=0; i < getMenu().size(); ++i) {
+
+            if (getMenu().getItem(i).isChecked()) {
+                return getMenu().getItem(i);
+            }
+        }
+
+        return null;
+    }
 }
