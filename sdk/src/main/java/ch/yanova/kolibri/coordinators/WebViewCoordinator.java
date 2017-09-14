@@ -109,7 +109,10 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
     @Override
     public void onFound(Map<String, String> data) {
-        listener.onFound(data);
+
+        if (listener != null) {
+            listener.onFound(data);
+        }
 
         handleFavorizable(data.get(META_FAVORIZABLE), view.getUrl(), view);
 
