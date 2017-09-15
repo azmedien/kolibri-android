@@ -5,8 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebBackForwardList;
-import android.webkit.WebHistoryItem;
 
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.coordinators.ClientWebViewCoordinator;
@@ -29,7 +27,7 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
 
     @Override
     public Fragment onPostInitialize() {
-        return WebViewFragment.newInstance("");
+        return WebViewFragment.newInstance();
     }
 
     @Override
@@ -59,11 +57,11 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
         final MenuItem selectedItem = getSelectedMenuItem();
         final MenuItem defaultItem = getDefaultItem();
 
-        // Default cannot be null, it's mandatory
-        if (defaultItem.equals(selectedItem)) {
-            super.onBackPressed();
-            return;
-        }
+//        // Default cannot be null, it's mandatory
+//        if (defaultItem.equals(selectedItem)) {
+//            super.onBackPressed();
+//            return;
+//        }
 
         if (getWebView().canGoBack()) {
 

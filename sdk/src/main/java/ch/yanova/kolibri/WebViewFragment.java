@@ -46,10 +46,9 @@ public class WebViewFragment extends KolibriLoadingFragment implements WebViewLi
 
     private KolibriWebView webView;
 
-    public static WebViewFragment newInstance(String url) {
+    public static WebViewFragment newInstance() {
 
         Bundle args = new Bundle();
-        args.putString("url", url);
 
         WebViewFragment fragment = new WebViewFragment();
         fragment.setArguments(args);
@@ -63,11 +62,6 @@ public class WebViewFragment extends KolibriLoadingFragment implements WebViewLi
         webView = (KolibriWebView) view.findViewById(R.id.webview);
         webView.setTag(KolibriWebView.class);
         webView.setWebViewListener(this);
-
-        if (getArguments() != null && getArguments().containsKey("url")) {
-            final String url = getArguments().getString("url");
-            webView.loadUrl(url);
-        }
 
         setHasOptionsMenu(true);
     }
