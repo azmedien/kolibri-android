@@ -32,7 +32,7 @@
             android:layout_marginLeft="32dp"
             android:layout_marginStart="32dp"
             android:gravity="center"
-            android:text="@string/error_message"
+            android:text="@string/internet_error_message"
             tools:visibility="visible"
             android:drawableTop="@drawable/ic_bike_grey600_48dp"
             android:drawablePadding="16dp"/>
