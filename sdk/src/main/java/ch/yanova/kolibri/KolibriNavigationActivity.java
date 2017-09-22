@@ -101,7 +101,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
 
         if (type == Kolibri.HandlerType.NONE) {
-            Kolibri.notifyComponents(KolibriNavigationActivity.this, Kolibri.getErrorIntent(KolibriNavigationActivity.this, "No Such Component Exists!"));
+            Kolibri.notifyComponents(KolibriNavigationActivity.this, Kolibri.getErrorIntent(KolibriNavigationActivity.this, getString(R.string.text_update_app)));
         }
 
         return type;
@@ -384,7 +384,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         if (type == Kolibri.HandlerType.NONE) {
             setIntent(null);
-            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, "No Such Component Exists!"));
+            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, getString(R.string.text_update_app)));
         }
     }
 
