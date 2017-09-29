@@ -4,7 +4,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
@@ -14,10 +13,9 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.util.List;
-
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.R;
+import ch.yanova.kolibri.RuntimeConfig;
 
 /**
  * Created by lekov on 5/18/17.
@@ -35,7 +33,6 @@ public final class KolibriFirebaseMessagingService extends FirebaseMessagingServ
     private static final String TAG = "KolibriNotifications";
 
     public static final String KOLIBRI_NOTIFICATION_INTENT = "kolibri://notification";
-    public static final String KOLIBRI_ID_INTENT = "kolibri://navigation";
 
     protected void handleMessage(Context context, RemoteMessage message) {
         if (message == null) {
@@ -49,44 +46,29 @@ public final class KolibriFirebaseMessagingService extends FirebaseMessagingServ
 
         final String title = message.getData().get("title");
         final String body = message.getData().get("body");
-        final String componentUri = message.getData().get("url");
+        final String url = message.getData().get("url");
 
-        handleNow(context, componentUri, title, body);
+        handleNow(context, url, title, body);
     }
 
-    static void handleNow(Context context, String componentUri, String title, String body) {
+    static void handleNow(Context context, String url, String title, String body) {
         final Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Intent result;
 
-        if (componentUri != null) {
-            result = getResultIntent(context, componentUri);
-        } else {
-            result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
+        final RuntimeConfig runtime = Kolibri.getInstance(context).getRuntime();
+
+        if (runtime == null) {
+            return;
         }
 
-        final PackageManager packageManager = context.getPackageManager();
-        if (result.resolveActivity(packageManager) == null) {
+        final String scheme = runtime.getScheme();
 
-            if (result.hasExtra(Kolibri.EXTRA_ID)) {
-                final String id = result.getStringExtra(Kolibri.EXTRA_ID);
+        final Uri uri = Uri.parse(scheme + "://navigation");
 
-                final String query = result.getData().getQuery();
-
-                String modifiedUri = KOLIBRI_NOTIFICATION_INTENT;
-                if (query != null) {
-                    modifiedUri += "?" + query;
-                }
-
-                result = Kolibri.createIntent(Uri.parse(modifiedUri));
-                result.putExtra(Kolibri.EXTRA_ID, id);
-            } else {
-                Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
-                result = Kolibri.getErrorIntent(context, "Content of this type cannot be open.");
-            }
-
-        }
+        Intent result = Kolibri.createIntent(uri);
+        result.addCategory("notification");
+        result.putExtra("url", url);
 
         result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -104,35 +86,4 @@ public final class KolibriFirebaseMessagingService extends FirebaseMessagingServ
 
         notificationManager.notify(Kolibri.getInstance(context).getNotificationIcon(), notificationBuilder.build());
     }
-
-    public static Intent getResultIntent(Context context, String componentUri) {
-
-        final Intent result = new Intent(Intent.ACTION_VIEW);
-
-        if (componentUri == null) {
-            return Kolibri.getErrorIntent(context, "Error with component");
-        }
-
-        Uri uri;
-        if (componentUri.startsWith("http")) {
-            componentUri = KOLIBRI_NOTIFICATION_INTENT + "?url=" + componentUri;
-            uri = Uri.parse(componentUri);
-        } else if (componentUri.startsWith(KOLIBRI_ID_INTENT)) {
-            uri = Uri.parse(componentUri);
-            final List<String> pathSegments = uri.getPathSegments();
-
-            if (pathSegments == null || pathSegments.size() <= 0) {
-                return Kolibri.getErrorIntent(context, "Content of this type cannot be open.");
-            }
-            final String id = pathSegments.get(pathSegments.size() - 1);
-            result.putExtra(Kolibri.EXTRA_ID, id);
-        } else {
-            uri = Uri.parse(componentUri);
-        }
-
-        result.setData(uri);
-
-        return result;
-    }
-
 }

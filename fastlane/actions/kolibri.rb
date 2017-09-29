@@ -18,8 +18,9 @@ module Fastlane
           "project" => params[:kolibri_project],
           "build"   => params[:build] || ENV['BUILD_ID'],
           "url"     => ENV['RUN_DISPLAY_URL'] || ENV['BUILD_URL'],
-          "type"    => params[:stage],
-          "status"  => params[:state],
+          "code"   => params[:code] || 0,
+          "stage"    => params[:stage],
+          "message"  => params[:message],
           "platform" => ENV['FASTLANE_PLATFORM_NAME']
         })
 
@@ -32,7 +33,7 @@ module Fastlane
         when 200, 204
           true
         when 404
-          UI.user_error!("Kolibri Cocpit not found")
+          UI.user_error!("Application or cockpit itself cannot be found ")
         when 401
           UI.user_error!("Access denied to Kolibri Cockpit")
         else
@@ -76,11 +77,16 @@ module Fastlane
                                          description: "Webhook project stage to be reported",
                                          is_string: true,
                                          optional: true),
-            FastlaneCore::ConfigItem.new(key: :state,
-                                         env_name: "KOLIBRI_STATE",
+            FastlaneCore::ConfigItem.new(key: :message,
+                                         env_name: "KOLIBRI_MESSAGE",
                                          description: "Webhook project state of the stage to be reported",
                                          is_string: true,
                                          optional: true),
+           FastlaneCore::ConfigItem.new(key: :code,
+                                        env_name: "KOLIBRI_CODE",
+                                        description: "Webhook project error of success code to be reported",
+                                        is_string: false,
+                                        optional: true),
             FastlaneCore::ConfigItem.new(key: :build,
                                          env_name: "KOLIBRI_BUILD",
                                          description: "Webhook project build id to be reported",

@@ -32,7 +32,7 @@
             android:layout_marginLeft="32dp"
             android:layout_marginStart="32dp"
             android:gravity="center"
-            android:text="@string/error_message"
+            android:text="@string/internet_error_message"
             tools:visibility="visible"
             android:drawableTop="@drawable/ic_bike_grey600_48dp"
             android:drawablePadding="16dp"/>
@@ -41,6 +41,7 @@
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/error_button_text"/>
+            android:text="@string/error_button_text"
+            android:visibility="gone"/>
     </LinearLayout>
 </FrameLayout>

@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -37,8 +38,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import ch.yanova.kolibri.components.KolibriWebChromeClient;
+import ch.yanova.kolibri.components.KolibriWebView;
+import ch.yanova.kolibri.components.KolibriWebViewClient;
+import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
 import ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService;
 
@@ -81,7 +88,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
     };
 
-    private void notifyComponenets(Intent intent) {
+    private Kolibri.HandlerType notifyComponenets(Intent intent) {
         final Kolibri.HandlerType type = Kolibri.notifyComponents(KolibriNavigationActivity.this, intent);
 
         if (type == Kolibri.HandlerType.COMPONENT) {
@@ -95,8 +102,10 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
 
         if (type == Kolibri.HandlerType.NONE) {
-            Kolibri.notifyComponents(KolibriNavigationActivity.this, Kolibri.getErrorIntent(KolibriNavigationActivity.this, "No Such Component Exists!"));
+            Kolibri.notifyComponents(KolibriNavigationActivity.this, Kolibri.getErrorIntent(KolibriNavigationActivity.this, getString(R.string.text_update_app)));
         }
+
+        return type;
     }
 
     private Toolbar toolbar;
@@ -230,21 +239,17 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         final Intent intent = item.getIntent();
 
-        notifyComponenets(intent);
+        Kolibri.HandlerType type = notifyComponenets(intent);
 
-        for (int i = 0; i < navigationView.getMenu().size(); i++) {
-            if (item.equals(navigationView.getMenu().getItem(i))) {
-                item.setChecked(true);
-            } else {
-                navigationView.getMenu().getItem(i).setChecked(false);
-            }
+        if (type.equals(Kolibri.HandlerType.COMPONENT)) {
+            unselectAllMenuItemsExcept(item);
         }
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    private void setActionBarTitle(String title) {
+    protected void setActionBarTitle(String title) {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null && title != null) {
             actionBar.setTitle(title);
@@ -253,6 +258,11 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     private void constructNavigation(Navigation navigation) {
         final Menu menu = navigationView.getMenu();
+
+        final MenuItem selectedMenuItem = getSelectedMenuItem();
+        final String selectedMenuItemId = selectedMenuItem == null ?
+                null : selectedMenuItem.getIntent().getStringExtra(ID);
+
         menu.clear();
 
         final Map<String, RuntimeConfig.NavigationItem> items = navigation.getItems();
@@ -278,6 +288,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         if (!restarted) {
             loadDefaultItem();
+        } else if (selectedMenuItemId != null) {
+            final MenuItem itemByid = findMenuItem(selectedMenuItemId);
+            unselectAllMenuItemsExcept(itemByid);
         }
 
         onNavigationInitialize();
@@ -285,16 +298,9 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     protected void loadDefaultItem() {
 
-        final Menu menu = navigationView.getMenu();
-
-        for (int i = 0; i < menu.size(); i++) {
-            final MenuItem item = menu.getItem(i);
-            if (item.getIntent().getCategories().contains(Intent.CATEGORY_DEFAULT)) {
-                item.setChecked(true);
-                Kolibri.notifyComponents(this, item.getIntent());
-                break;
-            }
-        }
+        final MenuItem defaultItem = getDefaultItem();
+        defaultItem.setChecked(true);
+        Kolibri.notifyComponents(this, defaultItem.getIntent());
     }
 
     @Override
@@ -304,58 +310,86 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     @Override
     public void onNavigationInitialize() {
-        Intent intent = getIntent();
 
-        if (intent == null) {
+        if (getIntent() == null || !getIntent().hasCategory("notification")) {
             return;
         }
 
-        intent = prepareIntentFromNotification(intent);
+        final String notificationUrl = getIntent().getStringExtra("url");
+        final Uri notificationUri = Uri.parse(notificationUrl);
 
-        if (intent.hasExtra(ID)) {
-            final Menu menu = navigationView.getMenu();
+        if (notificationUri.getScheme().startsWith("http")) {
+            Uri uri = Uri.parse(WebViewCoordinator.webViewUri);
 
-            for (int i = 0; i < menu.size(); i++) {
+            Uri.Builder builder = uri.buildUpon();
+            builder.appendQueryParameter("url", notificationUrl);
 
-                final MenuItem item = menu.getItem(i);
-                final String idInMenu = item.getIntent().getStringExtra(ID);
+            Intent intent = Kolibri.createIntent(builder.build());
+            Kolibri.notifyComponents(this, intent);
+            setIntent(null);
+            return;
+        }
 
-                if (intent.getStringExtra(ID).equals(idInMenu)) {
+        if ("navigation".equals(notificationUri.getAuthority())) {
 
-                    final Uri data = intent.getData();
-                    final String urlToLoad = data.getQueryParameter("url");
-                    final Uri menuData = item.getIntent().getData();
+            final List<String> segments = notificationUri.getPathSegments();
 
-                    //There is a specific url that was pushed to the app
-                    if (urlToLoad != null) {
-                        intent.putExtra(Kolibri.EXTRA_GO_BACK_URL, menuData.getQueryParameter("url"));
-                    } else { //We will load the url for the navigation item having the id from the notification
-                        final String url = menuData.getQueryParameter("url");
-                        final Uri uriWithUrl = data.buildUpon().appendQueryParameter("url", url).build();
-                        intent.setData(uriWithUrl);
+            if (segments != null && !segments.isEmpty()) {
+                final String id = segments.get(0);
+
+                final Menu menu = navigationView.getMenu();
+
+                for (int i = 0; i < menu.size(); i++) {
+
+                    final MenuItem item = menu.getItem(i);
+                    final String idInMenu = item.getIntent().getStringExtra(ID);
+
+                    if (id.equals(idInMenu)) {
+
+                        final String urlToLoad = notificationUri.getQueryParameter("url");
+                        final Uri menuData = item.getIntent().getData();
+
+                        Intent intent = Kolibri.createIntent(menuData);
+
+                        //There is a specific url that was pushed to the app
+                        if (urlToLoad != null) {
+                            Uri intentData = Uri.parse(WebViewCoordinator.webViewUri);
+                            Uri.Builder builder = intentData.buildUpon();
+                            builder.appendQueryParameter("url", urlToLoad);
+                            intentData = builder.build();
+                            intent.setData(intentData);
+                            intent.putExtra(Kolibri.EXTRA_GO_BACK_URL, menuData.getQueryParameter("url"));
+                        }
+
+                        unselectAllMenuItemsExcept(item);
+                        intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
+
+                        setIntent(null);
+                        Kolibri.notifyComponents(this, intent);
+                        return;
                     }
-
-                    unselectAllMenuItemsExcept(item);
-                    intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
-
-                    setIntent(null);
-                    Kolibri.notifyComponents(this, intent);
-                    return;
                 }
             }
 
+            //If the was no id
+            final Menu menu = navigationView.getMenu();
+            final Intent intent = menu.getItem(0).getIntent();
+            Kolibri.notifyComponents(this, intent);
             setIntent(null);
-            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, "No Such Component Exists!"));
             return;
         }
 
-        if (intent.getData() != null && intent.getData().getQueryParameter("url") != null) {
+        //If the host is not navigation
+        final Intent intent = Kolibri.createIntent(notificationUri);
+        Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
+
+        if (type == Kolibri.HandlerType.NONE) {
             setIntent(null);
-            Kolibri.notifyComponents(this, intent);
+            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, getString(R.string.text_update_app)));
         }
     }
 
-    private void unselectAllMenuItemsExcept(MenuItem item) {
+    public void unselectAllMenuItemsExcept(MenuItem item) {
         final Menu menu = navigationView.getMenu();
 
         for (int m = 0; m < menu.size(); m++) {
@@ -365,46 +399,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
 
         item.setChecked(true);
-    }
-
-    private Intent prepareIntentFromNotification(Intent intent) {
-
-        Intent result = intent;
-
-        if (intent.hasExtra("component")) {
-            String componentUri = intent.getStringExtra("component");
-
-            if (componentUri != null) {
-                result = KolibriFirebaseMessagingService.getResultIntent(this, componentUri);
-            } else {
-                result = Kolibri.createIntent(Uri.parse("kolibri://notification"));
-            }
-
-            final PackageManager packageManager = getPackageManager();
-            if (result.resolveActivity(packageManager) == null) {
-
-                if (result.hasExtra(Kolibri.EXTRA_ID)) {
-                    final String id = result.getStringExtra(Kolibri.EXTRA_ID);
-
-                    if (Kolibri.getInstance(this).getRuntime().getNavigation().hasItem(id)) {
-                        final String query = result.getData().getQuery();
-
-                        String modifiedUri = KOLIBRI_NOTIFICATION_INTENT;
-                        if (query != null) {
-                            modifiedUri += "?" + query;
-                        }
-
-                        result = Kolibri.createIntent(Uri.parse(modifiedUri));
-                        result.putExtra(Kolibri.EXTRA_ID, id);
-                    }
-                } else {
-                    Log.e("KolibriNotifications", "Notification received but nobody cannot handle the deeplink.");
-                    result = Kolibri.getErrorIntent(this, "Content of this type cannot be open.");
-                }
-
-            }
-        }
-        return result;
     }
 
     @Override
@@ -638,5 +632,39 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     public Toolbar getToolbar() {
         return toolbar;
+    }
+
+    public Menu getMenu() {
+        return navigationView.getMenu();
+    }
+
+    public MenuItem getSelectedMenuItem() {
+
+        for(int i=0; i < getMenu().size(); ++i) {
+
+            if (getMenu().getItem(i).isChecked()) {
+                return getMenu().getItem(i);
+            }
+        }
+
+        return null;
+    }
+
+    public MenuItem findMenuItem(String id) {
+
+        for(int i=0; i < getMenu().size(); ++i) {
+
+            if (getMenu().getItem(i).getIntent().getStringExtra(ID).equals(id)) {
+                return getMenu().getItem(i);
+            }
+        }
+
+        return null;
+    }
+
+    protected MenuItem getDefaultItem() {
+        final int defaultItemIndex = configuration.getNavigation().getSettings().getInt("default-item");
+
+        return getMenu().getItem(defaultItemIndex);
     }
 }

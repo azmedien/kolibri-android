@@ -37,6 +37,8 @@ public class KolibriWebView extends WebView {
 
     private Intent intent;
 
+    private boolean clearHistory;
+
     public KolibriWebView(Context context) {
         super(context);
         init();
@@ -72,6 +74,8 @@ public class KolibriWebView extends WebView {
             getSettings().setAppCacheEnabled(true);
             getSettings().setDomStorageEnabled(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
+
+            clearHistory = false;
         }
     }
 
@@ -217,4 +221,11 @@ public class KolibriWebView extends WebView {
         }
     }
 
+    public boolean shouldClearHistory() {
+        return clearHistory;
+    }
+
+    public void setClearHistory(boolean clearHistory) {
+        this.clearHistory = clearHistory;
+    }
 }

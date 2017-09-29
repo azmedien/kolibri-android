@@ -22,18 +22,30 @@ android {
         applicationId "ch.yanova.kolibri.prototype"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 75
-        versionName "0.7.5-SNAPSHOT"
+        versionCode 88
+        versionName "0.8.8-SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs {
+        release {
+            storeFile file("keystore.jks")
+            storePassword System.env.KEYSTORE_PASSWORD
+            keyAlias System.env.KEYSTORE_ALIAS
+            keyPassword System.env.KEYSTORE_ALIAS_PASSWORD
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
     lintOptions {
+        checkReleaseBuilds false
         abortOnError false
     }
 }

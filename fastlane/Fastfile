@@ -1,34 +1,178 @@
-# Customise this file, documentation can be found here:
-# https://github.com/fastlane/fastlane/tree/master/fastlane/docs
-# All available actions: https://docs.fastlane.tools/actions
-# can also be listed using the `fastlane actions` command
-
-# Change the syntax highlighting to Ruby
-# All lines starting with a # are ignored when running `fastlane`
-
-# If you want to automatically update fastlane if a new version is available:
-# update_fastlane
-
-# This is the minimum version number required.
-# Update this, if you use features of a newer version
-fastlane_version "2.19.1"
-
+fastlane_version "2.38.1"
 default_platform :android
 
+# Android
 platform :android do
   before_all do
     ENV["SLACK_URL"] = "https://hooks.slack.com/services/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"
     ENV["KOLIBRI_URL"] = "https://kolibri.herokuapp.com"
-    ENV["KOLIBRI_PROJECT"] = "wpUn99KXFbo9J6LmihcfqCf3"
+    ENV["KOLIBRI_PROJECT"] = "hFxsFLsMXZyvAddBGXWCcxQf"
   end
 
-  desc "Kolibri Build & Test"
+  desc "Kolibri Pipeline (build, test and publish)"
   lane :all do
+
+    kolibri(
+      stage: "initialize",
+      message: "Setup configuration and credentials before we go...",
+    )
+
+    cryptex(
+      git_branch: "test",
+      type: "export",
+      out: "prototype/keystore.jks",
+      key: "android_keystore"
+    )
+
+    cryptex(
+      git_branch: "test",
+      type: "export",
+      out: "google-play-console.json",
+      key: "android_google_play"
+    )
+
+    cryptex(
+      git_branch: "test",
+      type: "export_env",
+      key: "android_keystore",
+      set_env: true
+    )
+
+    gradle(task: "assembleRelease", flags: "-q")
+
     build
     test
+    # publish
   end
 
-  lane :beta do
+  desc "Runs all the tests"
+  lane :test do
+    kolibri(
+      stage: "test",
+      message: "Running all the tests..."
+    )
+
+    gradle(task: "test")
+
+    kolibri(
+      stage: "test",
+      message: "All tests passed.",
+      code: 1
+    )
+  end
+
+  desc "Build the project"
+  lane :build do
+
+    kolibri(
+      stage: "build",
+      message: "Building project..."
+    )
+
+    gradle(task: "assembleRelease", flags: "-q")
+
+    kolibri(
+      stage: "build",
+      message: "Build successful",
+      code: 1
+    )
+  end
+
+  desc "Publish the app"
+  lane :publish do
+
+    kolibri(
+      stage: "publish",
+      message: "Publishing app to Fabric..."
+    )
+
+    crashlytics(
+       api_token: "5b0e4ca8fe72e1ad97ccbd82e18f18ba4cacd219",
+       build_secret: "8f94e66fae0366a48a613623166a2586ae77e7fab1b68d021471e0036ba46ad8"
+    )
+
+    kolibri(
+      stage: "publish",
+      message: "Successfully published to Fabric",
+      code: 1
+    )
+
+    # sleep(10)
+
+    # kolibri(
+    #   stage: "publish",
+    #   message: "Publish app to Google Play as a Beta...",
+    # )
+
+    # supply(track: 'beta')
+
+    # kolibri(
+    #   stage: "publish",
+    #   message: "Application beta is published to Google Play",
+    #   code: 1
+    # )
+  end
+
+  after_all do |lane|
+    slack(message: "Kolibri pipelane was successfully executed")
+    update_fastlane
+  end
+
+  error do |lane, exception|
+
+    error = %{Something goes wrong...
+      #{exception.message}
+    }
+
+    kolibri(
+      stage: lane.to_s,
+      message: error,
+      code: -1
+    )
+
+    slack(message: exception.message, success: false)
+  end
+end
+
+
+# iOS
+platform :ios do
+  before_all do
+    ENV["SLACK_URL"] = "https://hooks.slack.com/services/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"
+    ENV["KOLIBRI_URL"] = "https://kolibri.herokuapp.com"
+    ENV["KOLIBRI_PROJECT"] = "krK71VxotpyLKED759CR5RCB"
+  end
+
+  desc "Kolibri Pipeline (build, test and publish)"
+  lane :all do
+
+    unless ENV.key?('FL_APPLE_USER')
+      UI.user_error!("FL_APPLE_USER not set.  Exiting")
+    end
+
+    kolibri(
+      stage: "initialize",
+      message: "Setup provisioning and certificates before we go...",
+    )
+
+    keychain_entry = CredentialsManager::AccountManager.new(user: ENV['FL_APPLE_USER'] || '')
+
+    produce(
+      app_name: "TeleZüri",
+      app_identifier: "ch.azmedien.telezuri",
+      username:keychain_entry.user
+    )
+
+    cert(
+      username:keychain_entry.user
+    )
+
+    sigh(
+      username:keychain_entry.user,
+      app_identifier: "ch.azmedien.telezuri",
+      force: true
+    )
+
     build
     test
     publish
@@ -38,14 +182,15 @@ platform :android do
   lane :test do
     kolibri(
       stage: "test",
-      state: "started"
+      message: "Running all the tests..."
     )
 
-    gradle(task: "test")
+    scan
 
     kolibri(
       stage: "test",
-      state: "finished"
+      message: "All tests passed.",
+      code: 1
     )
   end
 
@@ -54,50 +199,52 @@ platform :android do
 
     kolibri(
       stage: "build",
-      state: "started"
+      message: "Building project..."
     )
 
-    gradle(task: "assembleDebug")
+    gym
 
     kolibri(
       stage: "build",
-      state: "finished"
+      message: "Build successful",
+      code: 1
     )
   end
 
-  desc "Publish to Fabric Beta"
+  desc "Publish the app"
   lane :publish do
-    commit = last_git_commit
 
-    crashlytics(
-        api_token: "5b0e4ca8fe72e1ad97ccbd82e18f18ba4cacd219",
-        build_secret: "8f94e66fae0366a48a613623166a2586ae77e7fab1b68d021471e0036ba46ad8"
-     )
+    kolibri(
+      stage: "publish",
+      message: "Publish app TestFlight",
+    )
 
-     kolibri(
-       stage: "publish",
-       state: "finished"
-      )
+    pilot(skip_waiting_for_build_processing: true)
+
+    kolibri(
+      stage: "publish",
+      message: "Application beta is published to TestFlight",
+      code: 1
+    )
   end
 
   after_all do |lane|
-    # This block is called, only if the executed lane was successful
-
-    slack(
-      message: "Successfully builded and tested"
-    )
+    slack(message: "Kolibri pipelane was successfully executed")
+    update_fastlane
   end
 
   error do |lane, exception|
 
+    error = %{Something goes wrong...
+      #{exception.message}
+    }
+
     kolibri(
       stage: lane.to_s,
-      state: "failed"
+      message: error,
+      code: -1
     )
 
-    slack(
-       message: exception.message,
-       success: false
-    )
+    slack(message: exception.message, success: false)
   end
 end

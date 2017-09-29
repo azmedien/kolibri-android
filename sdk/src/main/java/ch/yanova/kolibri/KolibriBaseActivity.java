@@ -3,6 +3,7 @@ package ch.yanova.kolibri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.MenuItem;
 import android.view.View;
 
 import java.util.Map;
@@ -28,7 +29,7 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
 
     @Override
     public Fragment onPostInitialize() {
-        return WebViewFragment.newInstance("");
+        return WebViewFragment.newInstance();
     }
 
     @Override
@@ -60,10 +61,44 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
 
     @Override
     public void onBackPressed() {
+
+        final MenuItem selectedItem = getSelectedMenuItem();
+        final MenuItem defaultItem = getDefaultItem();
+
+//        // Default cannot be null, it's mandatory
+//        if (defaultItem.equals(selectedItem)) {
+//            super.onBackPressed();
+//            return;
+//        }
+
         if (getWebView().canGoBack()) {
-            getWebView().goBack();
-        } else {
-            super.onBackPressed();
+
+            final String selectedItemUrl = selectedItem.getIntent()
+                    .getData().getQueryParameter("url");
+            final String currentUrl = getWebView().getOriginalUrl();
+
+            //If the url we are going back from
+            //came from a menu item click, we clear the history
+            //and go back home
+            if (currentUrl.equals(selectedItemUrl)) {
+                final String url = defaultItem.getIntent().getData().getQueryParameter("url");
+
+                //If there is url on default item, then we load this url and clear that history
+                //so that the next time the user presses back they are redirected out
+                //of the app
+                if (url != null) {
+                    getWebView().setClearHistory(true);
+                    getWebView().loadUrl(url);
+                    setActionBarTitle(defaultItem.getTitle().toString());
+                    unselectAllMenuItemsExcept(defaultItem);
+                    return;
+                }
+            } else {
+                getWebView().goBack();
+                return;
+            }
         }
+
+        super.onBackPressed();
     }
 }

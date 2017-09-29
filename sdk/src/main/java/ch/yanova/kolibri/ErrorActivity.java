@@ -1,10 +1,13 @@
 package ch.yanova.kolibri;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 public class ErrorActivity extends AppCompatActivity {
@@ -38,5 +41,20 @@ public class ErrorActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void openGooglePlay(View view) {
+
+        final String applicationId = getApplicationContext().getPackageName();
+
+        final Uri googlePlayUri = Uri.parse("market://details?id=" + applicationId);
+
+        final Intent googlePlayIntent = new Intent(Intent.ACTION_VIEW, googlePlayUri);
+
+        final PackageManager packageManager = getPackageManager();
+        if (googlePlayIntent.resolveActivity(packageManager) != null) {
+            startActivity(googlePlayIntent);
+            finish();
+        }
     }
 }

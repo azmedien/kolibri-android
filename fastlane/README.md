@@ -27,13 +27,14 @@ xcode-select --install
 <td width="33%"><code>sudo gem install fastlane -NV</code></td>
 </tr>
 </table>
+
 # Available Actions
 ## Android
 ### android all
 ```
 fastlane android all
 ```
-Kolibri Build & Test
+Kolibri Pipeline (build, test and publish)
 ### android test
 ```
 fastlane android test
@@ -44,6 +45,35 @@ Runs all the tests
 fastlane android build
 ```
 Build the project
+### android publish
+```
+fastlane android publish
+```
+Publish the app
+
+----
+
+## iOS
+### ios all
+```
+fastlane ios all
+```
+Kolibri Pipeline (build, test and publish)
+### ios test
+```
+fastlane ios test
+```
+Runs all the tests
+### ios build
+```
+fastlane ios build
+```
+Build the project
+### ios publish
+```
+fastlane ios publish
+```
+Publish the app
 
 ----
 
