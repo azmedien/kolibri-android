@@ -54,12 +54,6 @@ public class KolibriWebView extends WebView {
         init();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public KolibriWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init();
-    }
-
     private void init() {
 
         if (!isInEditMode()) {
@@ -185,6 +179,12 @@ public class KolibriWebView extends WebView {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+
+            if (shouldClearHistory()) {
+                setClearHistory(false);
+                clearHistory();
+            }
+
             view.loadUrl(GET_HTML_STRING);
 
             if (webClient != null) {

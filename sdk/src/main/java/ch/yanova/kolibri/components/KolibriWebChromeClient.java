@@ -2,7 +2,6 @@ package ch.yanova.kolibri.components;
 
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
@@ -17,21 +16,11 @@ import static ch.yanova.kolibri.Kolibri.TARGET_EXTERNAL;
 
 public class KolibriWebChromeClient extends WebChromeClient {
 
-    private WebViewListener listener;
-
-    public void setWebViewListener(@NonNull WebViewListener listener) {
-        this.listener = listener;
-    }
-
     @Override
     public void onProgressChanged(WebView view, int newProgress) {
         super.onProgressChanged(view, newProgress);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && newProgress == 100) {
-            if (listener != null) {
-                listener.onPageVisible(view, view.getUrl());
-            }
-
             final String url = view.getUrl();
             if ("about:blank".equals(url)) {
                 return;

@@ -1,5 +1,6 @@
 package ch.yanova.kolibri.prototype;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
@@ -15,12 +16,27 @@ import ch.yanova.kolibri.KolibriBaseActivity;
 import ch.yanova.kolibri.KolibriCoordinator;
 import ch.yanova.kolibri.KolibriProvider;
 import ch.yanova.kolibri.WebViewFragment;
+import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.SearchWebviewCoordinator;
 
 public class MainActivity extends KolibriBaseActivity implements View.OnClickListener {
 
     @Override
     public void onBindComponents() {
+
+        getWebView().setKolibriWebViewClient(new KolibriWebViewClient() {
+            @Override
+            protected boolean onCustomTarget(Uri link, String target) {
+
+                if ("360player".equals(target)) {
+                    startActivity(CardboardActivity.createIntent(MainActivity.this, link));
+                    return true;
+                }
+
+                return super.onCustomTarget(link, target);
+            }
+        });
+
         Kolibri.bind(getWebView(), new KolibriProvider() {
             @Nullable
             @Override

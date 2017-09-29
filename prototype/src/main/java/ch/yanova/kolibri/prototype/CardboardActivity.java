@@ -55,13 +55,13 @@ public class CardboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cardboard);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         progress = findViewById(R.id.progress);
         errorDialog = ErrorDialog.newInstance("Video cannot be played.");
 
-        videoWidgetView = (VrVideoView) findViewById(R.id.video_view);
+        videoWidgetView = findViewById(R.id.video_view);
         videoWidgetView.setInfoButtonEnabled(false);
         videoWidgetView.setEventListener(new VrVideoEventListener() {
             @Override
