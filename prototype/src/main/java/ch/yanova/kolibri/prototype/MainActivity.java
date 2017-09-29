@@ -8,6 +8,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.Map;
+
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriBaseActivity;
 import ch.yanova.kolibri.KolibriCoordinator;
@@ -23,7 +25,13 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
             @Nullable
             @Override
             public KolibriCoordinator provideCoordinator(@NonNull View view) {
-                return new SearchWebviewCoordinator(getMainWebViewFragment());
+                return new SearchWebviewCoordinator() {
+                    @Override
+                    public void onFound(Map<String, String> data) {
+                        super.onFound(data);
+                        getMainWebViewFragment().onFound(data);
+                    }
+                };
             }
         });
     }

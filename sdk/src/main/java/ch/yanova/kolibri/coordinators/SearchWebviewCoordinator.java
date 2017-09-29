@@ -4,7 +4,6 @@ import android.net.Uri;
 
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.OnAmpDataFoundListener;
 import ch.yanova.kolibri.search.OnSubmitFilteredSearchListener;
 
 /**
@@ -14,10 +13,6 @@ import ch.yanova.kolibri.search.OnSubmitFilteredSearchListener;
 public class SearchWebviewCoordinator extends WebViewCoordinator implements OnSubmitFilteredSearchListener {
 
     private KolibriWebView kolibriWebView;
-
-    public SearchWebviewCoordinator(OnAmpDataFoundListener ampDataFoundListener) {
-        super(ampDataFoundListener);
-    }
 
     @Override
     protected void attach(KolibriWebView view) {

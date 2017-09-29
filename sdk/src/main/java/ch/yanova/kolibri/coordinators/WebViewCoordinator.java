@@ -3,7 +3,6 @@ package ch.yanova.kolibri.coordinators;
 import android.content.Intent;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -56,12 +55,6 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     private static final String TAG = "WebViewCoordinator";
     public static final String NAME = "name";
 
-    private final OnAmpDataFoundListener listener;
-
-    public WebViewCoordinator(@NonNull OnAmpDataFoundListener listener) {
-        this.listener = listener;
-    }
-
     @Override
     protected void attach(KolibriWebView view) {
         super.attach(view);
@@ -99,13 +92,15 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         Kolibri.notifyComponents(view.getContext(), intent);
     }
 
-    @Override
-    public void onFound(Map<String, String> data) {
-        listener.onFound(data);
-
+    private void handleAmpData(Map<String, String> data) {
         handleFavorizable(data.get(META_FAVORIZABLE), view.getUrl(), view);
 
         KolibriApp.getInstance().reportToFirebase(data.get(META_CATEGORY), view.getUrl());
+    }
+
+    @Override
+    public void onFound(Map<String, String> data) {
+
     }
 
     private class GetHtmlJsInterface {
@@ -157,6 +152,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                 view.post(new Runnable() {
                     @Override
                     public void run() {
+                        handleAmpData(metaData);
                         onFound(metaData);
                     }
                 });

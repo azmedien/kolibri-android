@@ -84,6 +84,7 @@ public class WebViewFragment extends KolibriLoadingFragment implements OnAmpData
                     isThemeTinted = false;
                 }
 
+                getActivity().invalidateOptionsMenu();
                 showPageLoading();
             }
 

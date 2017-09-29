@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.View;
 
+import java.util.Map;
+
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 
@@ -36,7 +38,13 @@ public abstract class KolibriBaseActivity extends KolibriNavigationActivity impl
             @Nullable
             @Override
             public KolibriCoordinator provideCoordinator(View view) {
-                return new WebViewCoordinator(getMainWebViewFragment());
+                return new WebViewCoordinator() {
+                    @Override
+                    public void onFound(Map<String, String> data) {
+                        super.onFound(data);
+                        getMainWebViewFragment().onFound(data);
+                    }
+                };
             }
         });
     }
