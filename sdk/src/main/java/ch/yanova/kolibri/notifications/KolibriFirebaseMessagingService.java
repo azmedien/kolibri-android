@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.TypedValue;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -74,13 +74,16 @@ public final class KolibriFirebaseMessagingService extends FirebaseMessagingServ
 
         final PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, result, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.colorAccent, typedValue, true);
+
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(Kolibri.getInstance(context).getNotificationIcon())
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setColor(ContextCompat.getColor(context, R.color.colorAccent))
+                .setColor(typedValue.data)
                 .setTicker(String.format("%s: %s", title, body))
                 .setContentIntent(pendingIntent);
 
