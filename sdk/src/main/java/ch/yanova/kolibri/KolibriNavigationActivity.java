@@ -2,6 +2,7 @@ package ch.yanova.kolibri;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -14,7 +15,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,6 +28,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.AestheticActivity;
+import com.afollestad.aesthetic.BottomNavBgMode;
+import com.afollestad.aesthetic.BottomNavIconTextMode;
+import com.afollestad.aesthetic.NavigationViewMode;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -52,12 +57,8 @@ import static ch.yanova.kolibri.RuntimeConfig.ITEMS;
 import static ch.yanova.kolibri.RuntimeConfig.LABEL;
 import static ch.yanova.kolibri.RuntimeConfig.Navigation;
 import static ch.yanova.kolibri.RuntimeConfig.NavigationItem;
-import static ch.yanova.kolibri.RuntimeConfig.Styling;
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
-import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
 
-public abstract class KolibriNavigationActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, RuntimeListener {
+public abstract class KolibriNavigationActivity extends AestheticActivity implements NavigationView.OnNavigationItemSelectedListener, RuntimeListener {
 
     // this set prevents collecting targets by garbage collector
     final Set<Target> targets = new HashSet<>();
@@ -67,7 +68,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity implem
     private FloatingActionButton floatingActionButton;
     private KolibriWebView webView;
     private KolibriLoadingView webviewOverlay;
-    private KolibriLoadingView menuOverlay;
 
     private boolean restarted;
     private DrawerLayout drawer;
@@ -114,7 +114,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity implem
         floatingActionButton = findViewById(R.id.kolibri_fab);
         webView = findViewById(R.id.webview);
         webviewOverlay = findViewById(R.id.overlay);
-        menuOverlay = findViewById(R.id.menuOverlay);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -169,58 +168,26 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity implem
         });
     }
 
-    public void applyDefaultPalette() {
-        final RuntimeConfig.Styling styling = configuration.getStyling();
-        final int primary = styling.getPrimary();
-        final int[] materialPalette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & primary));
-
-        applyColorPalette(materialPalette);
-    }
-
-    public void applyColorPalette(int[] palette) {
-        TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
-        headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
-
-        final int tintColor = TintUtils.isDarkColor(palette[THEME_COLOR_PRIMARY]) ? palette[THEME_COLOR_PRIMARY] : palette[THEME_COLOR_PRIMARY_DARK];
-        TintUtils.tintNavigationView(navigationView, tintColor);
-    }
 
     private void setupStyling() {
         if (configuration == null) {
             return;
         }
 
-        final Styling styling = configuration.getStyling();
+        final RuntimeConfig.Styling styling = configuration.getStyling();
 
-        if (styling.hasPaletteColor(Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
-            final int toolbarBackgroud = styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_BACKGROUND);
-            final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
-
-            TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
-            headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
-        } else {
-            TintUtils.tintToolbar(this, toolbar, styling.getPrimary(), styling.getPrimaryDark(), false);
-            headerImageContainer.setBackgroundColor(styling.getPrimary());
-        }
-
-        if (styling.hasPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT)) {
-            toolbar.setTitleTextColor(styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT));
-            toolbar.setSubtitle(styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT));
-        }
-
-
-        if (styling.hasPaletteColor(Styling.OVERRIDES_NAVIGATION_ITEM_SELECTED)) {
-            final int menuItemSelected = styling.getPaletteColor(Styling.OVERRIDES_NAVIGATION_ITEM_SELECTED);
-            TintUtils.tintNavigationView(navigationView, menuItemSelected);
-        } else {
-            TintUtils.tintNavigationView(navigationView, styling.getPrimary());
-        }
-
-        if (styling.hasPaletteColor(Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND)) {
-            headerImageContainer.setBackgroundColor(styling.getPaletteColor(Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND));
-        } else {
-            headerImageContainer.setBackgroundColor(styling.getPrimary());
-        }
+        Aesthetic.get()
+                .textColorPrimary(styling.getPrimary())
+                .textColorSecondary(styling.getPrimaryLight())
+                .colorPrimary(styling.getPrimary())
+                .colorAccent(styling.getAccent())
+                .colorStatusBarAuto()
+                .colorNavigationBarAuto()
+                .textColorPrimary(Color.BLACK)
+                .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                .bottomNavigationBackgroundMode(BottomNavBgMode.PRIMARY)
+                .bottomNavigationIconTextMode(BottomNavIconTextMode.SELECTED_ACCENT)
+                .apply();
     }
 
     @Override
@@ -232,8 +199,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity implem
     @Override
     protected void onResume() {
         super.onResume();
-
-        menuOverlay.showLoading();
 
         Kolibri kolibri = Kolibri.getInstance(this);
         kolibri.loadRuntimeConfiguration(this);
@@ -301,8 +266,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity implem
         }
 
         menu.getItem(navigation.getSettings().getInt("default-item")).getIntent().addCategory(Intent.CATEGORY_DEFAULT);
-
-        menuOverlay.showView();
 
         if (!restarted) {
             loadDefaultItem();
@@ -536,12 +499,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity implem
 
     @Override
     public boolean onFailed(final Exception e) {
-        navigationView.post(new Runnable() {
-            @Override
-            public void run() {
-                menuOverlay.showError();
-            }
-        });
         return false;
     }
 

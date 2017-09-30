@@ -9,21 +9,20 @@
     tools:openDrawer="start">
 
     <android.support.design.widget.CoordinatorLayout
+        app:statusBarBackground="?colorPrimaryDark"
+        app:statusBarScrim="?colorPrimary"
+        app:contentScrim="?colorPrimaryDark"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:layout_height="match_parent">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:layout_height="wrap_content">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                android:layout_height="?attr/actionBarSize" />
 
         </android.support.design.widget.AppBarLayout>
 
@@ -48,32 +47,14 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
-
-    <ch.yanova.kolibri.components.KolibriLoadingView
-        android:id="@+id/menuOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:clipToPadding="false"
-        android:fitsSystemWindows="true">
-
         <android.support.design.widget.NavigationView
             android:id="@+id/nav_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:clipToPadding="false"
-            android:fitsSystemWindows="true"
             android:paddingBottom="48dp"
             app:headerLayout="@layout/nav_header"
             app:menu="@menu/drawer_menu">
-
-            <include
-                layout="@layout/loading_error"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="?attr/actionBarSize"
-                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/kolibri_footer"
@@ -87,6 +68,4 @@
                 android:orientation="horizontal"
                 app:elevation="8dp" />
         </android.support.design.widget.NavigationView>
-
-    </ch.yanova.kolibri.components.KolibriLoadingView>
 </android.support.v4.widget.DrawerLayout>

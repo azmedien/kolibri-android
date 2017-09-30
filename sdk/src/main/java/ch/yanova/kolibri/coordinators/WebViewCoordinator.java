@@ -1,11 +1,17 @@
 package ch.yanova.kolibri.coordinators;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.BottomNavBgMode;
+import com.afollestad.aesthetic.BottomNavIconTextMode;
+import com.afollestad.aesthetic.NavigationViewMode;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -155,6 +161,19 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                     public void run() {
                         handleAmpData(metaData);
                         onFound(metaData);
+
+                        if (metaData.containsKey(META_THEME_COLOR)) {
+                            Aesthetic.get()
+                                    .colorPrimary(Color.parseColor(metaData.get(META_THEME_COLOR)))
+                                    .colorAccent(Color.parseColor(metaData.get(META_THEME_COLOR)))
+                                    .colorStatusBarAuto()
+                                    .colorNavigationBarAuto()
+                                    .textColorPrimary(Color.BLACK)
+                                    .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                                    .bottomNavigationBackgroundMode(BottomNavBgMode.PRIMARY)
+                                    .bottomNavigationIconTextMode(BottomNavIconTextMode.SELECTED_ACCENT)
+                                    .apply();
+                        }
                     }
                 });
             }
