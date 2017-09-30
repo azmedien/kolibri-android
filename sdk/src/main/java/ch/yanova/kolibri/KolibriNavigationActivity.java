@@ -237,6 +237,17 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity implem
 
         Kolibri kolibri = Kolibri.getInstance(this);
         kolibri.loadRuntimeConfiguration(this);
+
+        getWebView().resumeTimers();
+        getWebView().onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        getWebView().onPause();
+        getWebView().pauseTimers();
+
+        super.onPause();
     }
 
     @Override
