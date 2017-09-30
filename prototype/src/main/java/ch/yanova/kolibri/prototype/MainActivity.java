@@ -1,6 +1,8 @@
 package ch.yanova.kolibri.prototype;
 
+import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
@@ -9,22 +11,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.util.Map;
-
 import ch.yanova.kolibri.Kolibri;
-import ch.yanova.kolibri.KolibriBaseActivity;
 import ch.yanova.kolibri.KolibriCoordinator;
+import ch.yanova.kolibri.KolibriNavigationActivity;
 import ch.yanova.kolibri.KolibriProvider;
-import ch.yanova.kolibri.WebViewFragment;
+import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
+import ch.yanova.kolibri.coordinators.ActionButtonCoordinator;
 import ch.yanova.kolibri.coordinators.SearchWebviewCoordinator;
 
-public class MainActivity extends KolibriBaseActivity implements View.OnClickListener {
+public class MainActivity extends KolibriNavigationActivity {
 
     @Override
-    public void onBindComponents() {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        getWebView().setKolibriWebViewClient(new KolibriWebViewClient() {
+        getWebView().addKolibriWebViewClient(new KolibriWebViewClient() {
             @Override
             protected boolean onCustomTarget(Uri link, String target) {
 
@@ -43,20 +45,24 @@ public class MainActivity extends KolibriBaseActivity implements View.OnClickLis
             public KolibriCoordinator provideCoordinator(@NonNull View view) {
                 return new SearchWebviewCoordinator() {
                     @Override
-                    public void onFound(Map<String, String> data) {
-                        super.onFound(data);
-                        getMainWebViewFragment().onFound(data);
+                    protected void handleIntent(KolibriWebView view, Intent intent) {
+                        super.handleIntent(view, intent);
                     }
                 };
+            }
+        });
+
+        Kolibri.bind(getFloatingActionButton(), new KolibriProvider() {
+            @Nullable
+            @Override
+            public KolibriCoordinator provideCoordinator(@NonNull View view) {
+                return new ActionButtonCoordinator();
             }
         });
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-
-        WebViewFragment fragment = getMainWebViewFragment();
-        fragment.setShowSearchOption(false);
 
         MenuItem searchItem = menu.findItem(R.id.action_search_show);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);

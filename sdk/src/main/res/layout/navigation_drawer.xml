@@ -27,8 +27,9 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <FrameLayout
-            android:id="@+id/kolibri_main_content"
+        <include
+            android:id="@+id/overlay"
+            layout="@layout/loadng_web_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
@@ -42,40 +43,50 @@
             android:src="@drawable/ic_heart_outline_white_24dp"
             android:visibility="gone"
             app:fabSize="normal"
-            app:layout_anchor="@id/kolibri_main_content"
+            app:layout_anchor="@id/overlay"
             app:layout_anchorGravity="bottom|right|end" />
 
     </android.support.design.widget.CoordinatorLayout>
 
-    <android.support.design.widget.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+
+    <ch.yanova.kolibri.components.KolibriLoadingView
+        android:id="@+id/menuOverlay"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:clipToPadding="false"
-        android:fitsSystemWindows="true"
-        android:paddingBottom="48dp"
-        app:headerLayout="@layout/nav_header"
-        app:menu="@menu/drawer_menu">
+        android:fitsSystemWindows="true">
 
-        <include
-            layout="@layout/loading_error"
-            android:layout_width="match_parent"
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginTop="?attr/actionBarSize"
-            android:visibility="gone" />
+            android:layout_gravity="start"
+            android:clipToPadding="false"
+            android:fitsSystemWindows="true"
+            android:paddingBottom="48dp"
+            app:headerLayout="@layout/nav_header"
+            app:menu="@menu/drawer_menu">
 
-        <LinearLayout
-            android:id="@+id/kolibri_footer"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="-48dp"
-            android:background="@android:color/white"
-            android:elevation="8dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:elevation="8dp" />
-    </android.support.design.widget.NavigationView>
+            <include
+                layout="@layout/loading_error"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="?attr/actionBarSize"
+                android:visibility="gone" />
 
+            <LinearLayout
+                android:id="@+id/kolibri_footer"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="-48dp"
+                android:background="@android:color/white"
+                android:elevation="8dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:elevation="8dp" />
+        </android.support.design.widget.NavigationView>
+
+    </ch.yanova.kolibri.components.KolibriLoadingView>
 </android.support.v4.widget.DrawerLayout>

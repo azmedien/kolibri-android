@@ -11,8 +11,12 @@ import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
@@ -32,11 +36,12 @@ public class KolibriWebView extends WebView {
     public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
     private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
 
-    private KolibriWebViewClient webClient;
+    private List<KolibriWebViewClient> webClients;
     private WebChromeClient chromeClient;
 
     private Intent intent;
 
+    private boolean shouldHandleInternal;
     private boolean clearHistory;
 
     public KolibriWebView(Context context) {
@@ -58,16 +63,31 @@ public class KolibriWebView extends WebView {
 
         if (!isInEditMode()) {
 
-            InternalWebViewClient internalWebViewClient = new InternalWebViewClient();
+            final InternalWebViewClient internalWebViewClient = new InternalWebViewClient();
 
-            setLayerType(View.LAYER_TYPE_NONE, null);
+            webClients = new ArrayList<>();
+
             super.setWebViewClient(internalWebViewClient);
             super.setWebChromeClient(new KolibriWebChromeClient());
 
+            setVerticalScrollBarEnabled(false);
+            setHorizontalScrollBarEnabled(false);
+
             getSettings().setJavaScriptEnabled(true);
             getSettings().setAppCacheEnabled(true);
+            getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
             getSettings().setDomStorageEnabled(true);
             getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                // chromium, enable hardware acceleration
+                setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            } else {
+                // older android version, disable hardware acceleration
+                setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            }
+
+            getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 
             clearHistory = false;
         }
@@ -82,8 +102,10 @@ public class KolibriWebView extends WebView {
     public final void setWebChromeClient(WebChromeClient client) {
     }
 
-    public void setKolibriWebViewClient(KolibriWebViewClient client) {
-        webClient = client;
+    public void addKolibriWebViewClient(KolibriWebViewClient client) {
+        if (client != null) {
+            webClients.add(client);
+        }
     }
 
     public Intent getIntent() {
@@ -99,7 +121,7 @@ public class KolibriWebView extends WebView {
             target = TARGET_SELF;
         }
 
-        if (TARGET_INTERNAL.equals(target) && !webClient.shouldHandleInternal()) {
+        if (TARGET_INTERNAL.equals(target) && !shouldHandleInternal) {
             target = TARGET_SELF;
         }
 
@@ -111,10 +133,18 @@ public class KolibriWebView extends WebView {
         final String target = Kolibri.getInstance(getContext()).getTarget(link);
 
         final boolean handleInNewView = handleInNewView(target);
+        boolean handleCustomTarget = false;
 
         if (handleInNewView) {
 
-            if (!webClient.onCustomTarget(link, target)) {
+            for (KolibriWebViewClient webClient : webClients) {
+                if (webClient.onCustomTarget(link, target)) {
+                    handleCustomTarget = true;
+                    break;
+                }
+            }
+
+            if (!handleCustomTarget) {
                 Intent linkIntent = target.equals(TARGET_INTERNAL) ?
                         new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
                         new Intent(Intent.ACTION_VIEW, link);
@@ -171,7 +201,8 @@ public class KolibriWebView extends WebView {
                 KolibriApp.getInstance().logEvent(null, link.toString());
             }
 
-            if (webClient != null) {
+
+            for (KolibriWebViewClient webClient : webClients) {
                 webClient.onPageCommitVisible(view, url);
             }
         }
@@ -187,7 +218,7 @@ public class KolibriWebView extends WebView {
 
             view.loadUrl(GET_HTML_STRING);
 
-            if (webClient != null) {
+            for (KolibriWebViewClient webClient : webClients) {
                 webClient.onPageFinished(view, url);
             }
         }
@@ -196,7 +227,7 @@ public class KolibriWebView extends WebView {
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
 
-            if (webClient != null) {
+            for (KolibriWebViewClient webClient : webClients) {
                 webClient.onPageStarted(view, url, favicon);
             }
         }
@@ -206,7 +237,7 @@ public class KolibriWebView extends WebView {
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             super.onReceivedError(view, request, error);
 
-            if (webClient != null) {
+            for (KolibriWebViewClient webClient : webClients) {
                 webClient.onReceivedError(view, request, error);
             }
         }
@@ -215,10 +246,18 @@ public class KolibriWebView extends WebView {
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
 
-            if (webClient != null) {
+            for (KolibriWebViewClient webClient : webClients) {
                 webClient.onReceivedError(view, errorCode, description, failingUrl);
             }
         }
+    }
+
+    public boolean shouldHandleInternal() {
+        return shouldHandleInternal;
+    }
+
+    public void setHandleInternal(boolean handleInternal) {
+        this.shouldHandleInternal = handleInternal;
     }
 
     public boolean shouldClearHistory() {

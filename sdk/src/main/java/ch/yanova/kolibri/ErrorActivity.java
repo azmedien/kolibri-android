@@ -17,11 +17,11 @@ public class ErrorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_error);
 
-        final Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        final TextView errorMessageTextView = (TextView) findViewById(R.id.error_text);
+        final TextView errorMessageTextView = findViewById(R.id.error_text);
 
         final Intent intent = getIntent();
 
