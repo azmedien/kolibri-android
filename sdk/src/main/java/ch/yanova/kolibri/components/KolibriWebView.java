@@ -6,12 +6,22 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.webkit.ConsoleMessage;
+import android.webkit.GeolocationPermissions;
+import android.webkit.JsPromptResult;
+import android.webkit.JsResult;
+import android.webkit.PermissionRequest;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -37,7 +47,7 @@ public class KolibriWebView extends WebView {
     private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
 
     private List<KolibriWebViewClient> webClients;
-    private WebChromeClient chromeClient;
+    private List<KolibriWebChromeClient> webChromeClients;
 
     private Intent intent;
 
@@ -64,11 +74,13 @@ public class KolibriWebView extends WebView {
         if (!isInEditMode()) {
 
             final InternalWebViewClient internalWebViewClient = new InternalWebViewClient();
+            final InternalChromeClient internalChromeClient = new InternalChromeClient();
 
             webClients = new ArrayList<>();
+            webChromeClients = new ArrayList<>();
 
             super.setWebViewClient(internalWebViewClient);
-            super.setWebChromeClient(new KolibriWebChromeClient());
+            super.setWebChromeClient(internalChromeClient);
 
             setVerticalScrollBarEnabled(false);
             setHorizontalScrollBarEnabled(false);
@@ -100,11 +112,18 @@ public class KolibriWebView extends WebView {
 
     @Override
     public final void setWebChromeClient(WebChromeClient client) {
+        throw new KolibriException("Cannot preset WebChrome client. Use #setKolibriWebChromeClient instead.");
     }
 
-    public void addKolibriWebViewClient(KolibriWebViewClient client) {
+    public void addKolibriWebViewClient(@NonNull KolibriWebViewClient client) {
         if (client != null) {
             webClients.add(client);
+        }
+    }
+
+    public void addKolibriWebChromeClient(@NonNull KolibriWebChromeClient client) {
+        if (client != null) {
+            webChromeClients.add(client);
         }
     }
 
@@ -166,6 +185,88 @@ public class KolibriWebView extends WebView {
         }
 
         return handleInNewView;
+    }
+
+    private class InternalChromeClient extends WebChromeClient {
+
+
+        @Override
+        public void onProgressChanged(WebView view, int newProgress) {
+            super.onProgressChanged(view, newProgress);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && newProgress == 100) {
+                final String url = view.getUrl();
+                if ("about:blank".equals(url)) {
+                    return;
+                }
+
+                final Uri link = Uri.parse(url);
+                final String target = Kolibri.getInstance(view.getContext()).getTarget(link);
+
+                // Skip external targets when reporting to netmetrix
+                if (!TARGET_EXTERNAL.equals(target)) {
+                    KolibriApp.getInstance().logEvent(null, link.toString());
+                }
+            }
+            for (KolibriWebChromeClient webChromeClient : webChromeClients) {
+                webChromeClient.onProgressChanged(view, newProgress);
+            }
+
+        }
+
+        @Override
+        public void onShowCustomView(View view, CustomViewCallback callback) {
+            super.onShowCustomView(view, callback);
+            for (KolibriWebChromeClient webChromeClient : webChromeClients) {
+                webChromeClient.onShowCustomView(view, callback);
+            }
+        }
+
+        @Override
+        public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) {
+            super.onShowCustomView(view, requestedOrientation, callback);
+            for (KolibriWebChromeClient webChromeClient : webChromeClients) {
+                webChromeClient.onShowCustomView(view, requestedOrientation, callback);
+            }
+        }
+
+        @Override
+        public void onHideCustomView() {
+            super.onHideCustomView();
+            for (KolibriWebChromeClient webChromeClient : webChromeClients) {
+                webChromeClient.onHideCustomView();
+            }
+        }
+
+        @Override
+        public View getVideoLoadingProgressView() {
+
+            for (KolibriWebChromeClient webChromeClient : webChromeClients) {
+                if (webChromeClient.getVideoLoadingProgressView() != null) {
+                    return webChromeClient.getVideoLoadingProgressView();
+                }
+            }
+
+            return super.getVideoLoadingProgressView();
+        }
+
+        @Override
+        public void getVisitedHistory(ValueCallback<String[]> callback) {
+            super.getVisitedHistory(callback);
+        }
+
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+        @Override
+        public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+
+            for (KolibriWebChromeClient webChromeClient : webChromeClients) {
+                if (webChromeClient.onShowFileChooser(webView, filePathCallback, fileChooserParams)) {
+                    return true;
+                }
+            }
+
+            return super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
+
+        }
     }
 
     private class InternalWebViewClient extends WebViewClient {
