@@ -43,7 +43,7 @@ public abstract class KolibriSplashActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoaded(RuntimeConfig runtime) {
+    public void onLoaded(RuntimeConfig runtime, boolean isFresh) {
         findViewById(R.id.splash).postDelayed(new Runnable() {
             @Override
             public void run() {

@@ -419,7 +419,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity implem
     }
 
     @Override
-    public void onLoaded(@NonNull final RuntimeConfig runtime) {
+    public void onLoaded(@NonNull final RuntimeConfig runtime, boolean isFresh) {
 
         this.configuration = runtime;
 
