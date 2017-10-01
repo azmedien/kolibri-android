@@ -24,6 +24,7 @@ import java.util.Map;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriCoordinator;
+import ch.yanova.kolibri.RuntimeConfig;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
 
@@ -34,7 +35,7 @@ import ch.yanova.kolibri.components.OnAmpDataFoundListener;
 public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements OnAmpDataFoundListener {
 
     public static final String webViewUri = "kolibri://content/link";
-    private static final String[] sURIs = new String[]{ webViewUri };
+    private static final String[] sURIs = new String[]{webViewUri};
 
     private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
     private static final String JS_INTERFACE_NAME = "GetHtml";
@@ -62,9 +63,12 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     private static final String TAG = "WebViewCoordinator";
     public static final String NAME = "name";
 
+    private KolibriWebView webView;
+
     @Override
     protected void attach(KolibriWebView view) {
         super.attach(view);
+        webView = view;
         view.addJavascriptInterface(new GetHtmlJsInterface(), JS_INTERFACE_NAME);
     }
 
@@ -163,9 +167,12 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                         onFound(metaData);
 
                         if (metaData.containsKey(META_THEME_COLOR)) {
+
+                            int[] palette = RuntimeConfig.getMaterialPalette(metaData.get(META_THEME_COLOR));
+
                             Aesthetic.get()
-                                    .colorPrimary(Color.parseColor(metaData.get(META_THEME_COLOR)))
-                                    .colorAccent(Color.parseColor(metaData.get(META_THEME_COLOR)))
+                                    .colorPrimary(palette[RuntimeConfig.THEME_COLOR_PRIMARY])
+                                    .colorAccent(palette[13])
                                     .colorStatusBarAuto()
                                     .colorNavigationBarAuto()
                                     .textColorPrimary(Color.BLACK)
@@ -173,6 +180,31 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                                     .bottomNavigationBackgroundMode(BottomNavBgMode.PRIMARY)
                                     .bottomNavigationIconTextMode(BottomNavIconTextMode.SELECTED_ACCENT)
                                     .apply();
+                        } else {
+
+
+                            // Check if there's no meta theme and we navigate to menu item.
+                            // In this case we prefer default app theme
+                            final RuntimeConfig config = Kolibri.getInstance(view.getContext()).getRuntime();
+                            final RuntimeConfig.Navigation navigation = config.getNavigation();
+
+                            for (String item : navigation.getItems().keySet()) {
+                                final RuntimeConfig.NavigationItem navItem = navigation.getItem(item);
+
+                                if (navItem.hasSetting("url") && navItem.getString("url").equals(webView.getOriginalUrl())) {
+
+                                    final RuntimeConfig.Styling styling = config.getStyling();
+
+                                    Aesthetic.get()
+                                            .colorPrimary(styling.getPrimary())
+                                            .colorAccent(styling.getAccent())
+                                            .colorStatusBarAuto()
+                                            .textColorPrimary(Color.BLACK)
+                                            .apply();
+
+                                    break;
+                                }
+                            }
                         }
                     }
                 });

@@ -277,7 +277,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             loadDefaultItem();
         } else if (selectedMenuItemId != null) {
             final MenuItem itemByid = findMenuItem(selectedMenuItemId);
-//  FIXME:          unselectAllMenuItemsExcept(itemByid);
+            navigationView.setCheckedItem(itemByid.getItemId());
         }
 
         onNavigationInitialize();
