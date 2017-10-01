@@ -138,7 +138,7 @@ public class Kolibri {
             public void onResponse(Call call, Response response) throws IOException {
 
                 final String json = response.body().string();
-                final boolean isFresh = response.cacheResponse() != null;
+                final boolean isFresh = response.cacheResponse() == null;
                 Exception exception = null;
 
                 try {

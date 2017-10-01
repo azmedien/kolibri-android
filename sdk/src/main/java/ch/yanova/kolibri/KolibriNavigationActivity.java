@@ -375,7 +375,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     }
 
     @Override
-    public void onLoaded(@NonNull final RuntimeConfig runtime, boolean isFresh) {
+    public void onLoaded(@NonNull final RuntimeConfig runtime, final boolean isFresh) {
 
         this.configuration = runtime;
 
@@ -384,7 +384,12 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             public void run() {
                 final Navigation navigation = runtime.getNavigation();
 
-                setupStyling();
+                // We may skip setup styling if we are coming from background or loading same configuration
+                // In case we are starting the app now, we setup the styling
+                if (Aesthetic.isFirstTime() || isFresh) {
+                    setupStyling();
+                }
+
                 setupHeader();
 
                 constructNavigation(navigation);
