@@ -126,7 +126,7 @@ public class Kolibri {
                     if (!userDefined) {
                         try { // Try to load saved one as a fallback configuratio
                             runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")), getRuntimeUrl());
-                            runtimeListener.onLoaded(runtime);
+                            runtimeListener.onLoaded(runtime, false);
                         } catch (JSONException | KolibriException exception) {
                             runtimeListener.onFailed(exception);
                         }
@@ -138,9 +138,11 @@ public class Kolibri {
             public void onResponse(Call call, Response response) throws IOException {
 
                 final String json = response.body().string();
+                final boolean isFresh = response.cacheResponse() != null;
                 Exception exception = null;
 
                 try {
+
                     Log.i(TAG, "onResponse: cache " + response.cacheResponse());
                     Log.i(TAG, "onResponse: network " + response.networkResponse());
 
@@ -159,7 +161,7 @@ public class Kolibri {
                 } finally {
                     if (runtimeListener != null) {
                         if (exception == null) {
-                            runtimeListener.onLoaded(runtime);
+                            runtimeListener.onLoaded(runtime, isFresh);
                         } else {
                             runtimeListener.onFailed(exception);
                         }
@@ -199,7 +201,6 @@ public class Kolibri {
     public static Intent createIntent(@NonNull Uri uri) {
         final Intent res = new Intent(Intent.ACTION_VIEW);
         res.setData(uri);
-
         return res;
     }
 
