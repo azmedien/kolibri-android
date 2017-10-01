@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,8 +16,8 @@ import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.ProgressBar;
 
+import com.afollestad.aesthetic.Aesthetic;
 import com.google.vr.sdk.widgets.video.VrVideoEventListener;
 import com.google.vr.sdk.widgets.video.VrVideoView;
 
@@ -25,11 +26,6 @@ import java.io.IOException;
 
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.RuntimeConfig;
-import ch.yanova.kolibri.TintUtils;
-
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
-import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
 
 public class CardboardActivity extends AppCompatActivity {
 
@@ -155,21 +151,12 @@ public class CardboardActivity extends AppCompatActivity {
 
         final RuntimeConfig.Styling styling = configuration.getStyling();
 
-        if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
-            final int toolbarBackgroud = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND);
-            final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
-
-            TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
-        } else {
-            TintUtils.tintToolbar(this, toolbar, styling.getPrimary(), styling.getPrimaryDark(), false);
-        }
-
-        if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_TEXT)) {
-            toolbar.setTitleTextColor(styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_TEXT));
-            toolbar.setSubtitle(styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_TEXT));
-        }
-
-        TintUtils.tintProgressBar((ProgressBar) progress);
+        Aesthetic.get()
+                .colorPrimary(styling.getPrimary())
+                .colorAccent(styling.getAccent())
+                .colorStatusBarAuto()
+                .textColorPrimary(Color.BLACK)
+                .apply();
     }
 
     public static class ErrorDialog extends AppCompatDialogFragment {

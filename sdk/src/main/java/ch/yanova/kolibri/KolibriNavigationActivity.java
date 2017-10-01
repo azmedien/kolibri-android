@@ -1,6 +1,7 @@
 package ch.yanova.kolibri;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -30,9 +31,6 @@ import android.widget.TextView;
 
 import com.afollestad.aesthetic.Aesthetic;
 import com.afollestad.aesthetic.AestheticActivity;
-import com.afollestad.aesthetic.BottomNavBgMode;
-import com.afollestad.aesthetic.BottomNavIconTextMode;
-import com.afollestad.aesthetic.NavigationViewMode;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -64,20 +62,23 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     final Set<Target> targets = new HashSet<>();
 
     protected RuntimeConfig configuration;
+
     private NavigationView navigationView;
+    private DrawerLayout drawer;
+    private ActionBarDrawerToggle drawerToggle;
+
     private FloatingActionButton floatingActionButton;
+
     private KolibriWebView webView;
     private KolibriLoadingView webviewOverlay;
 
     private boolean restarted;
-    private DrawerLayout drawer;
+
     private final View.OnClickListener onFooterClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             final Intent intent = (Intent) v.getTag();
-
             notifyComponenets(intent);
-
             drawer.closeDrawer(GravityCompat.START);
         }
     };
@@ -120,9 +121,9 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         drawer = findViewById(R.id.drawer_layout);
 
-        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        drawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerToggle.setDrawerSlideAnimationEnabled(false);
+        drawer.addDrawerListener(drawerToggle);
 
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -168,6 +169,23 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         });
     }
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
 
     private void setupStyling() {
         if (configuration == null) {
@@ -177,16 +195,10 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         final RuntimeConfig.Styling styling = configuration.getStyling();
 
         Aesthetic.get()
-                .textColorPrimary(styling.getPrimary())
-                .textColorSecondary(styling.getPrimaryLight())
                 .colorPrimary(styling.getPrimary())
                 .colorAccent(styling.getAccent())
                 .colorStatusBarAuto()
-                .colorNavigationBarAuto()
                 .textColorPrimary(Color.BLACK)
-                .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
-                .bottomNavigationBackgroundMode(BottomNavBgMode.PRIMARY)
-                .bottomNavigationIconTextMode(BottomNavIconTextMode.SELECTED_ACCENT)
                 .apply();
     }
 
@@ -211,7 +223,6 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     protected void onPause() {
         getWebView().onPause();
         getWebView().pauseTimers();
-
         super.onPause();
     }
 
@@ -221,15 +232,10 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
         final Intent intent = item.getIntent();
-
-        Kolibri.HandlerType type = notifyComponenets(intent);
-
-        if (type.equals(Kolibri.HandlerType.COMPONENT)) {
-            unselectAllMenuItemsExcept(item);
-        }
+        final Kolibri.HandlerType type = notifyComponenets(intent);
 
         drawer.closeDrawer(GravityCompat.START);
-        return true;
+        return type.equals(Kolibri.HandlerType.COMPONENT);
     }
 
     protected void setActionBarTitle(String title) {
@@ -271,7 +277,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             loadDefaultItem();
         } else if (selectedMenuItemId != null) {
             final MenuItem itemByid = findMenuItem(selectedMenuItemId);
-            unselectAllMenuItemsExcept(itemByid);
+//  FIXME:          unselectAllMenuItemsExcept(itemByid);
         }
 
         onNavigationInitialize();
@@ -341,7 +347,6 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                             intent.putExtra(Kolibri.EXTRA_GO_BACK_URL, menuData.getQueryParameter("url"));
                         }
 
-                        unselectAllMenuItemsExcept(item);
                         intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
 
                         setIntent(null);
@@ -367,18 +372,6 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             setIntent(null);
             Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, getString(R.string.text_update_app)));
         }
-    }
-
-    public void unselectAllMenuItemsExcept(MenuItem item) {
-        final Menu menu = navigationView.getMenu();
-
-        for (int m = 0; m < menu.size(); m++) {
-            if (!menu.getItem(m).equals(item)) {
-                menu.getItem(m).setChecked(false);
-            }
-        }
-
-        item.setChecked(true);
     }
 
     @Override
@@ -462,7 +455,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         }
 
         final JSONArray items = footer.getJSONArray(ITEMS);
-        final LinearLayout footerView = navigationView.findViewById(R.id.kolibri_footer);
+        final LinearLayout footerView = navigationView.findViewById(R.id.footer);
         final LayoutInflater inflater = LayoutInflater.from(this);
 
         for (int i = 0; i < items.length(); i++) {
@@ -494,7 +487,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     }
 
     private boolean isFooterConstructed() {
-        return ((LinearLayout) navigationView.findViewById(R.id.kolibri_footer)).getChildCount() > 0;
+        return ((LinearLayout) navigationView.findViewById(R.id.footer)).getChildCount() > 0;
     }
 
     @Override
@@ -512,7 +505,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         final String id = item.getId();
         intent.putExtra(Kolibri.EXTRA_ID, id);
 
-        MenuItem menuItem = menu.add(label).setIntent(intent);
+        MenuItem menuItem = menu.add(0, id.hashCode(), Menu.NONE, label).setIntent(intent).setCheckable(true);
 
         if (item.hasSetting(ICON)) {
             String iconUrl = item.getIcon();
@@ -620,7 +613,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                     webView.setClearHistory(true);
                     webView.loadUrl(url);
                     setActionBarTitle(defaultItem.getTitle().toString());
-                    unselectAllMenuItemsExcept(defaultItem);
+                    navigationView.setCheckedItem(defaultItem.getItemId());
                     return;
                 }
             } else {

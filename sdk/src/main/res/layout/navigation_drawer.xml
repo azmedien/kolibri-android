@@ -49,19 +49,17 @@
 
         <android.support.design.widget.NavigationView
             android:id="@+id/nav_view"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:paddingBottom="48dp"
             app:headerLayout="@layout/nav_header"
             app:menu="@menu/drawer_menu">
 
             <LinearLayout
-                android:id="@+id/kolibri_footer"
+                android:id="@+id/footer"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_gravity="bottom"
-                android:layout_marginBottom="-48dp"
                 android:background="@android:color/white"
                 android:elevation="8dp"
                 android:gravity="center"
