@@ -9,8 +9,6 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
 import com.afollestad.aesthetic.Aesthetic;
-import com.afollestad.aesthetic.BottomNavBgMode;
-import com.afollestad.aesthetic.BottomNavIconTextMode;
 import com.afollestad.aesthetic.NavigationViewMode;
 
 import org.jsoup.Jsoup;
@@ -177,12 +175,8 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                                     .colorNavigationBarAuto()
                                     .textColorPrimary(Color.BLACK)
                                     .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
-                                    .bottomNavigationBackgroundMode(BottomNavBgMode.PRIMARY)
-                                    .bottomNavigationIconTextMode(BottomNavIconTextMode.SELECTED_ACCENT)
                                     .apply();
                         } else {
-
-
                             // Check if there's no meta theme and we navigate to menu item.
                             // In this case we prefer default app theme
                             final RuntimeConfig config = Kolibri.getInstance(view.getContext()).getRuntime();
@@ -192,16 +186,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                                 final RuntimeConfig.NavigationItem navItem = navigation.getItem(item);
 
                                 if (navItem.hasSetting("url") && navItem.getString("url").equals(webView.getOriginalUrl())) {
-
-                                    final RuntimeConfig.Styling styling = config.getStyling();
-
-                                    Aesthetic.get()
-                                            .colorPrimary(styling.getPrimary())
-                                            .colorAccent(styling.getAccent())
-                                            .colorStatusBarAuto()
-                                            .textColorPrimary(Color.BLACK)
-                                            .apply();
-
+                                    Kolibri.getInstance(view.getContext()).applyRuntimeTheme();
                                     break;
                                 }
                             }

@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
@@ -20,7 +22,7 @@ import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.ActionButtonCoordinator;
 import ch.yanova.kolibri.coordinators.SearchWebviewCoordinator;
 
-public class MainActivity extends KolibriNavigationActivity {
+public class PrototypeActivity extends KolibriNavigationActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +33,7 @@ public class MainActivity extends KolibriNavigationActivity {
             protected boolean onCustomTarget(Uri link, String target) {
 
                 if ("360player".equals(target)) {
-                    startActivity(CardboardActivity.createIntent(MainActivity.this, link));
+                    startActivity(CardboardActivity.createIntent(PrototypeActivity.this, link));
                     return true;
                 }
 
@@ -57,6 +59,18 @@ public class MainActivity extends KolibriNavigationActivity {
             @Override
             public KolibriCoordinator provideCoordinator(@NonNull View view) {
                 return new ActionButtonCoordinator();
+            }
+        });
+
+        getFloatingActionButton().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Content added to favorites list", BaseTransientBottomBar.LENGTH_INDEFINITE).setAction("Check it out", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        finish();
+                    }
+                }).show();
             }
         });
     }

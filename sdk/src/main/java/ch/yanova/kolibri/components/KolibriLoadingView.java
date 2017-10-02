@@ -64,7 +64,7 @@ public class KolibriLoadingView extends FrameLayout {
             mainContentView = getChildAt(0);
         }
 
-        mLayoutOverlay = LayoutInflater.from(getContext()).inflate(R.layout.error, this, false);
+        mLayoutOverlay = LayoutInflater.from(getContext()).inflate(R.layout.overlay, this, false);
         mLayoutLoading = mLayoutOverlay.findViewById(R.id.progress);
         mLayoutError = mLayoutOverlay.findViewById(R.id.error);
 

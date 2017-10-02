@@ -39,7 +39,7 @@ public abstract class KolibriSplashActivity extends AppCompatActivity
     protected abstract void onSplashTimedOut();
 
     public void attachToRoot(View view) {
-        ((ViewGroup)findViewById(ch.yanova.kolibri.R.id.splash_root)).addView(view);
+        ((ViewGroup)findViewById(R.id.splash_root)).addView(view);
     }
 
     @Override

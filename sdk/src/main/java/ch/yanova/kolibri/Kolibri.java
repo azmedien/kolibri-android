@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.AnyThread;
@@ -15,6 +16,9 @@ import android.support.annotation.UiThread;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
+
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.NavigationViewMode;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +32,9 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
+import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
 
 /**
  * Created by mmironov on 2/26/17.
@@ -221,6 +228,28 @@ public class Kolibri {
         return HandlerType.NONE;
     }
 
+    public void applyRuntimeTheme() {
+        final RuntimeConfig.Styling styling = runtime.getStyling();
+        int primaryColor = styling.getPrimary();
+        int accentColor = styling.getAccent();
+
+        if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
+            final int toolbarBackgroud = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND);
+            final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
+
+            primaryColor = palette[THEME_COLOR_PRIMARY];
+            accentColor = palette[13];
+        }
+
+        Aesthetic.get()
+                .colorPrimary(primaryColor)
+                .colorAccent(accentColor)
+                .colorStatusBarAuto()
+                .textColorPrimary(Color.BLACK)
+                .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                .apply();
+    }
+
     public static String searchParamKey(Context context) {
         return Kolibri.getInstance(context).getRuntime().getComponent("search").getSettings().getString("search-param");
     }
@@ -255,9 +284,10 @@ public class Kolibri {
         return runtime;
     }
 
-    public static Intent getErrorIntent(Context context, String errorMessage) {
+    public static Intent getErrorIntent(Context context, String title, String errorMessage) {
 
         final Intent errorIntent = new Intent(context, ErrorActivity.class);
+        errorIntent.putExtra(Intent.EXTRA_TITLE, title);
         errorIntent.putExtra(EXTRA_ERROR_MESSAGE, errorMessage);
         return errorIntent;
     }

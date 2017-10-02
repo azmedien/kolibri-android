@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".ProrotypeSplashActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,9 +23,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:host="notification" android:scheme="kolibri"/>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:host="notification"
+                    android:scheme="kolibri" />
             </intent-filter>
         </activity>
 
@@ -39,6 +41,10 @@
         <activity
             android:name=".CardboardActivity"
             android:label="360Player" />
+
+        <activity
+            android:name=".PrototypeActivity"
+            android:label="@string/app_name" />
     </application>
 
 </manifest>

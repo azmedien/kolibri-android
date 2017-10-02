@@ -296,10 +296,7 @@ public class RuntimeConfig {
         public static final String COLOR_ACCENT = "accent";
 
         public static final String OVERRIDES_TOOLBAR_BACKGROUND = "toolbarBackground";
-        public static final String OVERRIDES_TOOLBAR_TEXT = "toolbarText";
-
         public static final String OVERRIDES_NAVIGATION_HEADER_BACKGROUND = "navigationHeaderBackground";
-        public static final String OVERRIDES_NAVIGATION_ITEM_SELECTED = "navigationItemSelectedColor";
 
         private final JSONObject json;
 

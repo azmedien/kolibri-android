@@ -3,7 +3,6 @@ package ch.yanova.kolibri;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -17,6 +16,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,7 +29,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.afollestad.aesthetic.Aesthetic;
 import com.afollestad.aesthetic.AestheticActivity;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -97,7 +96,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         }
 
         if (type == Kolibri.HandlerType.NONE) {
-            Kolibri.notifyComponents(KolibriNavigationActivity.this, Kolibri.getErrorIntent(KolibriNavigationActivity.this, getString(R.string.text_update_app)));
+            final Intent errorIntent = Kolibri.getErrorIntent(this, intent.getStringExtra(Intent.EXTRA_TITLE), getString(R.string.text_update_app));
+            Kolibri.notifyComponents(KolibriNavigationActivity.this, errorIntent);
         }
 
         return type;
@@ -192,14 +192,10 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             return;
         }
 
-        final RuntimeConfig.Styling styling = configuration.getStyling();
+        Kolibri.getInstance(this).applyRuntimeTheme();
 
-        Aesthetic.get()
-                .colorPrimary(styling.getPrimary())
-                .colorAccent(styling.getAccent())
-                .colorStatusBarAuto()
-                .textColorPrimary(Color.BLACK)
-                .apply();
+        final RuntimeConfig.Styling styling = configuration.getStyling();
+        overrideHeaderBackground(styling);
     }
 
     @Override
@@ -217,6 +213,26 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         getWebView().resumeTimers();
         getWebView().onResume();
+
+
+        // Workaround RX observers of Aesthetic which resets the color
+        if (restarted) {
+            final RuntimeConfig.Styling styling = configuration.getStyling();
+            overrideHeaderBackground(styling);
+        }
+    }
+
+    private void overrideHeaderBackground(RuntimeConfig.Styling styling) {
+        if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND)) {
+            final int navigationHeaderColor = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND);
+            headerImageContainer.post(new Runnable() {
+                @Override
+                public void run() {
+                    headerImageContainer.setBackgroundColor(navigationHeaderColor);
+                    headerImageContainer.setTag(":aesthetic_ignore");
+                }
+            });
+        }
     }
 
     @Override
@@ -224,6 +240,12 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         getWebView().onPause();
         getWebView().pauseTimers();
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        drawer.closeDrawer(Gravity.START);
+        super.onStop();
     }
 
     @Override
@@ -369,8 +391,9 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
 
         if (type == Kolibri.HandlerType.NONE) {
+            final Intent errorIntent = Kolibri.getErrorIntent(this, getIntent().getStringExtra(Intent.EXTRA_TITLE), getString(R.string.text_update_app));
+            Kolibri.notifyComponents(KolibriNavigationActivity.this, errorIntent);
             setIntent(null);
-            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, getString(R.string.text_update_app)));
         }
     }
 
@@ -385,8 +408,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                 final Navigation navigation = runtime.getNavigation();
 
                 // We may skip setup styling if we are coming from background or loading same configuration
-                // In case we are starting the app now, we setup the styling
-                if (Aesthetic.isFirstTime() || isFresh) {
+                if (!restarted || isFresh) {
                     setupStyling();
                 }
 

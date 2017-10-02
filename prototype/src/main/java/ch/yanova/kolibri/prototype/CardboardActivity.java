@@ -5,33 +5,28 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 
-import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.AestheticActivity;
 import com.google.vr.sdk.widgets.video.VrVideoEventListener;
 import com.google.vr.sdk.widgets.video.VrVideoView;
 
 import java.io.File;
 import java.io.IOException;
 
-import ch.yanova.kolibri.Kolibri;
-import ch.yanova.kolibri.RuntimeConfig;
-
-public class CardboardActivity extends AppCompatActivity {
+public class CardboardActivity extends AestheticActivity {
 
     protected VrVideoView videoWidgetView;
 
-    private Toolbar toolbar;
     private View progress;
 
     private DialogFragment errorDialog;
@@ -51,8 +46,9 @@ public class CardboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cardboard);
 
-        toolbar = findViewById(R.id.toolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         progress = findViewById(R.id.progress);
         errorDialog = ErrorDialog.newInstance("Video cannot be played.");
@@ -84,8 +80,6 @@ public class CardboardActivity extends AppCompatActivity {
 
         videoOptions.inputFormat = "mp4".equals(type) ? VrVideoView.Options.FORMAT_DEFAULT : VrVideoView.Options.FORMAT_HLS;
         videoOptions.inputType = VrVideoView.Options.TYPE_MONO;
-
-        setupStyling();
     }
 
     @Override
@@ -110,6 +104,18 @@ public class CardboardActivity extends AppCompatActivity {
     protected void onDestroy() {
         videoWidgetView.shutdown();
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void startVideo() {
@@ -139,24 +145,6 @@ public class CardboardActivity extends AppCompatActivity {
         }
 
         return extension;
-    }
-
-    private void setupStyling() {
-
-        final RuntimeConfig configuration = Kolibri.getInstance(this).getRuntime();
-
-        if (configuration == null) {
-            return;
-        }
-
-        final RuntimeConfig.Styling styling = configuration.getStyling();
-
-        Aesthetic.get()
-                .colorPrimary(styling.getPrimary())
-                .colorAccent(styling.getAccent())
-                .colorStatusBarAuto()
-                .textColorPrimary(Color.BLACK)
-                .apply();
     }
 
     public static class ErrorDialog extends AppCompatDialogFragment {
