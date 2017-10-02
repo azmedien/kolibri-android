@@ -22,6 +22,7 @@ import java.util.Map;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriCoordinator;
+import ch.yanova.kolibri.R;
 import ch.yanova.kolibri.RuntimeConfig;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
@@ -176,6 +177,9 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                                     .textColorPrimary(Color.BLACK)
                                     .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
                                     .apply();
+
+                            webView.setTag(R.id.primaryColor, palette[RuntimeConfig.THEME_COLOR_PRIMARY]);
+                            webView.setTag(R.id.accentColor, palette[13]);
                         } else {
                             // Check if there's no meta theme and we navigate to menu item.
                             // In this case we prefer default app theme
@@ -190,6 +194,9 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                                     break;
                                 }
                             }
+
+                            webView.setTag(R.id.primaryColor, null);
+                            webView.setTag(R.id.accentColor, null);
                         }
                     }
                 });

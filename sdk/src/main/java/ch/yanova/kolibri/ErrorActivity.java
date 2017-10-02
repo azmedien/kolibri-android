@@ -37,6 +37,8 @@ public class ErrorActivity extends AestheticActivity {
                 getSupportActionBar().setTitle(title);
             }
         }
+
+        Kolibri.getInstance(this).applyRuntimeTheme();
     }
 
     @Override

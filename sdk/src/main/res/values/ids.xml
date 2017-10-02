@@ -2,4 +2,6 @@
 <resources>
     <item name="coordinator" type="id"/>
     <item name="splash" type="drawable"/>
+    <item name="primaryColor" type="id"/>
+    <item name="accentColor" type="id"/>
 </resources>

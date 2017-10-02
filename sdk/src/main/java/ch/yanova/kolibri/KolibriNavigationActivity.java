@@ -3,6 +3,7 @@ package ch.yanova.kolibri;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -29,7 +30,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.afollestad.aesthetic.Aesthetic;
 import com.afollestad.aesthetic.AestheticActivity;
+import com.afollestad.aesthetic.NavigationViewMode;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -214,15 +217,32 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         getWebView().resumeTimers();
         getWebView().onResume();
 
-
-        // Workaround RX observers of Aesthetic which resets the color
         if (restarted) {
+
+            // Workaround RX observers of Aesthetic which resets the color
             final RuntimeConfig.Styling styling = configuration.getStyling();
             overrideHeaderBackground(styling);
+
+            // In case we are returning from other activity which is with runtime theme
+            // We want to be sure that if the there was theme-meta, we apply it again
+            final Integer lastPrimary = (Integer) webView.getTag(R.id.primaryColor);
+            final Integer lastAccent = (Integer) webView.getTag(R.id.accentColor);
+
+            if (lastPrimary != null) {
+                Aesthetic.get()
+                        .colorPrimary(lastPrimary)
+                        .colorAccent(lastAccent)
+                        .colorStatusBarAuto()
+                        .colorNavigationBarAuto()
+                        .textColorPrimary(Color.BLACK)
+                        .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                        .apply();
+            }
         }
     }
 
     private void overrideHeaderBackground(RuntimeConfig.Styling styling) {
+
         if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND)) {
             final int navigationHeaderColor = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND);
             headerImageContainer.post(new Runnable() {
@@ -610,8 +630,6 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     @Override
     public void onBackPressed() {
 
-
-        // FIXME
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
