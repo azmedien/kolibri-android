@@ -190,13 +190,12 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                                 final RuntimeConfig.NavigationItem navItem = navigation.getItem(item);
 
                                 if (navItem.hasSetting("url") && navItem.getString("url").equals(webView.getOriginalUrl())) {
-                                    Kolibri.getInstance(view.getContext()).applyRuntimeTheme();
+                                    Kolibri.getInstance(view.getContext()).applyRuntimeTheme(true);
+                                    webView.setTag(R.id.primaryColor, null);
+                                    webView.setTag(R.id.accentColor, null);
                                     break;
                                 }
                             }
-
-                            webView.setTag(R.id.primaryColor, null);
-                            webView.setTag(R.id.accentColor, null);
                         }
                     }
                 });

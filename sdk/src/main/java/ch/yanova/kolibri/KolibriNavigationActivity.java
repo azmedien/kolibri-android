@@ -195,7 +195,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             return;
         }
 
-        Kolibri.getInstance(this).applyRuntimeTheme();
+        Kolibri.getInstance(this).applyRuntimeTheme(true);
 
         final RuntimeConfig.Styling styling = configuration.getStyling();
         overrideHeaderBackground(styling);
@@ -237,6 +237,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                         .textColorPrimary(Color.BLACK)
                         .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
                         .apply();
+            } else {
+                Kolibri.getInstance(this).applyRuntimeTheme(true);
             }
         }
     }

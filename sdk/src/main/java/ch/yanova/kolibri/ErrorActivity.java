@@ -38,7 +38,7 @@ public class ErrorActivity extends AestheticActivity {
             }
         }
 
-        Kolibri.getInstance(this).applyRuntimeTheme();
+        Kolibri.getInstance(this).applyRuntimeTheme(false);
     }
 
     @Override

@@ -228,17 +228,17 @@ public class Kolibri {
         return HandlerType.NONE;
     }
 
-    public void applyRuntimeTheme() {
+    public void applyRuntimeTheme(boolean applyOverrides) {
         final RuntimeConfig.Styling styling = runtime.getStyling();
         int primaryColor = styling.getPrimary();
         int accentColor = styling.getAccent();
 
-        if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
+        if (applyOverrides && styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
             final int toolbarBackgroud = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND);
             final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
 
             primaryColor = palette[THEME_COLOR_PRIMARY];
-            accentColor = palette[13];
+//            accentColor = palette[13];
         }
 
         Aesthetic.get()
