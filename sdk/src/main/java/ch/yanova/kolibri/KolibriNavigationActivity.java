@@ -653,8 +653,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
+            return;
         }
 
         final MenuItem selectedItem = getSelectedMenuItem();
