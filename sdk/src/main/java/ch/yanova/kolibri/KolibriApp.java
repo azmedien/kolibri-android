@@ -3,6 +3,7 @@ package ch.yanova.kolibri;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.AnyThread;
@@ -124,7 +125,8 @@ public class KolibriApp extends Application {
         sb.append("&x=").append(viewportWidthPixels).append("x").append(viewportHeightPixels);
 
         if (url != null) {
-            sb.append("&r=").append(url);
+            final String urlEscaped = Uri.parse(url).buildUpon().clearQuery().build().toString();
+            sb.append("&r=").append(urlEscaped);
         }
 
         // TODO: check error if request is successful but the server return some error

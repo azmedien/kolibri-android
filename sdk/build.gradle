@@ -59,6 +59,10 @@ dependencies {
 
     provided 'com.google.firebase:firebase-core:11.2.0'
     provided 'com.google.firebase:firebase-messaging:11.2.0'
+
+    provided('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+        transitive = true;
+    }
 }
 
 publishing {
