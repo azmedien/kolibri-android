@@ -1,6 +1,7 @@
 package ch.yanova.kolibri;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -295,10 +296,15 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
         final Intent intent = item.getIntent();
-        final Kolibri.HandlerType type = notifyComponenets(intent);
 
+        final PackageManager packageManager = getPackageManager();
+        if (intent.resolveActivity(packageManager) != null) {
+            return false;
+        }
+
+        notifyComponenets(intent);
         drawer.closeDrawer(GravityCompat.START);
-        return type.equals(Kolibri.HandlerType.COMPONENT);
+        return true;
     }
 
     protected void setActionBarTitle(String title) {
@@ -451,16 +457,15 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                 // We may skip setup styling if we are coming from background or loading same configuration
                 if (!restarted || isFresh) {
                     setupStyling();
-                }
+                    setupHeader();
 
-                setupHeader();
-
-                constructNavigation(navigation);
-                if (navigation.hasSetting("footer")) {
-                    try {
-                        constructFooter(navigation.getObject("footer"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    constructNavigation(navigation);
+                    if (navigation.hasSetting("footer")) {
+                        try {
+                            constructFooter(navigation.getObject("footer"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
