@@ -1,5 +1,6 @@
 package ch.yanova.kolibri;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -42,6 +43,7 @@ import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -183,10 +185,17 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                 }
             }
 
+            @TargetApi(Build.VERSION_CODES.M)
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
-                getWebviewOverlay().showError();
+                getWebviewOverlay().showError(String.format(Locale.getDefault(), "Error %d: %s", error.getErrorCode(), error.getDescription()));
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+                getWebviewOverlay().showError(String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
             }
         });
     }

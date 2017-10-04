@@ -108,7 +108,10 @@ public class KolibriLoadingView extends FrameLayout {
         }
 
         mLayoutError.setVisibility(View.VISIBLE);
+    }
 
+    public void showError(String text) {
+        showError(text, null, null);
     }
 
     public void showError() {

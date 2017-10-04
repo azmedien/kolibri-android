@@ -171,9 +171,9 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
                             Aesthetic.get()
                                     .colorPrimary(palette[RuntimeConfig.THEME_COLOR_PRIMARY])
+                                    .colorPrimaryDark(palette[RuntimeConfig.THEME_COLOR_PRIMARY_DARK])
                                     .colorAccent(palette[13])
                                     .colorStatusBarAuto()
-                                    .colorNavigationBarAuto()
                                     .textColorPrimary(Color.BLACK)
                                     .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
                                     .apply();
