@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebResourceError;
@@ -78,6 +79,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     private KolibriLoadingView webviewOverlay;
 
     private boolean restarted;
+
+    private Intent shareIntent;
 
     private final View.OnClickListener onFooterClick = new View.OnClickListener() {
         @Override
@@ -162,6 +165,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
+                shareIntent = null;
+                invalidateOptionsMenu();
                 getWebviewOverlay().showLoading();
             }
 
@@ -216,6 +221,14 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        final int i = item.getItemId();
+
+        if (i == R.id.action_share) {
+            startActivity(Intent.createChooser(shareIntent, "Share link!"));
+            return true;
+        }
+
         return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
@@ -710,5 +723,41 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
     protected KolibriLoadingView getWebviewOverlay() {
         return webviewOverlay;
+    }
+
+    protected void handleAmpData(Map<String, String> data) {
+        if (data.size() > 0 && data.containsKey(WebViewCoordinator.META_SHAREABLE)) {
+
+            final String url = data.containsKey(WebViewCoordinator.META_CANONICAL)
+                    ? data.get(WebViewCoordinator.META_CANONICAL)
+                    : data.get(WebViewCoordinator.META_URL);
+
+            if (url != null) {
+                shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, data.get(WebViewCoordinator.META_TITLE));
+                shareIntent.putExtra(Intent.EXTRA_TEXT, url);
+            } else {
+                shareIntent = null;
+            }
+
+            invalidateOptionsMenu();
+        }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        final MenuItem share = menu.findItem(R.id.action_share);
+
+        share.setVisible(shareIntent != null);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_webview, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }
