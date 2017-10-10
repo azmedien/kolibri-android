@@ -22,7 +22,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebResourceError;
@@ -79,6 +78,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     private KolibriLoadingView webviewOverlay;
 
     private boolean restarted;
+    private boolean pageHasError;
 
     private Intent shareIntent;
 
@@ -166,6 +166,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 shareIntent = null;
+                pageHasError = false;
+
                 invalidateOptionsMenu();
                 getWebviewOverlay().showLoading();
             }
@@ -173,7 +175,9 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             @Override
             public void onPageCommitVisible(WebView view, String url) {
                 super.onPageCommitVisible(view, url);
-                getWebviewOverlay().showView();
+                if (!pageHasError) {
+                    getWebviewOverlay().showView();
+                }
             }
 
             @Override
@@ -181,13 +185,15 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                 super.onPageFinished(view, url);
 
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                    // On old devices without commitVisible we delay preventing flickering.
-                    getWebviewOverlay().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            getWebviewOverlay().showView();
-                        }
-                    }, 250);
+                    if (!pageHasError) {
+                        // On old devices without commitVisible we delay preventing flickering.
+                        getWebviewOverlay().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                getWebviewOverlay().showView();
+                            }
+                        }, 250);
+                    }
                 }
             }
 
@@ -195,12 +201,17 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
-                getWebviewOverlay().showError(String.format(Locale.getDefault(), "Error %d: %s", error.getErrorCode(), error.getDescription()));
+                showPageError(error.getErrorCode(), error.getDescription());
             }
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
+                showPageError(errorCode, description);
+            }
+
+            private void showPageError(int errorCode, CharSequence description) {
+                pageHasError = true;
                 getWebviewOverlay().showError(String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
             }
         });
@@ -321,6 +332,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         final PackageManager packageManager = getPackageManager();
         if (intent.resolveActivity(packageManager) != null) {
+            // Notify custom components in case they are activities
+            KolibriApp.getInstance().logEvent(null, intent.getData().toString());
             return false;
         }
 

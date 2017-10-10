@@ -331,7 +331,7 @@ public class KolibriWebView extends WebView {
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             super.onReceivedError(view, request, error);
-            Crashlytics.log(5, "KolibriWebView", "onReceivedError() called with: view = [" + view + "], request = [" + request + "], error = [" + error + "]");
+            Crashlytics.log(5, "KolibriWebView", "onReceivedError() called with: request = [" + request + "], error = [" + error + "]");
 
             // We ignore errors regarding assets loading,
             // so in this case we check if the request url and webview url are same
@@ -345,7 +345,7 @@ public class KolibriWebView extends WebView {
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
-            Crashlytics.log(5, "KolibriWebView", "onReceivedError() called with: view = [" + view + "], errorCode = [" + errorCode + "], description = [" + description + "], failingUrl = [" + failingUrl + "]");
+            Crashlytics.log(5, "KolibriWebView", "onReceivedError() called with: errorCode = [" + errorCode + "], description = [" + description + "], failingUrl = [" + failingUrl + "]");
 
             for (KolibriWebViewClient webClient : webClients) {
                 webClient.onReceivedError(view, errorCode, description, failingUrl);
