@@ -297,8 +297,7 @@ public class Kolibri {
     }
 
     public void unsubscribeFromPushNotifications() {
-
-        if (preferences.contains(KEY_SUBSCRIBED_FOR_PUSH)) {
+        if (isSubscribedForPushNotifications()) {
             preferences.edit().remove(KEY_SUBSCRIBED_FOR_PUSH).apply();
         }
     }
@@ -308,7 +307,7 @@ public class Kolibri {
     }
 
     public boolean hasUnsubscribedFromPushExplicitly() {
-        return preferences.contains(KEY_SUBSCRIBED_FOR_PUSH);
+        return !preferences.contains(KEY_SUBSCRIBED_FOR_PUSH);
     }
 
     public enum HandlerType {
