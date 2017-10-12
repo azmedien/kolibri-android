@@ -329,16 +329,28 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
 
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
+        final MenuItem previouslySelected = getSelectedMenuItem();
         final Intent intent = item.getIntent();
 
         final PackageManager packageManager = getPackageManager();
         if (intent.resolveActivity(packageManager) != null) {
             // Notify custom components in case they are activities
             KolibriApp.getInstance().logEvent(null, intent.getData().toString());
+
+            // Post to navigation view and select previously one menu item
+            // because we won't to select components that are handled by activities.
+            navigationView.post(new Runnable() {
+                @Override
+                public void run() {
+                    item.setChecked(false);
+                    previouslySelected.setChecked(true);
+                }
+            });
+
             return false;
         }
 

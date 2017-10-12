@@ -19,6 +19,8 @@ import android.view.View;
 
 import com.afollestad.aesthetic.Aesthetic;
 import com.afollestad.aesthetic.NavigationViewMode;
+import com.afollestad.aesthetic.TabLayoutBgMode;
+import com.afollestad.aesthetic.TabLayoutIndicatorMode;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +36,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
 import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
 
 /**
@@ -232,21 +235,28 @@ public class Kolibri {
         final RuntimeConfig.Styling styling = runtime.getStyling();
         int primaryColor = styling.getPrimary();
         int accentColor = styling.getAccent();
+        int primaryDarkColor = styling.getPrimaryDark();
+
 
         if (applyOverrides && styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
             final int toolbarBackgroud = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND);
             final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
 
             primaryColor = palette[THEME_COLOR_PRIMARY];
+            primaryDarkColor = palette[THEME_COLOR_PRIMARY_DARK];
 //            accentColor = palette[13];
         }
 
         Aesthetic.get()
                 .colorPrimary(primaryColor)
+                .colorPrimaryDark(primaryDarkColor)
                 .colorAccent(accentColor)
                 .colorStatusBarAuto()
                 .textColorPrimary(Color.BLACK)
+                .textColorSecondary(Color.BLACK)
                 .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                .tabLayoutBackgroundMode(TabLayoutBgMode.PRIMARY)
+                .tabLayoutIndicatorMode(TabLayoutIndicatorMode.ACCENT)
                 .apply();
     }
 
