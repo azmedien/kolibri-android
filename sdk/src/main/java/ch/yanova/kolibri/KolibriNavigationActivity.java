@@ -212,7 +212,12 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
             private void showPageError(int errorCode, CharSequence description) {
                 pageHasError = true;
-                getWebviewOverlay().showError(String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
+
+                if (errorCode == ERROR_CONNECT || errorCode == ERROR_HOST_LOOKUP) {
+                    getWebviewOverlay().showError(getResources().getString(R.string.internet_error_message));
+                } else {
+                    getWebviewOverlay().showError(String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
+                }
             }
         });
     }
