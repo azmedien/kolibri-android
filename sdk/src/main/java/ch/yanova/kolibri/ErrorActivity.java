@@ -8,7 +8,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-
 import com.afollestad.aesthetic.AestheticActivity;
 
 public class ErrorActivity extends AestheticActivity {

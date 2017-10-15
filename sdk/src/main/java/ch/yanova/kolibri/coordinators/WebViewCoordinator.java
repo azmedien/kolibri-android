@@ -7,18 +7,6 @@ import android.net.UrlQuerySanitizer;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
-
-import com.afollestad.aesthetic.Aesthetic;
-import com.afollestad.aesthetic.NavigationViewMode;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriCoordinator;
@@ -26,6 +14,14 @@ import ch.yanova.kolibri.R;
 import ch.yanova.kolibri.RuntimeConfig;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.OnAmpDataFoundListener;
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.NavigationViewMode;
+import java.util.HashMap;
+import java.util.Map;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 /**
  * Created by lekov on 3/28/17.

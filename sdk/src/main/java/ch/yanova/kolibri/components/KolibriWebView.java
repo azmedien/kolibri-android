@@ -1,5 +1,9 @@
 package ch.yanova.kolibri.components;
 
+import static ch.yanova.kolibri.Kolibri.TARGET_EXTERNAL;
+import static ch.yanova.kolibri.Kolibri.TARGET_INTERNAL;
+import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -16,20 +20,13 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
-import com.crashlytics.android.Crashlytics;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriException;
-
-import static ch.yanova.kolibri.Kolibri.TARGET_EXTERNAL;
-import static ch.yanova.kolibri.Kolibri.TARGET_INTERNAL;
-import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
+import com.crashlytics.android.Crashlytics;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mmironov on 2/26/17.

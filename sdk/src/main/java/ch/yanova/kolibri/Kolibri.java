@@ -1,5 +1,9 @@
 package ch.yanova.kolibri;
 
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
+import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,28 +20,20 @@ import android.support.annotation.UiThread;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
-
 import com.afollestad.aesthetic.Aesthetic;
 import com.afollestad.aesthetic.NavigationViewMode;
 import com.afollestad.aesthetic.TabLayoutBgMode;
 import com.afollestad.aesthetic.TabLayoutIndicatorMode;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
-import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by mmironov on 2/26/17.

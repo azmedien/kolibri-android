@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import ch.yanova.kolibri.R;
 
 public class KolibriLoadingView extends FrameLayout {

@@ -1,7 +1,6 @@
 package ch.yanova.kolibri.coordinators;
 
 import android.net.Uri;
-
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.search.OnSubmitFilteredSearchListener;
