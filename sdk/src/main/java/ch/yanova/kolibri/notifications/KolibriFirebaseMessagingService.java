@@ -9,13 +9,11 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.TypedValue;
-
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
-
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.R;
 import ch.yanova.kolibri.RuntimeConfig;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 
 /**
  * Created by lekov on 5/18/17.
@@ -69,6 +67,7 @@ public final class KolibriFirebaseMessagingService extends FirebaseMessagingServ
         Intent result = Kolibri.createIntent(uri);
         result.addCategory("notification");
         result.putExtra("url", url);
+        result.putExtra(Intent.EXTRA_TITLE, title);
 
         result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 

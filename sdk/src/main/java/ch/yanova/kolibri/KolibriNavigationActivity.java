@@ -1,5 +1,13 @@
 package ch.yanova.kolibri;
 
+import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;
+import static ch.yanova.kolibri.RuntimeConfig.ICON;
+import static ch.yanova.kolibri.RuntimeConfig.ID;
+import static ch.yanova.kolibri.RuntimeConfig.ITEMS;
+import static ch.yanova.kolibri.RuntimeConfig.LABEL;
+import static ch.yanova.kolibri.RuntimeConfig.Navigation;
+import static ch.yanova.kolibri.RuntimeConfig.NavigationItem;
+
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -31,35 +39,23 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import ch.yanova.kolibri.components.KolibriLoadingView;
+import ch.yanova.kolibri.components.KolibriWebView;
+import ch.yanova.kolibri.components.KolibriWebViewClient;
+import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 import com.afollestad.aesthetic.Aesthetic;
 import com.afollestad.aesthetic.AestheticActivity;
 import com.afollestad.aesthetic.NavigationViewMode;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import ch.yanova.kolibri.components.KolibriLoadingView;
-import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
-import ch.yanova.kolibri.coordinators.WebViewCoordinator;
-
-import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;
-import static ch.yanova.kolibri.RuntimeConfig.ICON;
-import static ch.yanova.kolibri.RuntimeConfig.ID;
-import static ch.yanova.kolibri.RuntimeConfig.ITEMS;
-import static ch.yanova.kolibri.RuntimeConfig.LABEL;
-import static ch.yanova.kolibri.RuntimeConfig.Navigation;
-import static ch.yanova.kolibri.RuntimeConfig.NavigationItem;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public abstract class KolibriNavigationActivity extends AestheticActivity implements NavigationView.OnNavigationItemSelectedListener, RuntimeListener {
 
@@ -472,6 +468,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
                         setIntent(null);
                         Kolibri.notifyComponents(this, intent);
+                        navigationView.setCheckedItem(item.getItemId());
                         return;
                     }
                 }
@@ -490,7 +487,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
 
         if (type == Kolibri.HandlerType.NONE) {
-            final Intent errorIntent = Kolibri.getErrorIntent(this, getIntent().getStringExtra(Intent.EXTRA_TITLE), getString(R.string.text_update_app));
+            final String title = getIntent().hasExtra("title") ? getIntent().getStringExtra("title") : getIntent().getStringExtra(Intent.EXTRA_TITLE);
+            final Intent errorIntent = Kolibri.getErrorIntent(this, title, getString(R.string.text_update_app));
             Kolibri.notifyComponents(KolibriNavigationActivity.this, errorIntent);
             setIntent(null);
         }
@@ -519,6 +517,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                             e.printStackTrace();
                         }
                     }
+                } else {
+                    onNavigationInitialize();
                 }
             }
         });
