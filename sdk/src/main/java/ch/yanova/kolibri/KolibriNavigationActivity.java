@@ -474,10 +474,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                 }
             }
 
-            //If the was no id
-            final Menu menu = navigationView.getMenu();
-            final Intent intent = menu.getItem(0).getIntent();
-            Kolibri.notifyComponents(this, intent);
+            //If the was no id, load default one instead
+            onNavigationItemSelected(getDefaultItem());
             setIntent(null);
             return;
         }
