@@ -456,8 +456,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                         intent.putExtras(item.getIntent().getExtras());
 
                         //There is a specific url that was pushed to the app
-                        if (urlToLoad != null) {
-                            intent.putExtra("deeplink", urlToLoad);
+                        if (urlToLoad != null && !urlToLoad.isEmpty()) {
+                            intent.putExtra(Kolibri.EXTRA_DEEPLINK, urlToLoad);
                         }
 
                         setIntent(null);
@@ -479,7 +479,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
 
         if (type == Kolibri.HandlerType.NONE) {
-            final String title = getIntent().hasExtra("title") ? getIntent().getStringExtra("title") : getIntent().getStringExtra(Intent.EXTRA_TITLE);
+            final String title = getIntent().hasExtra(Kolibri.EXTRA_TITLE) ? getIntent().getStringExtra(
+                Kolibri.EXTRA_TITLE) : getIntent().getStringExtra(Intent.EXTRA_TITLE);
             final Intent errorIntent = Kolibri.getErrorIntent(this, title, getString(R.string.text_update_app));
             Kolibri.notifyComponents(KolibriNavigationActivity.this, errorIntent);
             setIntent(null);
@@ -713,7 +714,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             // Go back from deeplink
             final Intent intent = webView.getIntent();
 
-            if (intent.hasExtra("deeplink")) {
+            if (intent.hasExtra(Kolibri.EXTRA_DEEPLINK)) {
 
                 MenuItem category = findMenuItem(intent.getStringExtra(Kolibri.EXTRA_ID));
 
@@ -721,7 +722,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                     navigationView.setCheckedItem(category.getItemId());
                 }
 
-                intent.removeExtra("deeplink");
+                intent.removeExtra(Kolibri.EXTRA_DEEPLINK);
                 notifyComponenets(intent);
                 return;
             } else {

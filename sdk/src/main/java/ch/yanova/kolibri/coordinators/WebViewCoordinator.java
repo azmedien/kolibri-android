@@ -77,8 +77,8 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
             final Uri url;
 
-            if (intent.hasExtra("deeplink")) {
-                url = Uri.parse(intent.getStringExtra("deeplink"));
+            if (intent.hasExtra(Kolibri.EXTRA_DEEPLINK)) {
+                url = Uri.parse(intent.getStringExtra(Kolibri.EXTRA_DEEPLINK));
             } else {
                 url = Uri.parse(intent.getData().getQueryParameter("url"));
             }
