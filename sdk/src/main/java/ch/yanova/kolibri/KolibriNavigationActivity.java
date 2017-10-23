@@ -92,7 +92,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         if (type == Kolibri.HandlerType.COMPONENT) {
 
-            final Uri uri = intent.getData();
+            final Uri uri = Uri.parse(intent.getData().getQueryParameter("url"));
             final String target = Kolibri.getInstance(this).getTarget(uri);
             if (Kolibri.TARGET_SELF.equals(target)) {
                 final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
@@ -723,6 +723,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
                 intent.removeExtra("deeplink");
                 notifyComponenets(intent);
+                return;
             } else {
 
                 final String selectedItemUrl = selectedItem.getIntent()
