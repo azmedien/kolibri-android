@@ -422,12 +422,12 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         final Uri notificationUri = Uri.parse(notificationUrl);
 
         if (notificationUri.getScheme().startsWith("http")) {
-            Uri uri = Uri.parse(WebViewCoordinator.webViewUri);
+            final Uri uri = Uri.parse(WebViewCoordinator.webViewUri);
 
-            Uri.Builder builder = uri.buildUpon();
+            final Uri.Builder builder = uri.buildUpon();
             builder.appendQueryParameter("url", notificationUrl);
 
-            Intent intent = Kolibri.createIntent(builder.build());
+            final Intent intent = Kolibri.createIntent(builder.build());
             Kolibri.notifyComponents(this, intent);
             setIntent(null);
             return;
@@ -452,19 +452,13 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
                         final String urlToLoad = notificationUri.getQueryParameter("url");
                         final Uri menuData = item.getIntent().getData();
 
-                        Intent intent = Kolibri.createIntent(menuData);
+                        final Intent intent = Kolibri.createIntent(menuData);
+                        intent.putExtras(item.getIntent().getExtras());
 
                         //There is a specific url that was pushed to the app
                         if (urlToLoad != null) {
-                            Uri intentData = Uri.parse(WebViewCoordinator.webViewUri);
-                            Uri.Builder builder = intentData.buildUpon();
-                            builder.appendQueryParameter("url", urlToLoad);
-                            intentData = builder.build();
-                            intent.setData(intentData);
-                            intent.putExtra(Kolibri.EXTRA_GO_BACK_URL, menuData.getQueryParameter("url"));
+                            intent.putExtra("deeplink", urlToLoad);
                         }
-
-                        intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
 
                         setIntent(null);
                         Kolibri.notifyComponents(this, intent);
@@ -716,29 +710,45 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         if (webView.canGoBack()) {
 
-            final String selectedItemUrl = selectedItem.getIntent()
+            // Go back from deeplink
+            final Intent intent = webView.getIntent();
+
+            if (intent.hasExtra("deeplink")) {
+
+                MenuItem category = findMenuItem(intent.getStringExtra(Kolibri.EXTRA_ID));
+
+                if (category != null) {
+                    navigationView.setCheckedItem(category.getItemId());
+                }
+
+                intent.removeExtra("deeplink");
+                notifyComponenets(intent);
+            } else {
+
+                final String selectedItemUrl = selectedItem.getIntent()
                     .getData().getQueryParameter("url");
-            final String currentUrl = webView.getOriginalUrl();
+                final String currentUrl = webView.getOriginalUrl();
 
-            //If the url we are going back from
-            //came from a menu item click, we clear the history
-            //and go back home
-            if (currentUrl.equals(selectedItemUrl)) {
-                final String url = defaultItem.getIntent().getData().getQueryParameter("url");
+                //If the url we are going back from
+                //came from a menu item click, we clear the history
+                //and go back home
+                if (currentUrl.equals(selectedItemUrl)) {
+                    final String url = defaultItem.getIntent().getData().getQueryParameter("url");
 
-                //If there is url on default item, then we load this url and clear that history
-                //so that the next time the user presses back they are redirected out
-                //of the app
-                if (url != null) {
-                    webView.setClearHistory(true);
-                    webView.loadUrl(url);
-                    setActionBarTitle(defaultItem.getTitle().toString());
-                    navigationView.setCheckedItem(defaultItem.getItemId());
+                    //If there is url on default item, then we load this url and clear that history
+                    //so that the next time the user presses back they are redirected out
+                    //of the app
+                    if (url != null) {
+                        webView.setClearHistory(true);
+                        webView.loadUrl(url);
+                        setActionBarTitle(defaultItem.getTitle().toString());
+                        navigationView.setCheckedItem(defaultItem.getItemId());
+                        return;
+                    }
+                } else {
+                    webView.goBack();
                     return;
                 }
-            } else {
-                webView.goBack();
-                return;
             }
         }
 
