@@ -52,6 +52,8 @@ public class Kolibri {
     public static final String TARGET_INTERNAL = "_internal";
     public static final String TARGET_EXTERNAL = "_external";
     public static final String TARGET_SELF = "_self";
+    public static final String EXTRA_DEEPLINK = "deeplink";
+    public static final String EXTRA_TITLE = "title";
 
     public static boolean isPageSearchable(Context context, String pageId) {
 
