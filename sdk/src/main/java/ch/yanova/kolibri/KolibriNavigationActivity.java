@@ -209,6 +209,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
             private void showPageError(int errorCode, CharSequence description) {
                 pageHasError = true;
 
+                Kolibri.getInstance(KolibriNavigationActivity.this).applyRuntimeTheme(false);
+
                 if (errorCode == ERROR_CONNECT || errorCode == ERROR_HOST_LOOKUP) {
                     getWebviewOverlay().showError(getResources().getString(R.string.internet_error_message));
                 } else {
