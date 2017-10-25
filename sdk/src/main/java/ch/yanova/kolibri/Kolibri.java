@@ -1,12 +1,15 @@
 package ch.yanova.kolibri;
 
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
+import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
+import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.AnyThread;
@@ -17,19 +20,20 @@ import android.support.annotation.UiThread;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.NavigationViewMode;
+import com.afollestad.aesthetic.TabLayoutBgMode;
+import com.afollestad.aesthetic.TabLayoutIndicatorMode;
 import java.io.IOException;
-
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by mmironov on 2/26/17.
@@ -48,6 +52,8 @@ public class Kolibri {
     public static final String TARGET_INTERNAL = "_internal";
     public static final String TARGET_EXTERNAL = "_external";
     public static final String TARGET_SELF = "_self";
+    public static final String EXTRA_DEEPLINK = "deeplink";
+    public static final String EXTRA_TITLE = "title";
 
     public static boolean isPageSearchable(Context context, String pageId) {
 
@@ -128,7 +134,7 @@ public class Kolibri {
                     if (!userDefined) {
                         try { // Try to load saved one as a fallback configuratio
                             runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")), getRuntimeUrl());
-                            runtimeListener.onLoaded(runtime);
+                            runtimeListener.onLoaded(runtime, false);
                         } catch (JSONException | KolibriException exception) {
                             runtimeListener.onFailed(exception);
                         }
@@ -140,9 +146,11 @@ public class Kolibri {
             public void onResponse(Call call, Response response) throws IOException {
 
                 final String json = response.body().string();
+                final boolean isFresh = response.cacheResponse() == null;
                 Exception exception = null;
 
                 try {
+
                     Log.i(TAG, "onResponse: cache " + response.cacheResponse());
                     Log.i(TAG, "onResponse: network " + response.networkResponse());
 
@@ -161,7 +169,7 @@ public class Kolibri {
                 } finally {
                     if (runtimeListener != null) {
                         if (exception == null) {
-                            runtimeListener.onLoaded(runtime);
+                            runtimeListener.onLoaded(runtime, isFresh);
                         } else {
                             runtimeListener.onFailed(exception);
                         }
@@ -201,7 +209,6 @@ public class Kolibri {
     public static Intent createIntent(@NonNull Uri uri) {
         final Intent res = new Intent(Intent.ACTION_VIEW);
         res.setData(uri);
-
         return res;
     }
 
@@ -220,6 +227,35 @@ public class Kolibri {
         }
 
         return HandlerType.NONE;
+    }
+
+    public void applyRuntimeTheme(boolean applyOverrides) {
+        final RuntimeConfig.Styling styling = runtime.getStyling();
+        int primaryColor = styling.getPrimary();
+        int accentColor = styling.getAccent();
+        int primaryDarkColor = styling.getPrimaryDark();
+
+
+        if (applyOverrides && styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
+            final int toolbarBackgroud = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND);
+            final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
+
+            primaryColor = palette[THEME_COLOR_PRIMARY];
+            primaryDarkColor = palette[THEME_COLOR_PRIMARY_DARK];
+//            accentColor = palette[13];
+        }
+
+        Aesthetic.get()
+                .colorPrimary(primaryColor)
+                .colorPrimaryDark(primaryDarkColor)
+                .colorAccent(accentColor)
+                .colorStatusBarAuto()
+                .textColorPrimary(Color.BLACK)
+                .textColorSecondary(Color.BLACK)
+                .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                .tabLayoutBackgroundMode(TabLayoutBgMode.PRIMARY)
+                .tabLayoutIndicatorMode(TabLayoutIndicatorMode.ACCENT)
+                .apply();
     }
 
     public static String searchParamKey(Context context) {
@@ -256,9 +292,10 @@ public class Kolibri {
         return runtime;
     }
 
-    public static Intent getErrorIntent(Context context, String errorMessage) {
+    public static Intent getErrorIntent(Context context, String title, String errorMessage) {
 
         final Intent errorIntent = new Intent(context, ErrorActivity.class);
+        errorIntent.putExtra(Intent.EXTRA_TITLE, title);
         errorIntent.putExtra(EXTRA_ERROR_MESSAGE, errorMessage);
         return errorIntent;
     }
@@ -268,8 +305,7 @@ public class Kolibri {
     }
 
     public void unsubscribeFromPushNotifications() {
-
-        if (preferences.contains(KEY_SUBSCRIBED_FOR_PUSH)) {
+        if (isSubscribedForPushNotifications()) {
             preferences.edit().remove(KEY_SUBSCRIBED_FOR_PUSH).apply();
         }
     }
@@ -279,7 +315,7 @@ public class Kolibri {
     }
 
     public boolean hasUnsubscribedFromPushExplicitly() {
-        return preferences.contains(KEY_SUBSCRIBED_FOR_PUSH);
+        return !preferences.contains(KEY_SUBSCRIBED_FOR_PUSH);
     }
 
     public enum HandlerType {

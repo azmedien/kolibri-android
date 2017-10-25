@@ -10,32 +10,23 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.ProgressBar;
 
+import com.afollestad.aesthetic.AestheticActivity;
 import com.google.vr.sdk.widgets.video.VrVideoEventListener;
 import com.google.vr.sdk.widgets.video.VrVideoView;
 
 import java.io.File;
 import java.io.IOException;
 
-import ch.yanova.kolibri.Kolibri;
-import ch.yanova.kolibri.RuntimeConfig;
-import ch.yanova.kolibri.TintUtils;
-
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
-import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
-
-public class CardboardActivity extends AppCompatActivity {
+public class CardboardActivity extends AestheticActivity {
 
     protected VrVideoView videoWidgetView;
 
-    private Toolbar toolbar;
     private View progress;
 
     private DialogFragment errorDialog;
@@ -55,13 +46,14 @@ public class CardboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cardboard);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         progress = findViewById(R.id.progress);
         errorDialog = ErrorDialog.newInstance("Video cannot be played.");
 
-        videoWidgetView = (VrVideoView) findViewById(R.id.video_view);
+        videoWidgetView = findViewById(R.id.video_view);
         videoWidgetView.setInfoButtonEnabled(false);
         videoWidgetView.setEventListener(new VrVideoEventListener() {
             @Override
@@ -88,8 +80,6 @@ public class CardboardActivity extends AppCompatActivity {
 
         videoOptions.inputFormat = "mp4".equals(type) ? VrVideoView.Options.FORMAT_DEFAULT : VrVideoView.Options.FORMAT_HLS;
         videoOptions.inputType = VrVideoView.Options.TYPE_MONO;
-
-        setupStyling();
     }
 
     @Override
@@ -114,6 +104,18 @@ public class CardboardActivity extends AppCompatActivity {
     protected void onDestroy() {
         videoWidgetView.shutdown();
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void startVideo() {
@@ -143,33 +145,6 @@ public class CardboardActivity extends AppCompatActivity {
         }
 
         return extension;
-    }
-
-    private void setupStyling() {
-
-        final RuntimeConfig configuration = Kolibri.getInstance(this).getRuntime();
-
-        if (configuration == null) {
-            return;
-        }
-
-        final RuntimeConfig.Styling styling = configuration.getStyling();
-
-        if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
-            final int toolbarBackgroud = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_BACKGROUND);
-            final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
-
-            TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
-        } else {
-            TintUtils.tintToolbar(this, toolbar, styling.getPrimary(), styling.getPrimaryDark(), false);
-        }
-
-        if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_TEXT)) {
-            toolbar.setTitleTextColor(styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_TEXT));
-            toolbar.setSubtitle(styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_TOOLBAR_TEXT));
-        }
-
-        TintUtils.tintProgressBar((ProgressBar) progress);
     }
 
     public static class ErrorDialog extends AppCompatDialogFragment {

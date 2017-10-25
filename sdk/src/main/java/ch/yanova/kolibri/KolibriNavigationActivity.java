@@ -1,53 +1,5 @@
 package ch.yanova.kolibri;
 
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.UiThread;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.webkit.WebView;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import ch.yanova.kolibri.components.KolibriWebChromeClient;
-import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
-import ch.yanova.kolibri.coordinators.WebViewCoordinator;
-import ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService;
-
 import static ch.yanova.kolibri.RuntimeConfig.COMPONENT;
 import static ch.yanova.kolibri.RuntimeConfig.ICON;
 import static ch.yanova.kolibri.RuntimeConfig.ID;
@@ -55,34 +7,82 @@ import static ch.yanova.kolibri.RuntimeConfig.ITEMS;
 import static ch.yanova.kolibri.RuntimeConfig.LABEL;
 import static ch.yanova.kolibri.RuntimeConfig.Navigation;
 import static ch.yanova.kolibri.RuntimeConfig.NavigationItem;
-import static ch.yanova.kolibri.RuntimeConfig.Styling;
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY;
-import static ch.yanova.kolibri.RuntimeConfig.THEME_COLOR_PRIMARY_DARK;
-import static ch.yanova.kolibri.RuntimeConfig.getMaterialPalette;
-import static ch.yanova.kolibri.notifications.KolibriFirebaseMessagingService.KOLIBRI_NOTIFICATION_INTENT;
 
-public abstract class KolibriNavigationActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
-        RuntimeListener, KolibriInitializeListener {
+import android.annotation.TargetApi;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebView;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import ch.yanova.kolibri.components.KolibriLoadingView;
+import ch.yanova.kolibri.components.KolibriWebView;
+import ch.yanova.kolibri.components.KolibriWebViewClient;
+import ch.yanova.kolibri.coordinators.WebViewCoordinator;
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.AestheticActivity;
+import com.afollestad.aesthetic.NavigationViewMode;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-    public static final String TAG_MAIN_FRAGMENT = "mainFragment";
+public abstract class KolibriNavigationActivity extends AestheticActivity implements NavigationView.OnNavigationItemSelectedListener, RuntimeListener {
+
     // this set prevents collecting targets by garbage collector
     final Set<Target> targets = new HashSet<>();
+
     protected RuntimeConfig configuration;
+
     private NavigationView navigationView;
-    private FloatingActionButton floatingActionButton;
-    private View mLayoutError;
-    private View mLayoutLoading;
-    private View mLayoutOverlay;
-    private boolean restarted;
     private DrawerLayout drawer;
+    private ActionBarDrawerToggle drawerToggle;
+
+    private FloatingActionButton floatingActionButton;
+
+    private KolibriWebView webView;
+    private KolibriLoadingView webviewOverlay;
+
+    private boolean restarted;
+    private boolean pageHasError;
+
+    private Intent shareIntent;
+
     private final View.OnClickListener onFooterClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             final Intent intent = (Intent) v.getTag();
-
             notifyComponenets(intent);
-
             drawer.closeDrawer(GravityCompat.START);
         }
     };
@@ -92,7 +92,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         if (type == Kolibri.HandlerType.COMPONENT) {
 
-            final Uri uri = intent.getData();
+            final Uri uri = Uri.parse(intent.getData().getQueryParameter("url"));
             final String target = Kolibri.getInstance(this).getTarget(uri);
             if (Kolibri.TARGET_SELF.equals(target)) {
                 final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
@@ -101,7 +101,8 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
 
         if (type == Kolibri.HandlerType.NONE) {
-            Kolibri.notifyComponents(KolibriNavigationActivity.this, Kolibri.getErrorIntent(KolibriNavigationActivity.this, getString(R.string.text_update_app)));
+            final Intent errorIntent = Kolibri.getErrorIntent(this, intent.getStringExtra(Intent.EXTRA_TITLE), getString(R.string.text_update_app));
+            Kolibri.notifyComponents(KolibriNavigationActivity.this, errorIntent);
         }
 
         return type;
@@ -114,51 +115,135 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        onPreInitialize();
-
         setContentView(R.layout.navigation_drawer);
 
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.kolibri_fab);
+        floatingActionButton = findViewById(R.id.kolibri_fab);
+        webView = findViewById(R.id.webview);
+        webviewOverlay = findViewById(R.id.overlay);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
 
-        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        drawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, slideOffset);
+                invalidateOptionsMenu();
+            }
+        };
+        drawerToggle.setDrawerSlideAnimationEnabled(false);
+        drawer.addDrawerListener(drawerToggle);
+
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        mLayoutError = navigationView.findViewById(R.id.error);
-        mLayoutLoading = navigationView.findViewById(R.id.progress);
-        mLayoutOverlay = navigationView.findViewById(R.id.overlay);
 
         headerImageContainer = navigationView.getHeaderView(0).findViewById(R.id.header_image_container);
 
-        final Fragment fragment = onPostInitialize();
-        startMainFragment(fragment);
-
         restarted = false;
+
+        webView.addKolibriWebViewClient(new KolibriWebViewClient() {
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                shareIntent = null;
+                pageHasError = false;
+
+                invalidateOptionsMenu();
+                getWebviewOverlay().showLoading();
+            }
+
+            @Override
+            public void onPageCommitVisible(WebView view, String url) {
+                super.onPageCommitVisible(view, url);
+                if (!pageHasError) {
+                    getWebviewOverlay().showView();
+                }
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    if (!pageHasError) {
+                        // On old devices without commitVisible we delay preventing flickering.
+                        getWebviewOverlay().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                getWebviewOverlay().showView();
+                            }
+                        }, 250);
+                    }
+                }
+            }
+
+            @TargetApi(Build.VERSION_CODES.M)
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                showPageError(error.getErrorCode(), error.getDescription());
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+                showPageError(errorCode, description);
+            }
+
+            private void showPageError(int errorCode, CharSequence description) {
+                pageHasError = true;
+
+                Kolibri.getInstance(KolibriNavigationActivity.this).applyRuntimeTheme(false);
+
+                if (errorCode == ERROR_CONNECT || errorCode == ERROR_HOST_LOOKUP) {
+                    getWebviewOverlay().showError(getResources().getString(R.string.internet_error_message));
+                } else {
+                    getWebviewOverlay().showError(String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
+                }
+            }
+        });
     }
 
-    public void applyDefaultPalette() {
-
-        final RuntimeConfig.Styling styling = configuration.getStyling();
-        final int primary = styling.getPrimary();
-        final int[] materialPalette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & primary));
-
-        applyColorPalette(materialPalette);
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
     }
 
-    public void applyColorPalette(int[] palette) {
-        TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
-        headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
 
-        final int tintColor = TintUtils.isDarkColor(palette[THEME_COLOR_PRIMARY]) ? palette[THEME_COLOR_PRIMARY] : palette[THEME_COLOR_PRIMARY_DARK];
-        TintUtils.tintNavigationView(navigationView, tintColor);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        final int i = item.getItemId();
+
+        if (i == R.id.action_share) {
+            startActivity(Intent.createChooser(shareIntent, "Share link!"));
+            return true;
+        }
+
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     private void setupStyling() {
@@ -166,37 +251,10 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             return;
         }
 
-        final Styling styling = configuration.getStyling();
+        Kolibri.getInstance(this).applyRuntimeTheme(true);
 
-        if (styling.hasPaletteColor(Styling.OVERRIDES_TOOLBAR_BACKGROUND)) {
-            final int toolbarBackgroud = styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_BACKGROUND);
-            final int[] palette = getMaterialPalette(String.format("#%06X", 0xFFFFFF & toolbarBackgroud));
-
-            TintUtils.tintToolbar(this, toolbar, palette[THEME_COLOR_PRIMARY], palette[THEME_COLOR_PRIMARY_DARK], false);
-            headerImageContainer.setBackgroundColor(palette[THEME_COLOR_PRIMARY]);
-        } else {
-            TintUtils.tintToolbar(this, toolbar, styling.getPrimary(), styling.getPrimaryDark(), false);
-            headerImageContainer.setBackgroundColor(styling.getPrimary());
-        }
-
-        if (styling.hasPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT)) {
-            toolbar.setTitleTextColor(styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT));
-            toolbar.setSubtitle(styling.getPaletteColor(Styling.OVERRIDES_TOOLBAR_TEXT));
-        }
-
-
-        if (styling.hasPaletteColor(Styling.OVERRIDES_NAVIGATION_ITEM_SELECTED)) {
-            final int menuItemSelected = styling.getPaletteColor(Styling.OVERRIDES_NAVIGATION_ITEM_SELECTED);
-            TintUtils.tintNavigationView(navigationView, menuItemSelected);
-        } else {
-            TintUtils.tintNavigationView(navigationView, styling.getPrimary());
-        }
-
-        if (styling.hasPaletteColor(Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND)) {
-            headerImageContainer.setBackgroundColor(styling.getPaletteColor(Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND));
-        } else {
-            headerImageContainer.setBackgroundColor(styling.getPrimary());
-        }
+        final RuntimeConfig.Styling styling = configuration.getStyling();
+        overrideHeaderBackground(styling);
     }
 
     @Override
@@ -208,42 +266,93 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        showNavigationLoading();
+
         Kolibri kolibri = Kolibri.getInstance(this);
         kolibri.loadRuntimeConfiguration(this);
+
+        getWebView().resumeTimers();
+        getWebView().onResume();
+
+        if (restarted) {
+
+            // Workaround RX observers of Aesthetic which resets the color
+            final RuntimeConfig.Styling styling = configuration.getStyling();
+            overrideHeaderBackground(styling);
+
+            // In case we are returning from other activity which is with runtime theme
+            // We want to be sure that if the there was theme-meta, we apply it again
+            final Integer lastPrimary = (Integer) webView.getTag(R.id.primaryColor);
+            final Integer lastAccent = (Integer) webView.getTag(R.id.accentColor);
+
+            if (lastPrimary != null) {
+                Aesthetic.get()
+                        .colorPrimary(lastPrimary)
+                        .colorAccent(lastAccent)
+                        .colorStatusBarAuto()
+                        .colorNavigationBarAuto()
+                        .textColorPrimary(Color.BLACK)
+                        .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                        .apply();
+            } else {
+                Kolibri.getInstance(this).applyRuntimeTheme(true);
+            }
+        }
     }
 
-    private void startMainFragment(@NonNull Fragment fragment) {
-        getSupportFragmentManager().beginTransaction().replace(R.id.kolibri_main_content, fragment, TAG_MAIN_FRAGMENT).commitAllowingStateLoss();
-    }
+    private void overrideHeaderBackground(RuntimeConfig.Styling styling) {
 
-    @NonNull
-    protected Fragment getMainFragment() {
-        return getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
+        if (styling.hasPaletteColor(RuntimeConfig.Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND)) {
+            final int navigationHeaderColor = styling.getPaletteColor(RuntimeConfig.Styling.OVERRIDES_NAVIGATION_HEADER_BACKGROUND);
+            headerImageContainer.post(new Runnable() {
+                @Override
+                public void run() {
+                    headerImageContainer.setBackgroundColor(navigationHeaderColor);
+                    headerImageContainer.setTag(":aesthetic_ignore");
+                }
+            });
         }
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    protected void onPause() {
+        getWebView().onPause();
+        getWebView().pauseTimers();
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        drawer.closeDrawer(Gravity.START);
+        super.onStop();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
 
         KolibriApp.getInstance().logMenuItemToFirebase(item);
 
+        final MenuItem previouslySelected = getSelectedMenuItem();
         final Intent intent = item.getIntent();
 
-        Kolibri.HandlerType type = notifyComponenets(intent);
+        final PackageManager packageManager = getPackageManager();
+        if (intent.resolveActivity(packageManager) != null) {
+            // Notify custom components in case they are activities
+            KolibriApp.getInstance().logEvent(null, intent.getData().toString());
 
-        if (type.equals(Kolibri.HandlerType.COMPONENT)) {
-            unselectAllMenuItemsExcept(item);
+            // Post to navigation view and select previously one menu item
+            // because we won't to select components that are handled by activities.
+            navigationView.post(new Runnable() {
+                @Override
+                public void run() {
+                    item.setChecked(false);
+                    previouslySelected.setChecked(true);
+                }
+            });
+
+            return false;
         }
 
+        notifyComponenets(intent);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -283,13 +392,11 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
         menu.getItem(navigation.getSettings().getInt("default-item")).getIntent().addCategory(Intent.CATEGORY_DEFAULT);
 
-        showNavigation();
-
         if (!restarted) {
             loadDefaultItem();
         } else if (selectedMenuItemId != null) {
             final MenuItem itemByid = findMenuItem(selectedMenuItemId);
-            unselectAllMenuItemsExcept(itemByid);
+            navigationView.setCheckedItem(itemByid.getItemId());
         }
 
         onNavigationInitialize();
@@ -307,7 +414,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         setIntent(intent);
     }
 
-    @Override
     public void onNavigationInitialize() {
 
         if (getIntent() == null || !getIntent().hasCategory("notification")) {
@@ -318,12 +424,12 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final Uri notificationUri = Uri.parse(notificationUrl);
 
         if (notificationUri.getScheme().startsWith("http")) {
-            Uri uri = Uri.parse(WebViewCoordinator.webViewUri);
+            final Uri uri = Uri.parse(WebViewCoordinator.webViewUri);
 
-            Uri.Builder builder = uri.buildUpon();
+            final Uri.Builder builder = uri.buildUpon();
             builder.appendQueryParameter("url", notificationUrl);
 
-            Intent intent = Kolibri.createIntent(builder.build());
+            final Intent intent = Kolibri.createIntent(builder.build());
             Kolibri.notifyComponents(this, intent);
             setIntent(null);
             return;
@@ -348,32 +454,24 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
                         final String urlToLoad = notificationUri.getQueryParameter("url");
                         final Uri menuData = item.getIntent().getData();
 
-                        Intent intent = Kolibri.createIntent(menuData);
+                        final Intent intent = Kolibri.createIntent(menuData);
+                        intent.putExtras(item.getIntent().getExtras());
 
                         //There is a specific url that was pushed to the app
-                        if (urlToLoad != null) {
-                            Uri intentData = Uri.parse(WebViewCoordinator.webViewUri);
-                            Uri.Builder builder = intentData.buildUpon();
-                            builder.appendQueryParameter("url", urlToLoad);
-                            intentData = builder.build();
-                            intent.setData(intentData);
-                            intent.putExtra(Kolibri.EXTRA_GO_BACK_URL, menuData.getQueryParameter("url"));
+                        if (urlToLoad != null && !urlToLoad.isEmpty()) {
+                            intent.putExtra(Kolibri.EXTRA_DEEPLINK, urlToLoad);
                         }
-
-                        unselectAllMenuItemsExcept(item);
-                        intent.putExtra(Intent.EXTRA_TITLE, item.getTitle());
 
                         setIntent(null);
                         Kolibri.notifyComponents(this, intent);
+                        navigationView.setCheckedItem(item.getItemId());
                         return;
                     }
                 }
             }
 
-            //If the was no id
-            final Menu menu = navigationView.getMenu();
-            final Intent intent = menu.getItem(0).getIntent();
-            Kolibri.notifyComponents(this, intent);
+            //If the was no id, load default one instead
+            onNavigationItemSelected(getDefaultItem());
             setIntent(null);
             return;
         }
@@ -383,25 +481,16 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
 
         if (type == Kolibri.HandlerType.NONE) {
+            final String title = getIntent().hasExtra(Kolibri.EXTRA_TITLE) ? getIntent().getStringExtra(
+                Kolibri.EXTRA_TITLE) : getIntent().getStringExtra(Intent.EXTRA_TITLE);
+            final Intent errorIntent = Kolibri.getErrorIntent(this, title, getString(R.string.text_update_app));
+            Kolibri.notifyComponents(KolibriNavigationActivity.this, errorIntent);
             setIntent(null);
-            Kolibri.notifyComponents(this, Kolibri.getErrorIntent(this, getString(R.string.text_update_app)));
         }
-    }
-
-    public void unselectAllMenuItemsExcept(MenuItem item) {
-        final Menu menu = navigationView.getMenu();
-
-        for (int m = 0; m < menu.size(); m++) {
-            if (!menu.getItem(m).equals(item)) {
-                menu.getItem(m).setChecked(false);
-            }
-        }
-
-        item.setChecked(true);
     }
 
     @Override
-    public void onLoaded(@NonNull final RuntimeConfig runtime) {
+    public void onLoaded(@NonNull final RuntimeConfig runtime, final boolean isFresh) {
 
         this.configuration = runtime;
 
@@ -410,16 +499,21 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
             public void run() {
                 final Navigation navigation = runtime.getNavigation();
 
-                setupStyling();
-                setupHeader();
+                // We may skip setup styling if we are coming from background or loading same configuration
+                if (!restarted || isFresh) {
+                    setupStyling();
+                    setupHeader();
 
-                constructNavigation(navigation);
-                if (navigation.hasSetting("footer")) {
-                    try {
-                        constructFooter(navigation.getObject("footer"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    constructNavigation(navigation);
+                    if (navigation.hasSetting("footer")) {
+                        try {
+                            constructFooter(navigation.getObject("footer"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
+                } else {
+                    onNavigationInitialize();
                 }
             }
         });
@@ -438,7 +532,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
                 final Target target = new Target() {
                     @Override
                     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        final FrameLayout layout = (FrameLayout) headerView.findViewById(R.id.header_image_container);
+                        final FrameLayout layout = headerView.findViewById(R.id.header_image_container);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                             layout.setBackground(new BitmapDrawable(getResources(), bitmap));
                         } else {
@@ -481,7 +575,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         }
 
         final JSONArray items = footer.getJSONArray(ITEMS);
-        final LinearLayout footerView = (LinearLayout) navigationView.findViewById(R.id.kolibri_footer);
+        final LinearLayout footerView = navigationView.findViewById(R.id.footer);
         final LayoutInflater inflater = LayoutInflater.from(this);
 
         for (int i = 0; i < items.length(); i++) {
@@ -513,17 +607,11 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
     }
 
     private boolean isFooterConstructed() {
-        return ((LinearLayout) navigationView.findViewById(R.id.kolibri_footer)).getChildCount() > 0;
+        return ((LinearLayout) navigationView.findViewById(R.id.footer)).getChildCount() > 0;
     }
 
     @Override
     public boolean onFailed(final Exception e) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                showNavigationError(e.getLocalizedMessage());
-            }
-        });
         return false;
     }
 
@@ -537,7 +625,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final String id = item.getId();
         intent.putExtra(Kolibri.EXTRA_ID, id);
 
-        MenuItem menuItem = menu.add(label).setIntent(intent);
+        MenuItem menuItem = menu.add(0, id.hashCode(), Menu.NONE, label).setIntent(intent).setCheckable(true);
 
         if (item.hasSetting(ICON)) {
             String iconUrl = item.getIcon();
@@ -574,61 +662,6 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         return floatingActionButton;
     }
 
-    @UiThread
-    protected void showNavigationLoading() {
-
-        if (mLayoutOverlay.getVisibility() != View.VISIBLE) {
-            mLayoutOverlay.setVisibility(View.VISIBLE);
-        }
-
-        if (mLayoutError != null && mLayoutError.getVisibility() != View.GONE) {
-            mLayoutError.setVisibility(View.GONE);
-        }
-
-        navigationView.setVisibility(View.GONE);
-
-        mLayoutLoading.setVisibility(View.VISIBLE);
-    }
-
-    @UiThread
-    protected void showNavigationError(String text) {
-
-        if (mLayoutOverlay.getVisibility() != View.VISIBLE) {
-            mLayoutOverlay.setVisibility(View.VISIBLE);
-        }
-
-        if (mLayoutLoading.getVisibility() != View.GONE) {
-            mLayoutLoading.setVisibility(View.GONE);
-        }
-
-        if (text != null) {
-            ((TextView) mLayoutError).setText(text);
-        }
-
-        if (navigationView.getVisibility() != View.GONE) {
-            navigationView.setVisibility(View.GONE);
-        }
-
-        mLayoutError.setVisibility(View.VISIBLE);
-    }
-
-    @UiThread
-    protected void showNavigation() {
-        if (mLayoutLoading.getVisibility() != View.GONE) {
-            mLayoutLoading.setVisibility(View.GONE);
-        }
-
-        if (mLayoutError.getVisibility() != View.GONE) {
-            mLayoutError.setVisibility(View.GONE);
-        }
-
-        if (mLayoutOverlay.getVisibility() != View.GONE) {
-            mLayoutOverlay.setVisibility(View.GONE);
-        }
-
-        navigationView.setVisibility(View.VISIBLE);
-    }
-
     public Toolbar getToolbar() {
         return toolbar;
     }
@@ -639,7 +672,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     public MenuItem getSelectedMenuItem() {
 
-        for(int i=0; i < getMenu().size(); ++i) {
+        for (int i = 0; i < getMenu().size(); ++i) {
 
             if (getMenu().getItem(i).isChecked()) {
                 return getMenu().getItem(i);
@@ -651,7 +684,7 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
 
     public MenuItem findMenuItem(String id) {
 
-        for(int i=0; i < getMenu().size(); ++i) {
+        for (int i = 0; i < getMenu().size(); ++i) {
 
             if (getMenu().getItem(i).getIntent().getStringExtra(ID).equals(id)) {
                 return getMenu().getItem(i);
@@ -665,5 +698,108 @@ public abstract class KolibriNavigationActivity extends AppCompatActivity
         final int defaultItemIndex = configuration.getNavigation().getSettings().getInt("default-item");
 
         return getMenu().getItem(defaultItemIndex);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+            return;
+        }
+
+        final MenuItem selectedItem = getSelectedMenuItem();
+        final MenuItem defaultItem = getDefaultItem();
+
+        if (webView.canGoBack()) {
+
+            // Go back from deeplink
+            final Intent intent = webView.getIntent();
+
+            if (intent.hasExtra(Kolibri.EXTRA_DEEPLINK)) {
+
+                MenuItem category = findMenuItem(intent.getStringExtra(Kolibri.EXTRA_ID));
+
+                if (category != null) {
+                    navigationView.setCheckedItem(category.getItemId());
+                }
+
+                intent.removeExtra(Kolibri.EXTRA_DEEPLINK);
+                notifyComponenets(intent);
+                return;
+            } else {
+
+                final String selectedItemUrl = selectedItem.getIntent()
+                    .getData().getQueryParameter("url");
+                final String currentUrl = webView.getOriginalUrl();
+
+                //If the url we are going back from
+                //came from a menu item click, we clear the history
+                //and go back home
+                if (currentUrl.equals(selectedItemUrl)) {
+                    final String url = defaultItem.getIntent().getData().getQueryParameter("url");
+
+                    //If there is url on default item, then we load this url and clear that history
+                    //so that the next time the user presses back they are redirected out
+                    //of the app
+                    if (url != null) {
+                        webView.setClearHistory(true);
+                        webView.loadUrl(url);
+                        setActionBarTitle(defaultItem.getTitle().toString());
+                        navigationView.setCheckedItem(defaultItem.getItemId());
+                        return;
+                    }
+                } else {
+                    webView.goBack();
+                    return;
+                }
+            }
+        }
+
+        super.onBackPressed();
+    }
+
+    protected KolibriWebView getWebView() {
+        return webView;
+    }
+
+    protected KolibriLoadingView getWebviewOverlay() {
+        return webviewOverlay;
+    }
+
+    protected void handleAmpData(Map<String, String> data) {
+        if (data.size() > 0 && data.containsKey(WebViewCoordinator.META_SHAREABLE)) {
+
+            final String url = data.containsKey(WebViewCoordinator.META_CANONICAL)
+                    ? data.get(WebViewCoordinator.META_CANONICAL)
+                    : data.get(WebViewCoordinator.META_URL);
+
+            if (url != null) {
+                shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, data.get(WebViewCoordinator.META_TITLE));
+                shareIntent.putExtra(Intent.EXTRA_TEXT, url);
+            } else {
+                shareIntent = null;
+            }
+
+            invalidateOptionsMenu();
+        }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        final MenuItem share = menu.findItem(R.id.action_share);
+
+        share.setVisible(shareIntent != null);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_webview, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }

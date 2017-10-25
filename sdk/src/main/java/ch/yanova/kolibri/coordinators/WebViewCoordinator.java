@@ -1,39 +1,36 @@
 package ch.yanova.kolibri.coordinators;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
-
+import ch.yanova.kolibri.Kolibri;
+import ch.yanova.kolibri.KolibriApp;
+import ch.yanova.kolibri.KolibriCoordinator;
+import ch.yanova.kolibri.R;
+import ch.yanova.kolibri.RuntimeConfig;
+import ch.yanova.kolibri.components.KolibriWebView;
+import ch.yanova.kolibri.components.OnAmpDataFoundListener;
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.NavigationViewMode;
+import java.util.HashMap;
+import java.util.Map;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import ch.yanova.kolibri.Kolibri;
-import ch.yanova.kolibri.KolibriApp;
-import ch.yanova.kolibri.KolibriCoordinator;
-import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.OnAmpDataFoundListener;
-import ch.yanova.kolibri.components.WebViewListener;
-
 /**
  * Created by lekov on 3/28/17.
  */
 
-public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements WebViewListener, OnAmpDataFoundListener {
+public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> implements OnAmpDataFoundListener {
 
     public static final String webViewUri = "kolibri://content/link";
-    private static final String[] sURIs = new String[]{ webViewUri };
+    private static final String[] sURIs = new String[]{webViewUri};
 
     private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
     private static final String JS_INTERFACE_NAME = "GetHtml";
@@ -61,16 +58,12 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     private static final String TAG = "WebViewCoordinator";
     public static final String NAME = "name";
 
-    private final OnAmpDataFoundListener listener;
-
-    public WebViewCoordinator(@NonNull OnAmpDataFoundListener listener) {
-        this.listener = listener;
-    }
+    private KolibriWebView webView;
 
     @Override
     protected void attach(KolibriWebView view) {
         super.attach(view);
-        view.setWebViewListener(this);
+        webView = view;
         view.addJavascriptInterface(new GetHtmlJsInterface(), JS_INTERFACE_NAME);
     }
 
@@ -82,11 +75,15 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
         if (sanitizer.hasParameter("url")) {
 
-            final Uri url = Uri.parse(intent.getData().getQueryParameter("url"));
+            final Uri url;
 
-            //FIX ME: Not passing the intent extras, lose TITLE for example in case the client
-            // starts internal webview activity
-            final boolean handled = view.getWebClient().handleUri(view, url);
+            if (intent.hasExtra(Kolibri.EXTRA_DEEPLINK)) {
+                url = Uri.parse(intent.getStringExtra(Kolibri.EXTRA_DEEPLINK));
+            } else {
+                url = Uri.parse(intent.getData().getQueryParameter("url"));
+            }
+
+            final boolean handled = view.handleUri(url);
 
             if (!handled) {
                 view.loadUrl(url.toString());
@@ -107,16 +104,15 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         Kolibri.notifyComponents(view.getContext(), intent);
     }
 
-    @Override
-    public void onFound(Map<String, String> data) {
-
-        if (listener != null) {
-            listener.onFound(data);
-        }
-
+    private void handleAmpData(Map<String, String> data) {
         handleFavorizable(data.get(META_FAVORIZABLE), view.getUrl(), view);
 
         KolibriApp.getInstance().reportToFirebase(data.get(META_CATEGORY), view.getUrl());
+    }
+
+    @Override
+    public void onFound(Map<String, String> data) {
+
     }
 
     private class GetHtmlJsInterface {
@@ -168,7 +164,41 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                 view.post(new Runnable() {
                     @Override
                     public void run() {
+                        handleAmpData(metaData);
                         onFound(metaData);
+
+                        if (metaData.containsKey(META_THEME_COLOR)) {
+
+                            int[] palette = RuntimeConfig.getMaterialPalette(metaData.get(META_THEME_COLOR));
+
+                            Aesthetic.get()
+                                    .colorPrimary(palette[RuntimeConfig.THEME_COLOR_PRIMARY])
+                                    .colorPrimaryDark(palette[RuntimeConfig.THEME_COLOR_PRIMARY_DARK])
+                                    .colorAccent(palette[13])
+                                    .colorStatusBarAuto()
+                                    .textColorPrimary(Color.BLACK)
+                                    .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                                    .apply();
+
+                            webView.setTag(R.id.primaryColor, palette[RuntimeConfig.THEME_COLOR_PRIMARY]);
+                            webView.setTag(R.id.accentColor, palette[13]);
+                        } else {
+                            // Check if there's no meta theme and we navigate to menu item.
+                            // In this case we prefer default app theme
+                            final RuntimeConfig config = Kolibri.getInstance(view.getContext()).getRuntime();
+                            final RuntimeConfig.Navigation navigation = config.getNavigation();
+
+                            for (String item : navigation.getItems().keySet()) {
+                                final RuntimeConfig.NavigationItem navItem = navigation.getItem(item);
+
+                                if (navItem.hasSetting("url") && navItem.getString("url").equals(webView.getOriginalUrl())) {
+                                    Kolibri.getInstance(view.getContext()).applyRuntimeTheme(true);
+                                    webView.setTag(R.id.primaryColor, null);
+                                    webView.setTag(R.id.accentColor, null);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 });
             }
@@ -179,32 +209,4 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     protected String[] kolibriUris() {
         return sURIs;
     }
-
-    @Override
-    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-
-    }
-
-    @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-    }
-
-    @Override
-    public void onPageVisible(WebView view, String url) {
-        view.loadUrl(GET_HTML_STRING);
-    }
-
-    @Override
-    public void onPageFinished(final WebView view, String url) {}
-
-    @Override
-    public boolean shouldHandleInternal() {
-        return false;
-    }
-
-    @Override
-    public boolean onCustomTarget(Uri link, String target) {
-        return false;
-    }
-
 }

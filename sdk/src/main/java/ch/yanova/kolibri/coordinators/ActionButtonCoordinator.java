@@ -2,7 +2,6 @@ package ch.yanova.kolibri.coordinators;
 
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
-
 import ch.yanova.kolibri.KolibriCoordinator;
 
 /**

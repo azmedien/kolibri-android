@@ -4,31 +4,40 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import com.afollestad.aesthetic.AestheticActivity;
 
-public class ErrorActivity extends AppCompatActivity {
+public class ErrorActivity extends AestheticActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_error);
 
-        final Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(myToolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        final TextView errorMessageTextView = (TextView) findViewById(R.id.error_text);
+        final TextView errorMessageTextView = findViewById(R.id.error_text);
 
         final Intent intent = getIntent();
 
-        if (intent != null && intent.hasExtra(Kolibri.EXTRA_ERROR_MESSAGE)) {
-            final String message = intent.getStringExtra(Kolibri.EXTRA_ERROR_MESSAGE);
-            errorMessageTextView.setText(message);
+        if (intent != null) {
+            if (intent.hasExtra(Kolibri.EXTRA_ERROR_MESSAGE)) {
+                final String message = intent.getStringExtra(Kolibri.EXTRA_ERROR_MESSAGE);
+                errorMessageTextView.setText(message);
+            }
+
+            if (intent.hasExtra(Intent.EXTRA_TITLE)) {
+                final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
+                getSupportActionBar().setTitle(title);
+            }
         }
+
+        Kolibri.getInstance(this).applyRuntimeTheme(false);
     }
 
     @Override

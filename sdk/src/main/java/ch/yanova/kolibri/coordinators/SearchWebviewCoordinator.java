@@ -1,24 +1,17 @@
 package ch.yanova.kolibri.coordinators;
 
 import android.net.Uri;
-
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.OnAmpDataFoundListener;
-import ch.yanova.kolibri.components.WebViewListener;
 import ch.yanova.kolibri.search.OnSubmitFilteredSearchListener;
 
 /**
  * Created by lekov on 4/2/17.
  */
 
-public class SearchWebviewCoordinator extends ClientWebViewCoordinator implements OnSubmitFilteredSearchListener {
+public class SearchWebviewCoordinator extends WebViewCoordinator implements OnSubmitFilteredSearchListener {
 
     private KolibriWebView kolibriWebView;
-
-    public SearchWebviewCoordinator(OnAmpDataFoundListener ampDataFoundListener, WebViewListener listener) {
-        super(ampDataFoundListener, listener);
-    }
 
     @Override
     protected void attach(KolibriWebView view) {

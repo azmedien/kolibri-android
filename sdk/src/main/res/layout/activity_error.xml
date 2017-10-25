@@ -5,19 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    app:contentScrim="?colorPrimaryDark"
+    app:statusBarBackground="?colorPrimaryDark"
+    app:statusBarScrim="?colorPrimary"
     tools:context=".ErrorActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="wrap_content">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="?attr/actionBarSize" />
 
     </android.support.design.widget.AppBarLayout>
 
@@ -30,23 +30,25 @@
         android:focusableInTouchMode="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="64dp">
+        android:padding="64dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <TextView
-            style="@style/Base.TextAppearance.AppCompat.Headline"
             android:id="@+id/error_text"
+            style="@style/Base.TextAppearance.AppCompat.Headline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textSize="18sp" />
+
         <ImageButton
             android:id="@+id/google_play_button"
             android:layout_width="wrap_content"
             android:layout_height="100dp"
-            android:src="@drawable/google_play_badge"
-            android:scaleType="centerInside"
             android:background="@android:color/transparent"
-            android:onClick="openGooglePlay"/>
+            android:onClick="openGooglePlay"
+            android:scaleType="centerInside"
+            android:src="@drawable/google_play_badge" />
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import ch.yanova.kolibri.R;
 
 public class KolibriLoadingView extends FrameLayout {
@@ -64,7 +63,7 @@ public class KolibriLoadingView extends FrameLayout {
             mainContentView = getChildAt(0);
         }
 
-        mLayoutOverlay = LayoutInflater.from(getContext()).inflate(R.layout.error, this, false);
+        mLayoutOverlay = LayoutInflater.from(getContext()).inflate(R.layout.overlay, this, false);
         mLayoutLoading = mLayoutOverlay.findViewById(R.id.progress);
         mLayoutError = mLayoutOverlay.findViewById(R.id.error);
 
@@ -108,7 +107,10 @@ public class KolibriLoadingView extends FrameLayout {
         }
 
         mLayoutError.setVisibility(View.VISIBLE);
+    }
 
+    public void showError(String text) {
+        showError(text, null, null);
     }
 
     public void showError() {
