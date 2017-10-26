@@ -1,1 +1,1 @@
-include ':prototype', ':sdk', ':aesthetic-dirty'
+include ':prototype', ':sdk'

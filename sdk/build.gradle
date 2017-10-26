@@ -49,8 +49,7 @@ dependencies {
 
     compile 'com.android.support:design:26.1.0'
 
-    compile project(':aesthetic-dirty')
-    // compile 'com.afollestad:aesthetic:0.4.7'
+    compile 'com.afollestad:aesthetic:0.4.7'
 
     provided 'com.google.firebase:firebase-core:11.4.2'
     provided 'com.google.firebase:firebase-messaging:11.4.2'
