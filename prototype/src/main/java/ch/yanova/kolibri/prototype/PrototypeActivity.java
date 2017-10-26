@@ -73,6 +73,8 @@ public class PrototypeActivity extends KolibriNavigationActivity {
                 }).show();
             }
         });
+
+        getWebView().setHandleInternal(true);
     }
 
     @Override
