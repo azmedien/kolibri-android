@@ -22,8 +22,8 @@ android {
         applicationId "ch.yanova.kolibri.prototype"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 90
-        versionName "0.9.0-SNAPSHOT"
+        versionCode 91
+        versionName "0.9.1-SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
