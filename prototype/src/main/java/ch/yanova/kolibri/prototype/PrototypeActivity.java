@@ -78,14 +78,16 @@ public class PrototypeActivity extends KolibriNavigationActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
-        MenuItem searchItem = menu.findItem(R.id.action_search_show);
+        boolean res =  super.onPrepareOptionsMenu(menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 getWebViewCoordinator().onQueryByText(query);
-                return false;
+                return true;
             }
 
             @Override
@@ -93,13 +95,8 @@ public class PrototypeActivity extends KolibriNavigationActivity {
                 return false;
             }
         });
-        return super.onPrepareOptionsMenu(menu);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return super.onCreateOptionsMenu(menu);
+        return res;
     }
 
     private SearchWebviewCoordinator getWebViewCoordinator() {

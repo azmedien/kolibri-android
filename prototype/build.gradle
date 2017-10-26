@@ -62,13 +62,16 @@ configurations.all {
 }
 
 dependencies {
-    api project(":sdk")
+    api project(path: ':sdk')
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
+
+    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.afollestad:aesthetic:0.4.7'
 
     implementation 'com.google.firebase:firebase-core:11.4.2'
     implementation 'com.google.firebase:firebase-messaging:11.4.2'
