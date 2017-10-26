@@ -7,4 +7,5 @@ import com.google.firebase.iid.FirebaseInstanceIdService;
  */
 
 public final class KolibriFirebaseInstanceIDService extends FirebaseInstanceIdService {
+
 }

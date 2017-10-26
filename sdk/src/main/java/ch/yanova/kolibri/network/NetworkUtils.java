@@ -10,11 +10,12 @@ import android.net.NetworkInfo;
 
 public class NetworkUtils {
 
-    public static boolean isConnectedToInternet(Context context) {
-        final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        final NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+  public static boolean isConnectedToInternet(Context context) {
+    final ConnectivityManager cm = (ConnectivityManager) context
+        .getSystemService(Context.CONNECTIVITY_SERVICE);
+    final NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
-        return activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-    }
+    return activeNetwork != null &&
+        activeNetwork.isConnectedOrConnecting();
+  }
 }

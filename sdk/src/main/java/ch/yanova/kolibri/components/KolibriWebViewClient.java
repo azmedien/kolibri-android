@@ -9,7 +9,7 @@ import android.webkit.WebViewClient;
 
 public class KolibriWebViewClient extends WebViewClient {
 
-    protected boolean onCustomTarget(Uri link, String target) {
-        return false;
-    }
+  protected boolean onCustomTarget(Uri link, String target) {
+    return false;
+  }
 }

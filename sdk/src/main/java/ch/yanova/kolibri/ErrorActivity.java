@@ -12,58 +12,58 @@ import com.afollestad.aesthetic.AestheticActivity;
 
 public class ErrorActivity extends AestheticActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_error);
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_error);
 
-        final Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    final Toolbar toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        final TextView errorMessageTextView = findViewById(R.id.error_text);
+    final TextView errorMessageTextView = findViewById(R.id.error_text);
 
-        final Intent intent = getIntent();
+    final Intent intent = getIntent();
 
-        if (intent != null) {
-            if (intent.hasExtra(Kolibri.EXTRA_ERROR_MESSAGE)) {
-                final String message = intent.getStringExtra(Kolibri.EXTRA_ERROR_MESSAGE);
-                errorMessageTextView.setText(message);
-            }
+    if (intent != null) {
+      if (intent.hasExtra(Kolibri.EXTRA_ERROR_MESSAGE)) {
+        final String message = intent.getStringExtra(Kolibri.EXTRA_ERROR_MESSAGE);
+        errorMessageTextView.setText(message);
+      }
 
-            if (intent.hasExtra(Intent.EXTRA_TITLE)) {
-                final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
-                getSupportActionBar().setTitle(title);
-            }
-        }
-
-        Kolibri.getInstance(this).applyRuntimeTheme(false);
+      if (intent.hasExtra(Intent.EXTRA_TITLE)) {
+        final String title = intent.getStringExtra(Intent.EXTRA_TITLE);
+        getSupportActionBar().setTitle(title);
+      }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    Kolibri.getInstance(this).applyRuntimeTheme(false);
+  }
 
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-        }
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
 
-        return super.onOptionsItemSelected(item);
+    switch (item.getItemId()) {
+      case android.R.id.home:
+        finish();
+        return true;
     }
 
-    public void openGooglePlay(View view) {
+    return super.onOptionsItemSelected(item);
+  }
 
-        final String applicationId = getApplicationContext().getPackageName();
+  public void openGooglePlay(View view) {
 
-        final Uri googlePlayUri = Uri.parse("market://details?id=" + applicationId);
+    final String applicationId = getApplicationContext().getPackageName();
 
-        final Intent googlePlayIntent = new Intent(Intent.ACTION_VIEW, googlePlayUri);
+    final Uri googlePlayUri = Uri.parse("market://details?id=" + applicationId);
 
-        final PackageManager packageManager = getPackageManager();
-        if (googlePlayIntent.resolveActivity(packageManager) != null) {
-            startActivity(googlePlayIntent);
-            finish();
-        }
+    final Intent googlePlayIntent = new Intent(Intent.ACTION_VIEW, googlePlayUri);
+
+    final PackageManager packageManager = getPackageManager();
+    if (googlePlayIntent.resolveActivity(packageManager) != null) {
+      startActivity(googlePlayIntent);
+      finish();
     }
+  }
 }

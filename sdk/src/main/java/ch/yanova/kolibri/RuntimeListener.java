@@ -6,6 +6,7 @@ package ch.yanova.kolibri;
 
 interface RuntimeListener {
 
-    void onLoaded(RuntimeConfig runtime, boolean isFresh);
-    boolean onFailed(Exception e);
+  void onLoaded(RuntimeConfig runtime, boolean isFresh);
+
+  boolean onFailed(Exception e);
 }
