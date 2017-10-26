@@ -157,8 +157,12 @@ public class KolibriWebView extends WebView {
       }
 
       if (!handleCustomTarget) {
+
+        final String appScheme = Kolibri.getInstance(context).getRuntime().getScheme();
+
         Intent linkIntent = target.equals(TARGET_INTERNAL) ?
-            new Intent(Intent.ACTION_VIEW, Uri.parse("kolibri://internal/webview?url=" + link)) :
+            new Intent(Intent.ACTION_VIEW, Uri.parse(
+                String.format("%s://internal/webview?url=%s", appScheme, link))) :
             new Intent(Intent.ACTION_VIEW, link);
 
         final Intent kolibriIntent = getIntent();
@@ -171,7 +175,7 @@ public class KolibriWebView extends WebView {
 
         final String scheme = link.getScheme();
 
-        if (scheme.equals(Kolibri.getInstance(context).getRuntime().getScheme())) {
+        if (scheme.equals(appScheme)) {
           Kolibri.notifyComponents(context, Kolibri.createIntent(link));
         }
       }
