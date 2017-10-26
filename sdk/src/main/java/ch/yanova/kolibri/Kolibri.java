@@ -305,17 +305,15 @@ public class Kolibri {
     }
 
     public void unsubscribeFromPushNotifications() {
-        if (isSubscribedForPushNotifications()) {
-            preferences.edit().remove(KEY_SUBSCRIBED_FOR_PUSH).apply();
-        }
+        preferences.edit().putBoolean(KEY_SUBSCRIBED_FOR_PUSH, false).apply();
     }
 
     public boolean isSubscribedForPushNotifications() {
         return preferences.getBoolean(KEY_SUBSCRIBED_FOR_PUSH, false);
     }
 
-    public boolean hasUnsubscribedFromPushExplicitly() {
-        return !preferences.contains(KEY_SUBSCRIBED_FOR_PUSH);
+    public boolean hasChangedPushSetting() {
+        return preferences.contains(KEY_SUBSCRIBED_FOR_PUSH);
     }
 
     public enum HandlerType {
