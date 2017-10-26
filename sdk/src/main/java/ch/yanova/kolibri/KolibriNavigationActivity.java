@@ -67,18 +67,6 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
   private NavigationView navigationView;
   private DrawerLayout drawer;
-  private ActionBarDrawerToggle drawerToggle;
-
-  private FloatingActionButton floatingActionButton;
-
-  private KolibriWebView webView;
-  private KolibriLoadingView webviewOverlay;
-
-  private boolean restarted;
-  private boolean pageHasError;
-
-  private Intent shareIntent;
-
   private final View.OnClickListener onFooterClick = new View.OnClickListener() {
     @Override
     public void onClick(View v) {
@@ -87,6 +75,15 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
       drawer.closeDrawer(GravityCompat.START);
     }
   };
+  private ActionBarDrawerToggle drawerToggle;
+  private FloatingActionButton floatingActionButton;
+  private KolibriWebView webView;
+  private KolibriLoadingView webviewOverlay;
+  private boolean restarted;
+  private boolean pageHasError;
+  private Intent shareIntent;
+  private Toolbar toolbar;
+  private View headerImageContainer;
 
   private Kolibri.HandlerType notifyComponenets(Intent intent) {
     final Kolibri.HandlerType type = Kolibri
@@ -111,9 +108,6 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
     return type;
   }
-
-  private Toolbar toolbar;
-  private View headerImageContainer;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {

@@ -35,173 +35,174 @@ import okhttp3.Response;
 
 public class KolibriApp extends Application {
 
-    private static final String TAG = "KolibriApp";
+  private static final String TAG = "KolibriApp";
 
-    private static KolibriApp instance;
+  private static KolibriApp instance;
+  private static String lastUrlLogged;
+  private static boolean firebaseEnabled = true;
+  private static int viewportWidthPixels;
+  private static int viewportHeightPixels;
+  private OkHttpClient netmetrixClient;
 
-    private OkHttpClient netmetrixClient;
+  @UiThread
+  public static String getUserAgent(@NonNull final Context context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+      return WebSettings.getDefaultUserAgent(context);
+    } else {
+      try {
+        final Class<?> webSettingsClassicClass = Class.forName("android.webkit.WebSettingsClassic");
+        final Constructor<?> constructor = webSettingsClassicClass
+            .getDeclaredConstructor(Context.class, Class.forName("android.webkit.WebViewClassic"));
+        constructor.setAccessible(true);
+        final Method method = webSettingsClassicClass.getMethod("getUserAgentString");
+        return (String) method.invoke(constructor.newInstance(context, null));
+      } catch (final Exception e) {
+        return new WebView(context).getSettings()
+            .getUserAgentString();
+      }
+    }
+  }
 
-    private static String lastUrlLogged;
-    private static boolean firebaseEnabled = true;
+  @AnyThread
+  public static boolean isFirebaseEnabled() {
+    return firebaseEnabled;
+  }
 
-    private static int viewportWidthPixels;
-    private static int viewportHeightPixels;
+  @AnyThread
+  public static void setFirebaseEnabled(boolean firebaseEnabled) {
+    KolibriApp.firebaseEnabled = firebaseEnabled;
+  }
 
+  public static KolibriApp getInstance() {
+    return instance;
+  }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+  @Override
+  public void onCreate() {
+    super.onCreate();
 
-        Log.i(TAG, String.format("Using Kolibri %s version", BuildConfig.VERSION_NAME));
+    Log.i(TAG, String.format("Using Kolibri %s version", BuildConfig.VERSION_NAME));
 
-        final DisplayMetrics lDisplayMetrics = getResources().getDisplayMetrics();
-        viewportWidthPixels = Math.round(lDisplayMetrics.widthPixels / lDisplayMetrics.density);
-        viewportHeightPixels = Math.round(lDisplayMetrics.heightPixels / lDisplayMetrics.density);
+    final DisplayMetrics lDisplayMetrics = getResources().getDisplayMetrics();
+    viewportWidthPixels = Math.round(lDisplayMetrics.widthPixels / lDisplayMetrics.density);
+    viewportHeightPixels = Math.round(lDisplayMetrics.heightPixels / lDisplayMetrics.density);
 
-        final ClearableCookieJar cookieJar = new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(this));
+    final ClearableCookieJar cookieJar = new PersistentCookieJar(new SetCookieCache(),
+        new SharedPrefsCookiePersistor(this));
 
-        instance = this;
+    instance = this;
 
-        netmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
+    netmetrixClient = new OkHttpClient.Builder().cookieJar(cookieJar).build();
+  }
+
+  public void logEvent(@Nullable String name, @Nullable String url) {
+
+    if (lastUrlLogged != null && lastUrlLogged.equals(url)) {
+      Log.i(TAG, String.format("Trying to log again event for %s. Skipped.", url));
+      return;
     }
 
-    public void logEvent(@Nullable String name, @Nullable String url) {
+    lastUrlLogged = url;
 
-        if (lastUrlLogged != null && lastUrlLogged.equals(url)) {
-            Log.i(TAG, String.format("Trying to log again event for %s. Skipped.", url));
-            return;
-        }
+    reportToNetmetrix(url);
+  }
 
-        lastUrlLogged = url;
+  void logMenuItemToFirebase(@NonNull MenuItem item) {
+    if (firebaseEnabled) {
 
-        reportToNetmetrix(url);
+      final Intent intent = item.getIntent();
+
+      if (intent == null) {
+        Log.i(TAG, "logMenuItemToFirebase: Invalid menu item. Intent must be supplied!");
+        return;
+      }
+
+      final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+      final Bundle bundle = new Bundle();
+      bundle.putString(FirebaseAnalytics.Param.ITEM_ID, intent.getStringExtra(Kolibri.EXTRA_ID));
+
+      if (intent.hasExtra(Intent.EXTRA_TITLE)) {
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME,
+            intent.getStringExtra(Intent.EXTRA_TITLE));
+      }
+
+      bundle
+          .putString(FirebaseAnalytics.Param.CONTENT_TYPE, intent.getStringExtra(Kolibri.EXTRA_ID));
+      firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+    }
+  }
+
+  private void reportToNetmetrix(@Nullable String url) {
+
+    final String netmetrix = Kolibri.getInstance(this).getRuntime().getString("netmetrix");
+
+    // Netmetrix not configured, skipping
+    if (netmetrix == null || "".equals(netmetrix)) {
+      return;
     }
 
-    void logMenuItemToFirebase(@NonNull MenuItem item) {
-        if (firebaseEnabled) {
+    String variant = Kolibri.getInstance(this).getRuntime().getString("netmetrix-type");
 
-            final Intent intent = item.getIntent();
-
-            if (intent == null) {
-                Log.i(TAG, "logMenuItemToFirebase: Invalid menu item. Intent must be supplied!");
-                return;
-            }
-
-            final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
-            final Bundle bundle = new Bundle();
-            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, intent.getStringExtra(Kolibri.EXTRA_ID));
-
-            if (intent.hasExtra(Intent.EXTRA_TITLE))
-                bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, intent.getStringExtra(Intent.EXTRA_TITLE));
-
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, intent.getStringExtra(Kolibri.EXTRA_ID));
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-        }
+    if (variant == null || variant.isEmpty()) {
+      variant = "universal";
     }
 
-    private void reportToNetmetrix(@Nullable String url) {
+    final StringBuilder sb = new StringBuilder(netmetrix);
+    sb.append("/").append("android");
+    sb.append("/").append(variant);
+    sb.append("?d=").append(System.currentTimeMillis());
+    sb.append("&x=").append(viewportWidthPixels).append("x").append(viewportHeightPixels);
 
-        final String netmetrix = Kolibri.getInstance(this).getRuntime().getString("netmetrix");
-
-        // Netmetrix not configured, skipping
-        if (netmetrix == null || "".equals(netmetrix)) {
-            return;
-        }
-
-        String variant = Kolibri.getInstance(this).getRuntime().getString("netmetrix-type");
-
-        if (variant == null || variant.isEmpty()) {
-            variant = "universal";
-        }
-
-        final StringBuilder sb = new StringBuilder(netmetrix);
-        sb.append("/").append("android");
-        sb.append("/").append(variant);
-        sb.append("?d=").append(System.currentTimeMillis());
-        sb.append("&x=").append(viewportWidthPixels).append("x").append(viewportHeightPixels);
-
-        if (url != null) {
-            final String urlEscaped = Uri.parse(url).buildUpon().clearQuery().build().toString();
-            sb.append("&r=").append(urlEscaped);
-        }
-
-        // TODO: check error if request is successful but the server return some error
-
-        netmetrixClient.newCall(
-                new Request.Builder()
-                        .url(sb.toString())
-                        .get()
-                        .header("Accept-Language", "de")
-                        .header("User-Agent", "Mozilla/5.0 (Linux; U; Android-"+ variant +")")
-                        .build())
-                .enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        Log.e(TAG, "Report to Netmetrix failed: ", e);
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (response.isSuccessful()) {
-                            Log.i(TAG, "Successfully reported to Netmetrix");
-                        } else {
-                            Log.e(TAG, "Report to Netmetrix failed ");
-                        }
-                    }
-                });
-
-        Log.d(TAG, "reportToNetmetrix() called with: url = [" + sb.toString() + "]");
+    if (url != null) {
+      final String urlEscaped = Uri.parse(url).buildUpon().clearQuery().build().toString();
+      sb.append("&r=").append(urlEscaped);
     }
 
-    public void reportToFirebase(@Nullable String name, @NonNull String url) {
-        if (firebaseEnabled) {
+    // TODO: check error if request is successful but the server return some error
 
-            final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+    netmetrixClient.newCall(
+        new Request.Builder()
+            .url(sb.toString())
+            .get()
+            .header("Accept-Language", "de")
+            .header("User-Agent", "Mozilla/5.0 (Linux; U; Android-" + variant + ")")
+            .build())
+        .enqueue(new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.e(TAG, "Report to Netmetrix failed: ", e);
+          }
 
-            final Bundle bundle = new Bundle();
-            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, url);
-
-            if (name != null) {
-                bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
-                bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, name);
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            if (response.isSuccessful()) {
+              Log.i(TAG, "Successfully reported to Netmetrix");
             } else {
-                bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "application/amp+html");
+              Log.e(TAG, "Report to Netmetrix failed ");
             }
+          }
+        });
 
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-        }
-    }
+    Log.d(TAG, "reportToNetmetrix() called with: url = [" + sb.toString() + "]");
+  }
 
-    @UiThread
-    public static String getUserAgent(@NonNull final Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return WebSettings.getDefaultUserAgent(context);
-        } else {
-            try {
-                final Class<?> webSettingsClassicClass = Class.forName("android.webkit.WebSettingsClassic");
-                final Constructor<?> constructor = webSettingsClassicClass.getDeclaredConstructor(Context.class, Class.forName("android.webkit.WebViewClassic"));
-                constructor.setAccessible(true);
-                final Method method = webSettingsClassicClass.getMethod("getUserAgentString");
-                return (String) method.invoke(constructor.newInstance(context, null));
-            } catch (final Exception e) {
-                return new WebView(context).getSettings()
-                        .getUserAgentString();
-            }
-        }
-    }
+  public void reportToFirebase(@Nullable String name, @NonNull String url) {
+    if (firebaseEnabled) {
 
-    @AnyThread
-    public static boolean isFirebaseEnabled() {
-        return firebaseEnabled;
-    }
+      final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-    @AnyThread
-    public static void setFirebaseEnabled(boolean firebaseEnabled) {
-        KolibriApp.firebaseEnabled = firebaseEnabled;
-    }
+      final Bundle bundle = new Bundle();
+      bundle.putString(FirebaseAnalytics.Param.ITEM_ID, url);
 
-    public static KolibriApp getInstance() {
-        return instance;
+      if (name != null) {
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, name);
+      } else {
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "application/amp+html");
+      }
+
+      firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
+  }
 }

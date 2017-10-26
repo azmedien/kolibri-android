@@ -7,4 +7,5 @@ import android.webkit.WebChromeClient;
  */
 
 public class KolibriWebChromeClient extends WebChromeClient {
+
 }

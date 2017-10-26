@@ -5,18 +5,19 @@ package ch.yanova.kolibri;
  */
 
 public class KolibriException extends RuntimeException {
-    public KolibriException() {
-    }
 
-    public KolibriException(String message) {
-        super(message);
-    }
+  public KolibriException() {
+  }
 
-    public KolibriException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public KolibriException(String message) {
+    super(message);
+  }
 
-    public KolibriException(Throwable cause) {
-        super(cause);
-    }
+  public KolibriException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public KolibriException(Throwable cause) {
+    super(cause);
+  }
 }

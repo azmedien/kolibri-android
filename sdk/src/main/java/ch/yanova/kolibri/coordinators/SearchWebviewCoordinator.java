@@ -9,79 +9,81 @@ import ch.yanova.kolibri.search.OnSubmitFilteredSearchListener;
  * Created by lekov on 4/2/17.
  */
 
-public class SearchWebviewCoordinator extends WebViewCoordinator implements OnSubmitFilteredSearchListener {
+public class SearchWebviewCoordinator extends WebViewCoordinator implements
+    OnSubmitFilteredSearchListener {
 
-    private KolibriWebView kolibriWebView;
+  private KolibriWebView kolibriWebView;
 
-    @Override
-    protected void attach(KolibriWebView view) {
-        super.attach(view);
-        this.kolibriWebView = view;
+  @Override
+  protected void attach(KolibriWebView view) {
+    super.attach(view);
+    this.kolibriWebView = view;
+  }
+
+  @Override
+  public void onQueryByTags(String query) {
+
+    final String searchParamKey =
+        Kolibri.getInstance(kolibriWebView.getContext()).getRuntime().getComponent("search")
+            .getSettings().getString("search-param");
+
+    String url = kolibriWebView.getUrl();
+    Uri uri = Uri.parse(url);
+
+    Uri.Builder builder = uri.buildUpon();
+    builder.clearQuery();
+
+    String searchValue = uri.getQueryParameter(searchParamKey);
+
+    if (searchValue != null) {
+      builder.appendQueryParameter(searchParamKey, searchValue);
     }
 
-    @Override
-    public void onQueryByTags(String query) {
+    url = builder.build().toString();
 
-        final String searchParamKey =
-                Kolibri.getInstance(kolibriWebView.getContext()).getRuntime().getComponent("search").getSettings().getString("search-param");
-
-        String url = kolibriWebView.getUrl();
-        Uri uri = Uri.parse(url);
-
-
-        Uri.Builder builder = uri.buildUpon();
-        builder.clearQuery();
-
-        String searchValue = uri.getQueryParameter(searchParamKey);
-
-        if (searchValue != null) {
-            builder.appendQueryParameter(searchParamKey, searchValue);
-        }
-
-        url = builder.build().toString();
-
-        String filteredUrl = url;
-        if (!url.contains("?")) {
-            filteredUrl += "?";
-        } else {
-            query = "&" + query;
-        }
-
-        filteredUrl += query;
-
-        kolibriWebView.loadUrl(filteredUrl);
-
+    String filteredUrl = url;
+    if (!url.contains("?")) {
+      filteredUrl += "?";
+    } else {
+      query = "&" + query;
     }
 
-    @Override
-    public void onQueryByText(String text) {
+    filteredUrl += query;
 
-        final String searchParamKey =
-                Kolibri.getInstance(kolibriWebView.getContext()).getRuntime().getComponent("search").getSettings().getString("search-param");
+    kolibriWebView.loadUrl(filteredUrl);
 
-        String url = kolibriWebView.getUrl();
-        Uri uri = Uri.parse(url);
+  }
 
-        if (!"".equals(text)) {
-            Uri.Builder builder = uri.buildUpon();
-            builder.clearQuery();
+  @Override
+  public void onQueryByText(String text) {
 
-            if (uri.getQueryParameterNames().size() <= 0 || uri.getQueryParameter(searchParamKey) == null) {
-                builder.appendQueryParameter(searchParamKey, text);
-            } else {
-                for (String key : uri.getQueryParameterNames()) {
-                    if (searchParamKey.equals(key)) {
-                        builder.appendQueryParameter(searchParamKey, text);
-                    } else {
-                        builder.appendQueryParameter(key, uri.getQueryParameter(key));
-                    }
-                }
-            }
+    final String searchParamKey =
+        Kolibri.getInstance(kolibriWebView.getContext()).getRuntime().getComponent("search")
+            .getSettings().getString("search-param");
 
+    String url = kolibriWebView.getUrl();
+    Uri uri = Uri.parse(url);
 
-            uri = builder.build();
+    if (!"".equals(text)) {
+      Uri.Builder builder = uri.buildUpon();
+      builder.clearQuery();
+
+      if (uri.getQueryParameterNames().size() <= 0
+          || uri.getQueryParameter(searchParamKey) == null) {
+        builder.appendQueryParameter(searchParamKey, text);
+      } else {
+        for (String key : uri.getQueryParameterNames()) {
+          if (searchParamKey.equals(key)) {
+            builder.appendQueryParameter(searchParamKey, text);
+          } else {
+            builder.appendQueryParameter(key, uri.getQueryParameter(key));
+          }
         }
+      }
 
-        kolibriWebView.loadUrl(uri.toString());
+      uri = builder.build();
     }
+
+    kolibriWebView.loadUrl(uri.toString());
+  }
 }

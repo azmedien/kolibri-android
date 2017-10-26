@@ -9,6 +9,7 @@ import android.view.View;
  */
 
 public interface KolibriProvider {
-    @Nullable
-    KolibriCoordinator provideCoordinator(@NonNull View view);
+
+  @Nullable
+  KolibriCoordinator provideCoordinator(@NonNull View view);
 }

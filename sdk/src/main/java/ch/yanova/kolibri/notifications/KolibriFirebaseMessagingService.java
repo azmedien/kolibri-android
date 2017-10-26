@@ -21,71 +21,73 @@ import com.google.firebase.messaging.RemoteMessage;
 
 public final class KolibriFirebaseMessagingService extends FirebaseMessagingService {
 
-    @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
-        super.onMessageReceived(remoteMessage);
+  public static final String KOLIBRI_NOTIFICATION_INTENT = "kolibri://notification";
+  private static final String TAG = "KolibriNotifications";
 
-        handleMessage(this, remoteMessage);
+  static void handleNow(Context context, String url, String title, String body) {
+    final Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    final NotificationManager notificationManager = (NotificationManager) context
+        .getSystemService(Context.NOTIFICATION_SERVICE);
+
+    final RuntimeConfig runtime = Kolibri.getInstance(context).getRuntime();
+
+    if (runtime == null) {
+      return;
     }
 
-    private static final String TAG = "KolibriNotifications";
+    final String scheme = runtime.getScheme();
 
-    public static final String KOLIBRI_NOTIFICATION_INTENT = "kolibri://notification";
+    final Uri uri = Uri.parse(scheme + "://navigation");
 
-    protected void handleMessage(Context context, RemoteMessage message) {
-        if (message == null) {
-            return;
-        }
+    Intent result = Kolibri.createIntent(uri);
+    result.addCategory("notification");
+    result.putExtra("url", url);
+    result.putExtra(Intent.EXTRA_TITLE, title);
 
-        if (message.getData().isEmpty()) {
-            Log.w(TAG, "onReceive: Received notification without data. Skipping...");
-            return;
-        }
+    result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP
+        | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        final String title = message.getData().get("title");
-        final String body = message.getData().get("body");
-        final String url = message.getData().get("url");
+    final PendingIntent pendingIntent = PendingIntent
+        .getActivity(context, 0, result, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        handleNow(context, url, title, body);
+    TypedValue typedValue = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.colorAccent, typedValue, true);
+
+    final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+        .setSmallIcon(Kolibri.getInstance(context).getNotificationIcon())
+        .setContentTitle(title)
+        .setContentText(body)
+        .setAutoCancel(true)
+        .setSound(defaultSoundUri)
+        .setColor(typedValue.data)
+        .setTicker(String.format("%s: %s", title, body))
+        .setContentIntent(pendingIntent);
+
+    notificationManager
+        .notify(Kolibri.getInstance(context).getNotificationIcon(), notificationBuilder.build());
+  }
+
+  @Override
+  public void onMessageReceived(RemoteMessage remoteMessage) {
+    super.onMessageReceived(remoteMessage);
+
+    handleMessage(this, remoteMessage);
+  }
+
+  protected void handleMessage(Context context, RemoteMessage message) {
+    if (message == null) {
+      return;
     }
 
-    static void handleNow(Context context, String url, String title, String body) {
-        final Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-
-        final RuntimeConfig runtime = Kolibri.getInstance(context).getRuntime();
-
-        if (runtime == null) {
-            return;
-        }
-
-        final String scheme = runtime.getScheme();
-
-        final Uri uri = Uri.parse(scheme + "://navigation");
-
-        Intent result = Kolibri.createIntent(uri);
-        result.addCategory("notification");
-        result.putExtra("url", url);
-        result.putExtra(Intent.EXTRA_TITLE, title);
-
-        result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        final PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, result, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.colorAccent, typedValue, true);
-
-        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(Kolibri.getInstance(context).getNotificationIcon())
-                .setContentTitle(title)
-                .setContentText(body)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setColor(typedValue.data)
-                .setTicker(String.format("%s: %s", title, body))
-                .setContentIntent(pendingIntent);
-
-        notificationManager.notify(Kolibri.getInstance(context).getNotificationIcon(), notificationBuilder.build());
+    if (message.getData().isEmpty()) {
+      Log.w(TAG, "onReceive: Received notification without data. Skipping...");
+      return;
     }
+
+    final String title = message.getData().get("title");
+    final String body = message.getData().get("body");
+    final String url = message.getData().get("url");
+
+    handleNow(context, url, title, body);
+  }
 }

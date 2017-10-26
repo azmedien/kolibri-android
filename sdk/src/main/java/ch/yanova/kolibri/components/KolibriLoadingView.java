@@ -15,118 +15,120 @@ import ch.yanova.kolibri.R;
 
 public class KolibriLoadingView extends FrameLayout {
 
-    private View mLayoutOverlay;
-    private View mLayoutLoading;
-    private View mLayoutError;
+  private View mLayoutOverlay;
+  private View mLayoutLoading;
+  private View mLayoutError;
 
-    private View mainContentView;
+  private View mainContentView;
 
-    private String errorMessage;
-    private String buttonText;
-    private Drawable drawable;
+  private String errorMessage;
+  private String buttonText;
+  private Drawable drawable;
 
-    public KolibriLoadingView(Context context) {
-        super(context);
-        init(null, 0);
+  public KolibriLoadingView(Context context) {
+    super(context);
+    init(null, 0);
+  }
+
+  public KolibriLoadingView(Context context, AttributeSet attrs) {
+    super(context, attrs);
+    init(attrs, 0);
+  }
+
+  public KolibriLoadingView(Context context, AttributeSet attrs, int defStyle) {
+    super(context, attrs, defStyle);
+    init(attrs, defStyle);
+  }
+
+  private void init(AttributeSet attrs, int defStyle) {
+    // Load attributes
+    final TypedArray a = getContext().obtainStyledAttributes(
+        attrs, R.styleable.KolibriLoadingView, defStyle, 0);
+
+    errorMessage = a.getString(R.styleable.KolibriLoadingView_errorMessage);
+    buttonText = a.getString(R.styleable.KolibriLoadingView_buttonText);
+
+    if (a.hasValue(R.styleable.KolibriLoadingView_drawable)) {
+      drawable = a.getDrawable(R.styleable.KolibriLoadingView_drawable);
     }
 
-    public KolibriLoadingView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(attrs, 0);
+    a.recycle();
+  }
+
+  @Override
+  protected void onFinishInflate() {
+    super.onFinishInflate();
+
+    if (getChildCount() > 0) {
+      mainContentView = getChildAt(0);
     }
 
-    public KolibriLoadingView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init(attrs, defStyle);
+    mLayoutOverlay = LayoutInflater.from(getContext()).inflate(R.layout.overlay, this, false);
+    mLayoutLoading = mLayoutOverlay.findViewById(R.id.progress);
+    mLayoutError = mLayoutOverlay.findViewById(R.id.error);
+
+    if (errorMessage != null) {
+      ((TextView) mLayoutError.findViewById(R.id.error_text)).setText(errorMessage);
     }
 
-    private void init(AttributeSet attrs, int defStyle) {
-        // Load attributes
-        final TypedArray a = getContext().obtainStyledAttributes(
-                attrs, R.styleable.KolibriLoadingView, defStyle, 0);
-
-        errorMessage = a.getString(R.styleable.KolibriLoadingView_errorMessage);
-        buttonText = a.getString(R.styleable.KolibriLoadingView_buttonText);
-
-        if (a.hasValue(R.styleable.KolibriLoadingView_drawable)) {
-            drawable = a.getDrawable(R.styleable.KolibriLoadingView_drawable);
-        }
-
-        a.recycle();
+    if (buttonText != null) {
+      ((Button) mLayoutError.findViewById(R.id.error_button)).setText(buttonText);
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-
-        if (getChildCount() > 0) {
-            mainContentView = getChildAt(0);
-        }
-
-        mLayoutOverlay = LayoutInflater.from(getContext()).inflate(R.layout.overlay, this, false);
-        mLayoutLoading = mLayoutOverlay.findViewById(R.id.progress);
-        mLayoutError = mLayoutOverlay.findViewById(R.id.error);
-
-        if (errorMessage != null) {
-            ((TextView) mLayoutError.findViewById(R.id.error_text)).setText(errorMessage);
-        }
-
-        if (buttonText != null) {
-            ((Button) mLayoutError.findViewById(R.id.error_button)).setText(buttonText);
-        }
-
-        if (drawable != null) {
-            ((TextView) mLayoutError.findViewById(R.id.error_text)).setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
-        }
-
-        addView(mLayoutOverlay);
+    if (drawable != null) {
+      ((TextView) mLayoutError.findViewById(R.id.error_text))
+          .setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
     }
 
-    public void showLoading() {
-        mLayoutOverlay.setVisibility(View.VISIBLE);
-        mLayoutError.setVisibility(View.GONE);
-        mainContentView.setVisibility(View.GONE);
-        mLayoutLoading.setVisibility(View.VISIBLE);
+    addView(mLayoutOverlay);
+  }
+
+  public void showLoading() {
+    mLayoutOverlay.setVisibility(View.VISIBLE);
+    mLayoutError.setVisibility(View.GONE);
+    mainContentView.setVisibility(View.GONE);
+    mLayoutLoading.setVisibility(View.VISIBLE);
+  }
+
+  public void showError(String text, String buttonText, @DrawableRes Integer resDrawable) {
+    mLayoutOverlay.setVisibility(View.VISIBLE);
+    mLayoutLoading.setVisibility(View.GONE);
+    mainContentView.setVisibility(View.GONE);
+
+    if (text != null) {
+      ((TextView) mLayoutError.findViewById(R.id.error_text)).setText(text);
     }
 
-    public void showError(String text, String buttonText, @DrawableRes Integer resDrawable) {
-        mLayoutOverlay.setVisibility(View.VISIBLE);
-        mLayoutLoading.setVisibility(View.GONE);
-        mainContentView.setVisibility(View.GONE);
-
-        if (text != null) {
-            ((TextView) mLayoutError.findViewById(R.id.error_text)).setText(text);
-        }
-
-        if (buttonText != null) {
-            ((Button) mLayoutError.findViewById(R.id.error_button)).setText(buttonText);
-        }
-
-        if (resDrawable != null) {
-            ((TextView) mLayoutError.findViewById(R.id.error_text)).setCompoundDrawablesWithIntrinsicBounds(0, resDrawable, 0, 0);
-        }
-
-        mLayoutError.setVisibility(View.VISIBLE);
+    if (buttonText != null) {
+      ((Button) mLayoutError.findViewById(R.id.error_button)).setText(buttonText);
     }
 
-    public void showError(String text) {
-        showError(text, null, null);
+    if (resDrawable != null) {
+      ((TextView) mLayoutError.findViewById(R.id.error_text))
+          .setCompoundDrawablesWithIntrinsicBounds(0, resDrawable, 0, 0);
     }
 
-    public void showError() {
-        showError(null, null, null);
-    }
+    mLayoutError.setVisibility(View.VISIBLE);
+  }
 
-    public void showView() {
-        mLayoutLoading.setVisibility(View.GONE);
-        mLayoutError.setVisibility(View.GONE);
-        mLayoutOverlay.setVisibility(View.GONE);
-        mainContentView.setVisibility(View.VISIBLE);
-    }
+  public void showError(String text) {
+    showError(text, null, null);
+  }
 
-    public void setProgressColor(int color) {
-        ProgressBar v = (ProgressBar) mLayoutLoading;
-        v.getIndeterminateDrawable().setColorFilter(color,
-                android.graphics.PorterDuff.Mode.MULTIPLY);
-    }
+  public void showError() {
+    showError(null, null, null);
+  }
+
+  public void showView() {
+    mLayoutLoading.setVisibility(View.GONE);
+    mLayoutError.setVisibility(View.GONE);
+    mLayoutOverlay.setVisibility(View.GONE);
+    mainContentView.setVisibility(View.VISIBLE);
+  }
+
+  public void setProgressColor(int color) {
+    ProgressBar v = (ProgressBar) mLayoutLoading;
+    v.getIndeterminateDrawable().setColorFilter(color,
+        android.graphics.PorterDuff.Mode.MULTIPLY);
+  }
 }

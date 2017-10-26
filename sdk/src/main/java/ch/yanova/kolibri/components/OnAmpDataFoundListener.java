@@ -7,5 +7,6 @@ import java.util.Map;
  */
 
 public interface OnAmpDataFoundListener {
-    void onFound(Map<String, String> data);
+
+  void onFound(Map<String, String> data);
 }
