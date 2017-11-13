@@ -1,0 +1,119 @@
+{
+  "kolibri-version": 1.0,
+  "domain": "kolibriframework.io",
+  "scheme": "kolibri",
+  "amazon": "https://yanova-kolibri-assets-dev.s3.amazonaws.com",
+  "netmetrix-type": "universal",
+  "netmetrix": "https://we-ssl.wemfbox.ch/cgi-bin/ivw/CP/apps/wireltern",
+  "adtech": {
+    "settings": {
+      "network_id": 1605,
+      "subnetwork_id": 1,
+      "alias": "we_int",
+      "domain": "a.adtech.de",
+      "max_display_time": 6,
+      "app_name": "wireltern"
+    }
+  },
+  "styling": {
+    "color-palette": {
+      "primary": "#E94F35",
+      "primaryDark": "#E94F35",
+      "primaryLight": "#de0000",
+      "accent": "#E94F35",
+      "toolbarBackground": "#F6F6F6"
+    }
+  },
+  "navigation": {
+    "type": "drawer",
+    "settings": {
+      "default-item": 0,
+      "scheme": "kolibri",
+      "hamburger": {
+        "normal": "https://kolibri.herokuapp.com/apps/MWuSQb4PB2cwbGXs62PpQ9Xz/assets/burger-png-8e24a3b7-112b-4751-8c2f-5bf8116138c4/download",
+        "selected": "https://kolibri.herokuapp.com/apps/MWuSQb4PB2cwbGXs62PpQ9Xz/assets/burger-png-8e24a3b7-112b-4751-8c2f-5bf8116138c4/download"
+      }
+    },
+    "header": {
+      "image": "https://kolibri.herokuapp.com/apps/MWuSQb4PB2cwbGXs62PpQ9Xz/assets/logo_white-png/download",
+      "imagePosition": "bottomLeft"
+    },
+    "items": [
+      {
+        "search": true,
+        "id": "home",
+        "component": "kolibri://content/link",
+        "label": "Home",
+        "url": "https://www.wireltern.ch/amp?kolibri-target=_self",
+        "icon": "home"
+      },
+      {
+        "search": true,
+        "component": "kolibri://content/link",
+        "id": "familie",
+        "label": "Familie",
+        "url": "https://www.wireltern.ch/amp/familie?kolibri-target=_self",
+        "icon": "family"
+      },
+      {
+        "search": true,
+        "component": "kolibri://content/link",
+        "id": "freizeit_und_lifestyle",
+        "label": "Freizeit & Lifestyle",
+        "url": "https://www.wireltern.ch/amp/freizeit_und_lifestyle?kolibri-target=_self",
+        "icon": "freetime"
+      },
+      {
+        "search": true,
+        "component": "kolibri://content/link",
+        "id": "erziehung",
+        "label": "Erziehung",
+        "url": "https://www.wireltern.ch/amp/erziehung?kolibri-target=_self",
+        "icon": "education"
+      },
+      {
+        "search": true,
+        "component": "kolibri://content/link",
+        "id": "gesundheit",
+        "label": "Gesundheit",
+        "url": "https://www.wireltern.ch/amp/gesundheit?kolibri-target=_self",
+        "icon": "health"
+      },
+      {
+        "component": "kolibri://navigation/pregnancycalendar",
+        "id": "calendar",
+        "label": "Ihre Schwangerschaft",
+        "icon": "calendar"
+      }
+    ],
+    "footer": {
+      "type": "horizontal",
+      "items": [
+        {
+          "id": "forum",
+          "component": "kolibri://content/link",
+          "label": "Forum",
+          "url": "https://forum.wireltern.ch?kolibri-target=_external"
+        },
+        {
+          "id": "service",
+          "component": "kolibri://content/link",
+          "label": "Service",
+          "url": "https://www.wireltern.ch/service"
+        },
+        {
+          "id": "impressum",
+          "component": "kolibri://content/link",
+          "label": "Impressum",
+          "url": "https://www.wireltern.ch/service/impressum"
+        }
+      ]
+    }
+  },
+  "search": {
+    "settings": {
+      "url": "https://www.wireltern.ch/suche",
+      "search-param": "q"
+    }
+  }
+}
