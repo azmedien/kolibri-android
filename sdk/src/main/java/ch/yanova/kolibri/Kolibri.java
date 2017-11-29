@@ -317,6 +317,11 @@ public class Kolibri {
 
   @NonNull
   public String getTarget(Uri link) {
+
+    if (!link.isHierarchical()) {
+      return TARGET_EXTERNAL;
+    }
+
     String target = link.getQueryParameter(PARAM_TARGET);
 
     if (target == null) {
