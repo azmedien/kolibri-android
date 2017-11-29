@@ -208,16 +208,14 @@ public class KolibriWebView extends WebView {
       super.onProgressChanged(view, newProgress);
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && newProgress == 100) {
         final String url = view.getUrl();
-        if ("about:blank".equals(url)) {
-          return;
-        }
+        if (!"about:blank".equals(url) && url != null) {
+          final Uri link = Uri.parse(url);
+          final String target = Kolibri.getInstance(view.getContext()).getTarget(link);
 
-        final Uri link = Uri.parse(url);
-        final String target = Kolibri.getInstance(view.getContext()).getTarget(link);
-
-        // Skip external targets when reporting to netmetrix
-        if (!TARGET_EXTERNAL.equals(target)) {
-          KolibriApp.getInstance().logEvent(null, link.toString());
+          // Skip external targets when reporting to netmetrix
+          if (!TARGET_EXTERNAL.equals(target)) {
+            KolibriApp.getInstance().logEvent(null, link.toString());
+          }
         }
       }
       for (KolibriWebChromeClient webChromeClient : webChromeClients) {

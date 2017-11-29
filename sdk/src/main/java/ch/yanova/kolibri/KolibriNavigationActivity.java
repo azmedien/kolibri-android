@@ -701,7 +701,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
   }
 
   protected MenuItem getDefaultItem() {
-    final int defaultItemIndex = configuration.getNavigation().getSettings().getInt("default-item");
+    final int defaultItemIndex = configuration == null ?
+            0 : configuration.getNavigation().getSettings().getInt("default-item");
 
     return getMenu().getItem(defaultItemIndex);
   }
