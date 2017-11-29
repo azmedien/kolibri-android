@@ -143,3 +143,9 @@ artifacts {
     archives androidSourcesJar
     archives androidJavadocsJar
 }
+
+//task(':sdk:artifactoryPublish').mustRunAfter task(':sdk:bundleRelease')
+
+artifactoryPublish {
+    dependsOn ':sdk:bundleRelease'
+}
