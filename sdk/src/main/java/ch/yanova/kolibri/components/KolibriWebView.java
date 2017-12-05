@@ -7,6 +7,7 @@ import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -171,7 +172,11 @@ public class KolibriWebView extends WebView {
           linkIntent.putExtras(kolibriIntent);
         }
 
-        context.startActivity(linkIntent);
+
+        final PackageManager packageManager = context.getPackageManager();
+        if (intent.resolveActivity(packageManager) != null) {
+          context.startActivity(linkIntent);
+        }
 
         final String scheme = link.getScheme();
 
