@@ -81,6 +81,7 @@ public class KolibriWebView extends WebView {
       getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
       getSettings().setDomStorageEnabled(true);
       getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
+      getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         // chromium, enable hardware acceleration
@@ -89,8 +90,6 @@ public class KolibriWebView extends WebView {
         // older android version, disable hardware acceleration
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
       }
-
-      getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 
       clearHistory = false;
     }
