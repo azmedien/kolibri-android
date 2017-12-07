@@ -4,9 +4,14 @@ import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ImageView;
+import ch.yanova.kolibri.RuntimeConfig.NavigationItem;
+import ch.yanova.kolibri.components.KolibriWebView;
+import ch.yanova.kolibri.components.KolibriWebViewClient;
 
 /**
  * Created by mmironov on 6/16/17.
@@ -43,7 +48,7 @@ public abstract class KolibriSplashActivity extends AppCompatActivity
   }
 
   @Override
-  public void onLoaded(RuntimeConfig runtime, boolean isFresh) {
+  public void onLoaded(final RuntimeConfig runtime, boolean isFresh) {
     findViewById(R.id.splash).postDelayed(new Runnable() {
       @Override
       public void run() {
