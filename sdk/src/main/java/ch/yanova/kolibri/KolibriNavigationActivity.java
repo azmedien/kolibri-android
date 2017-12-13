@@ -10,12 +10,14 @@ import static ch.yanova.kolibri.RuntimeConfig.NavigationItem;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +45,7 @@ import ch.yanova.kolibri.components.KolibriLoadingView;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
+import ch.yanova.kolibri.network.NetworkChangeReceiver;
 import com.afollestad.aesthetic.Aesthetic;
 import com.afollestad.aesthetic.AestheticActivity;
 import com.afollestad.aesthetic.NavigationViewMode;
@@ -64,6 +67,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
   final Set<Target> targets = new HashSet<>();
 
   protected RuntimeConfig configuration;
+  private NetworkChangeReceiver receiver;
 
   private NavigationView navigationView;
   private DrawerLayout drawer;
@@ -156,6 +160,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
     restarted = false;
 
+    receiver = new NetworkChangeReceiver(webView);
+
     webView.addKolibriWebViewClient(new KolibriWebViewClient() {
 
       @Override
@@ -228,6 +234,13 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     super.onPostCreate(savedInstanceState);
     // Sync the toggle state after onRestoreInstanceState has occurred.
     drawerToggle.syncState();
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+    registerReceiver(receiver,
+        new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
   }
 
   @Override
@@ -326,6 +339,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
   @Override
   protected void onStop() {
+    unregisterReceiver(receiver);
     drawer.closeDrawer(Gravity.START);
     super.onStop();
   }

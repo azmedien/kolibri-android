@@ -25,13 +25,9 @@ import ch.yanova.kolibri.coordinators.SearchWebviewCoordinator;
 
 public class PrototypeActivity extends KolibriNavigationActivity {
 
-  private NetworkChangeReceiver networkChangeReceiver;
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-    networkChangeReceiver = new NetworkChangeReceiver(getWebView());
 
     getWebView().addKolibriWebViewClient(new KolibriWebViewClient() {
       @Override
@@ -82,19 +78,6 @@ public class PrototypeActivity extends KolibriNavigationActivity {
     });
 
     getWebView().setHandleInternal(true);
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    registerReceiver(networkChangeReceiver,
-        new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    unregisterReceiver(networkChangeReceiver);
   }
 
   @Override
