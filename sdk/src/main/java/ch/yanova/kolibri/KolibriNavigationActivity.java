@@ -171,7 +171,18 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         pageHasError = false;
 
         invalidateOptionsMenu();
-        getWebviewOverlay().showLoading();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+          if (!pageHasError) {
+            // On old devices without commitVisible we delay preventing flickering.
+            getWebviewOverlay().postDelayed(new Runnable() {
+              @Override
+              public void run() {
+                getWebviewOverlay().showLoading();
+              }
+            }, 250);
+          }
+        }
       }
 
       @Override
@@ -179,23 +190,6 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         super.onPageCommitVisible(view, url);
         if (!pageHasError) {
           getWebviewOverlay().showView();
-        }
-      }
-
-      @Override
-      public void onPageFinished(WebView view, String url) {
-        super.onPageFinished(view, url);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-          if (!pageHasError) {
-            // On old devices without commitVisible we delay preventing flickering.
-            getWebviewOverlay().postDelayed(new Runnable() {
-              @Override
-              public void run() {
-                getWebviewOverlay().showView();
-              }
-            }, 250);
-          }
         }
       }
 

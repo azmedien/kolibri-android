@@ -68,7 +68,18 @@ public class InternalActivity extends AestheticActivity {
         pageHasError = false;
 
         invalidateOptionsMenu();
-        webviewOverlay.showLoading();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+          if (!pageHasError) {
+            // On old devices without commitVisible we delay preventing flickering.
+            webviewOverlay.postDelayed(new Runnable() {
+              @Override
+              public void run() {
+                webviewOverlay.showLoading();
+              }
+            }, 250);
+          }
+        }
       }
 
       @Override
@@ -76,23 +87,6 @@ public class InternalActivity extends AestheticActivity {
         super.onPageCommitVisible(view, url);
         if (!pageHasError) {
           webviewOverlay.showView();
-        }
-      }
-
-      @Override
-      public void onPageFinished(WebView view, String url) {
-        super.onPageFinished(view, url);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-          if (!pageHasError) {
-            // On old devices without commitVisible we delay preventing flickering.
-            webviewOverlay.postDelayed(new Runnable() {
-              @Override
-              public void run() {
-                webviewOverlay.showView();
-              }
-            }, 250);
-          }
         }
       }
 
