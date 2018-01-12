@@ -271,6 +271,14 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     super.onResume();
 
     Kolibri kolibri = Kolibri.getInstance(this);
+
+    final RuntimeConfig runtime = Kolibri.getInstance(this).getRuntimeConfigFromCache();
+
+    if (runtime != null) {
+      final Navigation nav = runtime.getNavigation();
+      constructNavigation(nav);
+    }
+
     kolibri.loadRuntimeConfiguration(this);
 
     getWebView().resumeTimers();

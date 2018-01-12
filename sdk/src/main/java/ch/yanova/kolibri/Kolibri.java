@@ -189,10 +189,14 @@ public class Kolibri {
           final boolean userDefined = runtimeListener.onFailed(e);
           if (!userDefined) {
             try { // Try to load saved one as a fallback configuratio
-              runtime = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")),
-                  getRuntimeUrl());
-              runtimeListener.onLoaded(runtime, false);
-            } catch (JSONException | KolibriException exception) {
+              runtime = getRuntimeConfigFromCache();
+
+              if (runtime != null) {
+                runtimeListener.onLoaded(runtime, false);
+              } else {
+                throw new KolibriException("No runtime cache exists");
+              }
+            } catch (KolibriException exception) {
               runtimeListener.onFailed(exception);
             }
           }
@@ -347,5 +351,17 @@ public class Kolibri {
 
   public enum HandlerType {
     COMPONENT, ACTIVITY, NONE
+  }
+
+  public RuntimeConfig getRuntimeConfigFromCache() {
+    RuntimeConfig config = null;
+    try {
+      config = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")),
+              getRuntimeUrl());
+    } catch (JSONException e) {
+      Log.e(TAG, "No runtime cache exists: " + e.getMessage());
+    }
+
+    return config;
   }
 }
