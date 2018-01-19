@@ -358,8 +358,10 @@ public class Kolibri {
     try {
       config = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")),
               getRuntimeUrl());
-    } catch (JSONException e) {
+    } catch (KolibriException e) {
       Log.e(TAG, "No runtime cache exists: " + e.getMessage());
+    } catch (JSONException e) {
+      e.printStackTrace();
     }
 
     return config;
