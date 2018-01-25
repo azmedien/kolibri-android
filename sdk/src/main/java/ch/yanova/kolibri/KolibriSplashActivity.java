@@ -12,8 +12,7 @@ import android.widget.ImageView;
  * Created by mmironov on 6/16/17.
  */
 
-public abstract class KolibriSplashActivity extends AppCompatActivity
-    implements RuntimeListener {
+public abstract class KolibriSplashActivity extends AppCompatActivity {
 
   private long minimumDisplayTime;
 
@@ -22,9 +21,15 @@ public abstract class KolibriSplashActivity extends AppCompatActivity
     hideSystemUI();
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_splash);
-    minimumDisplayTime = 1000;
+    minimumDisplayTime = 2000;
 
-    Kolibri.getInstance(this).loadRuntimeConfiguration(this);
+    findViewById(R.id.splash).postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        onSplashTimedOut();
+      }
+    }, minimumDisplayTime);
+    Kolibri.getInstance(this).loadRuntimeConfiguration(null);
   }
 
   private void hideSystemUI() {
@@ -40,28 +45,6 @@ public abstract class KolibriSplashActivity extends AppCompatActivity
 
   public void attachToRoot(View view) {
     ((ViewGroup) findViewById(R.id.splash_root)).addView(view);
-  }
-
-  @Override
-  public void onLoaded(RuntimeConfig runtime, boolean isFresh) {
-    findViewById(R.id.splash).postDelayed(new Runnable() {
-      @Override
-      public void run() {
-        onSplashTimedOut();
-      }
-    }, minimumDisplayTime);
-  }
-
-  @Override
-  public boolean onFailed(Exception e) {
-    findViewById(R.id.splash).postDelayed(new Runnable() {
-      @Override
-      public void run() {
-        onSplashTimedOut();
-      }
-    }, minimumDisplayTime);
-
-    return true;
   }
 
   public void setSplashImage(@DrawableRes int resId) {
