@@ -10,12 +10,14 @@ import static ch.yanova.kolibri.RuntimeConfig.NavigationItem;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +45,7 @@ import ch.yanova.kolibri.components.KolibriLoadingView;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
+import ch.yanova.kolibri.network.NetworkChangeReceiver;
 import com.afollestad.aesthetic.Aesthetic;
 import com.afollestad.aesthetic.AestheticActivity;
 import com.afollestad.aesthetic.NavigationViewMode;
@@ -64,6 +67,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
   final Set<Target> targets = new HashSet<>();
 
   protected RuntimeConfig configuration;
+  private NetworkChangeReceiver receiver;
 
   private NavigationView navigationView;
   private DrawerLayout drawer;
@@ -156,6 +160,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
     restarted = false;
 
+    receiver = new NetworkChangeReceiver(webView);
+
     webView.addKolibriWebViewClient(new KolibriWebViewClient() {
 
       @Override
@@ -165,7 +171,18 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         pageHasError = false;
 
         invalidateOptionsMenu();
-        getWebviewOverlay().showLoading();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+          if (!pageHasError) {
+            // On old devices without commitVisible we delay preventing flickering.
+            getWebviewOverlay().postDelayed(new Runnable() {
+              @Override
+              public void run() {
+                getWebviewOverlay().showLoading();
+              }
+            }, 250);
+          }
+        }
       }
 
       @Override
@@ -173,23 +190,6 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
         super.onPageCommitVisible(view, url);
         if (!pageHasError) {
           getWebviewOverlay().showView();
-        }
-      }
-
-      @Override
-      public void onPageFinished(WebView view, String url) {
-        super.onPageFinished(view, url);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-          if (!pageHasError) {
-            // On old devices without commitVisible we delay preventing flickering.
-            getWebviewOverlay().postDelayed(new Runnable() {
-              @Override
-              public void run() {
-                getWebviewOverlay().showView();
-              }
-            }, 250);
-          }
         }
       }
 
@@ -213,7 +213,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         Kolibri.getInstance(KolibriNavigationActivity.this).applyRuntimeTheme(false);
 
-        if (errorCode == ERROR_CONNECT || errorCode == ERROR_HOST_LOOKUP) {
+        if (errorCode == ERROR_CONNECT || errorCode == ERROR_HOST_LOOKUP || errorCode == ERROR_UNKNOWN) {
           getWebviewOverlay().showError(getResources().getString(R.string.internet_error_message));
         } else {
           getWebviewOverlay().showError(
@@ -228,6 +228,13 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     super.onPostCreate(savedInstanceState);
     // Sync the toggle state after onRestoreInstanceState has occurred.
     drawerToggle.syncState();
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+    registerReceiver(receiver,
+        new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
   }
 
   @Override
@@ -334,6 +341,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
   @Override
   protected void onStop() {
+    unregisterReceiver(receiver);
     drawer.closeDrawer(Gravity.START);
     super.onStop();
   }

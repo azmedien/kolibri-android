@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.25.1'
     }
 }
 apply plugin: 'com.android.application'
@@ -17,13 +17,13 @@ repositories {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    buildToolsVersion "26.0.3"
     defaultConfig {
         applicationId "ch.yanova.kolibri.prototype"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 91
-        versionName "0.9.1-SNAPSHOT"
+        versionCode 93
+        versionName "0.9.3-SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -73,8 +73,8 @@ dependencies {
     implementation 'com.android.support:design:26.1.0'
     implementation 'com.afollestad:aesthetic:0.4.7'
 
-    implementation 'com.google.firebase:firebase-core:11.4.2'
-    implementation 'com.google.firebase:firebase-messaging:11.4.2'
+    implementation 'com.google.firebase:firebase-core:11.6.2'
+    implementation 'com.google.firebase:firebase-messaging:11.6.2'
     implementation 'com.google.vr:sdk-videowidget:1.100.0'
 }
 
