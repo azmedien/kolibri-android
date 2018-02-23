@@ -117,9 +117,9 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void processHTML(String html) {
+
       Document content = Jsoup.parseBodyFragment(html);
       Elements elements = content.getElementsByTag(TAG_META);
-      Log.i("PARSING", "processHTML meta: " + elements);
       final Map<String, String> metaData = new HashMap<>();
 
       for (Element link : elements) {
@@ -162,6 +162,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         view.post(new Runnable() {
           @Override
           public void run() {
+
             handleAmpData(metaData);
             onFound(metaData);
 
@@ -192,6 +193,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                 if (navItem.hasSetting("url") && navItem.getString("url")
                     .equals(webView.getOriginalUrl())) {
                   Kolibri.getInstance(view.getContext()).applyRuntimeTheme(true);
+
                   webView.setTag(R.id.primaryColor, null);
                   webView.setTag(R.id.accentColor, null);
                   break;

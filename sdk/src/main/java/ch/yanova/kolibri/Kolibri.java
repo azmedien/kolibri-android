@@ -21,6 +21,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.AestheticActivity;
 import com.afollestad.aesthetic.NavigationViewMode;
 import com.afollestad.aesthetic.TabLayoutBgMode;
 import com.afollestad.aesthetic.TabLayoutIndicatorMode;
@@ -62,6 +63,7 @@ public class Kolibri {
   private static Context fContext;
   private SharedPreferences preferences;
   private RuntimeConfig runtime;
+
   private Kolibri(Context context) {
     // There's no memory leak when we get the application context.
     fContext = context.getApplicationContext();

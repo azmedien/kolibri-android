@@ -395,23 +395,23 @@ public class KolibriWebView extends WebView {
       }
     }
 
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-      if (overridableExtensions
-          .contains(WebviewCache.getFileExt(WebviewCache.getLocalFileNameForUrl(url)))) {
-        return webviewCache.load(url);
-      }
-      return super.shouldInterceptRequest(view, url);
-    }
-
-    @TargetApi(VERSION_CODES.LOLLIPOP)
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-      if (overridableExtensions.contains(WebviewCache.getExtFromUrl(request.getUrl().toString()))) {
-        return webviewCache.load(request.getUrl().toString());
-      } else {
-        return super.shouldInterceptRequest(view, request.getUrl().toString());
-      }
-    }
+//    @Override
+//    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+//      if (overridableExtensions
+//          .contains(WebviewCache.getFileExt(WebviewCache.getLocalFileNameForUrl(url)))) {
+//        return webviewCache.load(url);
+//      }
+//      return super.shouldInterceptRequest(view, url);
+//    }
+//
+//    @TargetApi(VERSION_CODES.LOLLIPOP)
+//    @Override
+//    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+//      if (overridableExtensions.contains(WebviewCache.getExtFromUrl(request.getUrl().toString()))) {
+//        return webviewCache.load(request.getUrl().toString());
+//      } else {
+//        return super.shouldInterceptRequest(view, request.getUrl().toString());
+//      }
+//    }
   }
 }

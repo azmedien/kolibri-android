@@ -3,21 +3,16 @@ package ch.yanova.kolibri;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.ImageView;
-import ch.yanova.kolibri.RuntimeConfig.NavigationItem;
-import ch.yanova.kolibri.components.KolibriWebView;
-import ch.yanova.kolibri.components.KolibriWebViewClient;
+import com.afollestad.aesthetic.AestheticActivity;
 
 /**
  * Created by mmironov on 6/16/17.
  */
 
-public abstract class KolibriSplashActivity extends AppCompatActivity {
+public abstract class KolibriSplashActivity extends AestheticActivity implements RuntimeListener {
 
   private long minimumDisplayTime;
 
@@ -34,7 +29,7 @@ public abstract class KolibriSplashActivity extends AppCompatActivity {
         onSplashTimedOut();
       }
     }, minimumDisplayTime);
-    Kolibri.getInstance(this).loadRuntimeConfiguration(null);
+    Kolibri.getInstance(this).loadRuntimeConfiguration(this);
   }
 
   private void hideSystemUI() {
@@ -54,5 +49,15 @@ public abstract class KolibriSplashActivity extends AppCompatActivity {
 
   public void setSplashImage(@DrawableRes int resId) {
     ((ImageView) findViewById(R.id.splash)).setImageResource(resId);
+  }
+
+  @Override
+  public void onLoaded(RuntimeConfig runtime, boolean isFresh) {
+    Kolibri.getInstance(this).applyRuntimeTheme(false);
+  }
+
+  @Override
+  public boolean onFailed(Exception e) {
+    return false;
   }
 }
