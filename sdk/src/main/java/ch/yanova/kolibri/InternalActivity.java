@@ -203,6 +203,10 @@ public class InternalActivity extends AestheticActivity {
     }
   }
 
+  public KolibriWebView getWebView() {
+    return webView;
+  }
+
   protected void handleAmpData(Map<String, String> data) {
     if (data.size() > 0 && data.containsKey(WebViewCoordinator.META_SHAREABLE)) {
 
