@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import ch.yanova.kolibri.Kolibri;
@@ -97,7 +96,8 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
   }
 
   private void handleAmpData(Map<String, String> data) {
-    handleFavorizable(data.get(META_FAVORIZABLE), view.getUrl(), view);
+    final String toSave = data.containsKey(META_URL) ? data.get(META_URL) : view.getUrl();
+    handleFavorizable(data.get(META_FAVORIZABLE), toSave, view);
 
     KolibriApp.getInstance().reportToFirebase(data.get(META_CATEGORY), view.getUrl());
   }
@@ -149,7 +149,6 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
       }
 
       elements = content.getElementsByTag(TAG_LINK);
-      Log.i("PARSING", "processHTML link: " + elements);
 
       for (Element element : elements) {
         if (element.hasAttr(ATTR_REL) && element.attr(ATTR_REL).equals(META_CANONICAL)) {

@@ -7,12 +7,11 @@ import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.View;
@@ -20,7 +19,6 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -28,10 +26,8 @@ import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriException;
-import ch.yanova.kolibri.network.WebviewCache;
 import com.crashlytics.android.Crashlytics;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,13 +38,9 @@ public class KolibriWebView extends WebView {
 
   public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
   private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
-  private static List<String> overridableExtensions = new ArrayList<>(
-      Arrays.asList("js", "css", "png", "jpg", "woff", "ttf", "eot", "ico"));
 
   private List<KolibriWebViewClient> webClients;
   private List<KolibriWebChromeClient> webChromeClients;
-
-  private WebviewCache webviewCache;
 
   private Intent intent;
 
@@ -70,15 +62,9 @@ public class KolibriWebView extends WebView {
     init();
   }
 
-  public WebviewCache getCache() {
-    return webviewCache;
-  }
-
   private void init() {
 
     if (!isInEditMode()) {
-
-      webviewCache = new WebviewCache(getContext());
 
       final InternalWebViewClient internalWebViewClient = new InternalWebViewClient();
       final InternalChromeClient internalChromeClient = new InternalChromeClient();
@@ -191,14 +177,15 @@ public class KolibriWebView extends WebView {
 
 
         final PackageManager packageManager = context.getPackageManager();
-        if (intent.resolveActivity(packageManager) != null) {
+        if (linkIntent.resolveActivity(packageManager) != null) {
           context.startActivity(linkIntent);
-        }
+        } else {
 
-        final String scheme = link.getScheme();
+          final String scheme = link.getScheme();
 
-        if (scheme.equals(appScheme)) {
-          Kolibri.notifyComponents(context, Kolibri.createIntent(link));
+          if (scheme.equals(appScheme)) {
+            Kolibri.notifyComponents(context, Kolibri.createIntent(link));
+          }
         }
       }
     }
@@ -394,24 +381,5 @@ public class KolibriWebView extends WebView {
         webClient.onReceivedError(view, errorCode, description, failingUrl);
       }
     }
-
-//    @Override
-//    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-//      if (overridableExtensions
-//          .contains(WebviewCache.getFileExt(WebviewCache.getLocalFileNameForUrl(url)))) {
-//        return webviewCache.load(url);
-//      }
-//      return super.shouldInterceptRequest(view, url);
-//    }
-//
-//    @TargetApi(VERSION_CODES.LOLLIPOP)
-//    @Override
-//    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-//      if (overridableExtensions.contains(WebviewCache.getExtFromUrl(request.getUrl().toString()))) {
-//        return webviewCache.load(request.getUrl().toString());
-//      } else {
-//        return super.shouldInterceptRequest(view, request.getUrl().toString());
-//      }
-//    }
   }
 }
