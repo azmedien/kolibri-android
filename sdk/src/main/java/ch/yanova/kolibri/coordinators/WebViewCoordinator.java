@@ -46,7 +46,6 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
   public static final String META_THEME_COLOR = "theme-color";
   public static final String NAME = "name";
   private static final String[] sURIs = new String[]{webViewUri};
-  private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
   private static final String JS_INTERFACE_NAME = "GetHtml";
   private static final String TAG = "WebViewCoordinator";
   private KolibriWebView webView;
@@ -56,6 +55,12 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
     super.attach(view);
     webView = view;
     view.addJavascriptInterface(new GetHtmlJsInterface(), JS_INTERFACE_NAME);
+  }
+
+  @Override
+  protected void detach(KolibriWebView view) {
+    super.detach(view);
+    view.removeJavascriptInterface(JS_INTERFACE_NAME);
   }
 
   @Override
