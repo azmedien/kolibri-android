@@ -12,6 +12,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.View;
@@ -84,7 +86,12 @@ public class KolibriWebView extends WebView {
       getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
       getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      // Load http thumbnails and assets over a secure https webpages
+      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+        getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+      }
+
+      if (VERSION.SDK_INT >= VERSION_CODES.KITKAT) {
         // chromium, enable hardware acceleration
         setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
