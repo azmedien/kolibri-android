@@ -16,14 +16,14 @@ repositories {
 
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion "26.0.3"
     defaultConfig {
         applicationId "ch.yanova.kolibri.prototype"
         minSdkVersion 19
-        targetSdkVersion 26
-        versionCode 93
-        versionName "0.9.3-SNAPSHOT"
+        targetSdkVersion 27
+        versionCode 95
+        versionName "0.9.5-SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
