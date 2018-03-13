@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.net.UrlQuerySanitizer;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import ch.yanova.kolibri.Kolibri;
@@ -196,7 +197,15 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
 
                 if (navItem.hasSetting("url") && navItem.getString("url")
                     .equals(webView.getOriginalUrl())) {
-                  Kolibri.getInstance(view.getContext()).applyRuntimeTheme(true);
+
+
+                  //TODO: this handles a bug in the Aesthetic SDK about a null context
+                  //TODO: remove this try-catch when the bug in the SDK is fixed
+                  try {
+                    Kolibri.getInstance(view.getContext()).applyRuntimeTheme(true);
+                  } catch (NullPointerException e) {
+                    Log.e(TAG, e.getMessage());
+                  }
 
                   webView.setTag(R.id.primaryColor, null);
                   webView.setTag(R.id.accentColor, null);
