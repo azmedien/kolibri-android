@@ -4,7 +4,7 @@ apply plugin: "com.jfrog.artifactory"
 apply plugin: 'maven-publish'
 
 group = 'ch.yanova.kolibri'
-version = "0.9.5-SNAPSHOT"
+version = "0.9.6-SNAPSHOT"
 
 android {
     compileSdkVersion 27
@@ -13,7 +13,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 95
+        versionCode 96
         versionName project.version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -50,7 +50,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
     implementation 'com.android.support:design:27.1.0'
-    implementation 'com.afollestad:aesthetic:0.4.7'
+    implementation 'com.afollestad:aesthetic:0.4.8'
 
     compileOnly 'com.google.firebase:firebase-core:11.8.0'
     compileOnly 'com.google.firebase:firebase-messaging:11.8.0'
@@ -148,4 +148,8 @@ artifacts {
 
 artifactoryPublish {
     dependsOn ':sdk:bundleRelease'
+}
+
+repositories {
+    maven { url 'http://cimac.yanova.ch:8081/artifactory/libs-release/'}
 }
