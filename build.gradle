@@ -21,6 +21,7 @@ allprojects {
         jcenter()
         maven { url "https://jitpack.io" }
         maven { url 'https://maven.google.com' }
+        maven { url 'http://cimac.yanova.ch:8081/artifactory/libs-release/'}
     }
 }
 
