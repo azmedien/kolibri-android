@@ -269,6 +269,8 @@ public class Kolibri {
         .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
         .tabLayoutBackgroundMode(TabLayoutBgMode.PRIMARY)
         .tabLayoutIndicatorMode(TabLayoutIndicatorMode.ACCENT)
+        .fontNormal(R.font.font_normal)
+        .fontBold(R.font.font_bold)
         .apply();
   }
 

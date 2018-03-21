@@ -4,4 +4,6 @@
   <item name="splash" type="drawable"/>
   <item name="primaryColor" type="id"/>
   <item name="accentColor" type="id"/>
+  <item name="font_normal" type="font" />
+  <item name="font_bold" type="font"/>
 </resources>

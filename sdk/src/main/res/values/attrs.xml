@@ -5,8 +5,4 @@
     <attr format="string" name="buttonText"/>
     <attr format="color|reference" name="drawable"/>
   </declare-styleable>
-
-  <attr name="kolibriToolbarTheme" format="reference"/>
-  <attr name="kolibriToolbarTitle" format="reference"/>
-
 </resources>
