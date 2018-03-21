@@ -419,6 +419,13 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
       navigationView.setCheckedItem(itemByid.getItemId());
     }
 
+    /*
+     * Because Aesthetic use shared preferences, we change values to trigger refresh after
+     * navigation is constructed. Aesthetic loop over the new menu to apply the new fonts.
+     */
+    Aesthetic.get().fontNormal(R.font.font_bold).apply();
+    Aesthetic.get().fontNormal(R.font.font_normal).apply();
+
     onNavigationInitialize();
   }
 
