@@ -198,7 +198,6 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
                 if (navItem.hasSetting("url") && navItem.getString("url")
                     .equals(webView.getOriginalUrl())) {
 
-
                   //TODO: this handles a bug in the Aesthetic SDK about a null context
                   //TODO: remove this try-catch when the bug in the SDK is fixed
                   try {
