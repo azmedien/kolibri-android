@@ -21,7 +21,7 @@ import org.robolectric.annotation.Config;
  * Created by lekov on 8.11.17.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
+@Config(manifest = Config.NONE, sdk = 27)
 public class RuntimeConfigTest {
 
   public static final String APP_URL = "https://kolibri.herokuapp.com/apps/7yaaRbHQx2NvYTori9EWqazJ";

@@ -339,14 +339,18 @@ public class Kolibri {
         domain = domain.substring(4);
       }
 
-      if (host.startsWith("www.")) {
-        host = host.substring(4);
-      }
+      if (host != null) {
+        if (host.startsWith("www.")) {
+          host = host.substring(4);
+        }
 
-      if (host.equals(domain)) {
-        target = TARGET_INTERNAL;
+        if (host.equals(domain)) {
+          target = TARGET_INTERNAL;
+        } else {
+          target = TARGET_EXTERNAL;
+        }
       } else {
-        target = TARGET_EXTERNAL;
+        target = TARGET_INTERNAL;
       }
     }
     return target;
