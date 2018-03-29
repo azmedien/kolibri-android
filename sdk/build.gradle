@@ -4,7 +4,7 @@ apply plugin: "com.jfrog.artifactory"
 apply plugin: 'maven-publish'
 
 group = 'ch.yanova.kolibri'
-version = "0.9.7-SNAPSHOT"
+version = "0.9.8-SNAPSHOT"
 
 android {
     compileSdkVersion 27
@@ -13,7 +13,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 97
+        versionCode 98
         versionName project.version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -61,7 +61,8 @@ dependencies {
 
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:3.5.1'
+    testImplementation "org.assertj:assertj-core:3.9.0"
+    testImplementation 'org.robolectric:robolectric:3.8'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }
@@ -147,7 +148,7 @@ artifacts {
 //task(':sdk:artifactoryPublish').mustRunAfter task(':sdk:bundleRelease')
 
 artifactoryPublish {
-    dependsOn ':sdk:bundleRelease'
+    dependsOn ':sdk:test',':sdk:bundleRelease'
 }
 
 repositories {
