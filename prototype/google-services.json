@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "617375952464",
+    "firebase_url": "https://kolibri-prototype.firebaseio.com",
+    "project_id": "kolibri-prototype",
+    "storage_bucket": "kolibri-prototype.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:617375952464:android:243b82e7b9096973",
+        "android_client_info": {
+          "package_name": "ch.yanova.kolibri.prototype"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "617375952464-473ruubvvmuta20nrl831t32fa80pvua.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5FqXMCx-pGAiMKTNtmc9IlZg-V1AicPY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
