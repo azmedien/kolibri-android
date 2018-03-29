@@ -174,13 +174,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
           if (!pageHasError) {
-            // On old devices without commitVisible we delay preventing flickering.
-            getWebviewOverlay().postDelayed(new Runnable() {
-              @Override
-              public void run() {
-                getWebviewOverlay().showLoading();
-              }
-            }, 250);
+            getWebviewOverlay().showLoading();
           }
         }
       }
