@@ -148,7 +148,7 @@ artifacts {
 //task(':sdk:artifactoryPublish').mustRunAfter task(':sdk:bundleRelease')
 
 artifactoryPublish {
-    dependsOn ':sdk:bundleRelease'
+    dependsOn ':sdk:test',':sdk:bundleRelease'
 }
 
 repositories {
