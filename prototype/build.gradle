@@ -22,8 +22,8 @@ android {
         applicationId "ch.yanova.kolibri.prototype"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 96
-        versionName "0.9.6-SNAPSHOT"
+        versionCode 99
+        versionName "0.9.9-SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -55,7 +55,7 @@ configurations.all {
         def requested = details.requested
         if (requested.group == 'com.android.support') {
             if (!requested.name.startsWith("multidex")) {
-                details.useVersion '27.1.0'
+                details.useVersion '27.1.1'
             }
         }
     }
@@ -70,11 +70,11 @@ dependencies {
         transitive = true;
     }
 
-    implementation 'com.android.support:design:27.1.0'
-    implementation 'com.afollestad:aesthetic:0.5.0'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.afollestad:aesthetic:0.5.1'
 
-    implementation 'com.google.firebase:firebase-core:11.8.0'
-    implementation 'com.google.firebase:firebase-messaging:11.8.0'
+    implementation 'com.google.firebase:firebase-core:12.0.1'
+    implementation 'com.google.firebase:firebase-messaging:12.0.1'
     implementation 'com.google.vr:sdk-videowidget:1.100.0'
 }
 
