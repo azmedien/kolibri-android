@@ -4,7 +4,7 @@ apply plugin: "com.jfrog.artifactory"
 apply plugin: 'maven-publish'
 
 group = 'ch.yanova.kolibri'
-version = "0.9.8-SNAPSHOT"
+version = "0.9.9-SNAPSHOT"
 
 android {
     compileSdkVersion 27
@@ -13,7 +13,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 98
+        versionCode 99
         versionName project.version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -34,7 +34,7 @@ configurations.all {
         def requested = details.requested
         if (requested.group == 'com.android.support') {
             if (!requested.name.startsWith("multidex")) {
-                details.useVersion '27.1.0'
+                details.useVersion '27.1.1'
             }
         }
     }
@@ -49,11 +49,11 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.1'
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
-    implementation 'com.android.support:design:27.1.0'
-    implementation 'com.afollestad:aesthetic:0.5.0'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.afollestad:aesthetic:0.5.1'
 
-    compileOnly 'com.google.firebase:firebase-core:11.8.0'
-    compileOnly 'com.google.firebase:firebase-messaging:11.8.0'
+    compileOnly 'com.google.firebase:firebase-core:12.0.1'
+    compileOnly 'com.google.firebase:firebase-messaging:12.0.1'
 
     compileOnly('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
         transitive = true;
