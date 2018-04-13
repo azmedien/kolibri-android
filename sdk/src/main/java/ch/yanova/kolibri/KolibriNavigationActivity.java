@@ -273,11 +273,13 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
     Kolibri kolibri = Kolibri.getInstance(this);
 
-    final RuntimeConfig runtime = Kolibri.getInstance(this).getRuntimeConfigFromCache();
+    if (getIntent() == null || !getIntent().hasCategory("notification")) {
+      final RuntimeConfig runtime = Kolibri.getInstance(this).getRuntimeConfigFromCache();
 
-    if (runtime != null) {
-      final Navigation nav = runtime.getNavigation();
-      constructNavigation(nav);
+      if (runtime != null) {
+        final Navigation nav = runtime.getNavigation();
+        constructNavigation(nav);
+      }
     }
 
     kolibri.loadRuntimeConfiguration(this);
@@ -406,9 +408,9 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     menu.getItem(navigation.getSettings().getInt("default-item")).getIntent()
         .addCategory(Intent.CATEGORY_DEFAULT);
 
-    if (!restarted) {
+    if (selectedMenuItemId == null) {
       loadDefaultItem();
-    } else if (selectedMenuItemId != null) {
+    } else {
       final MenuItem itemByid = findMenuItem(selectedMenuItemId);
       navigationView.setCheckedItem(itemByid.getItemId());
     }
