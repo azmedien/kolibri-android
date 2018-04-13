@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import ch.yanova.kolibri.RuntimeConfig.Navigation;
 import com.afollestad.aesthetic.AestheticActivity;
 
 /**
@@ -23,12 +24,16 @@ public abstract class KolibriSplashActivity extends AestheticActivity implements
     setContentView(R.layout.activity_splash);
     minimumDisplayTime = 2000;
 
-    findViewById(R.id.splash).postDelayed(new Runnable() {
-      @Override
-      public void run() {
-        onSplashTimedOut();
-      }
-    }, minimumDisplayTime);
+    final RuntimeConfig runtime = Kolibri.getInstance(this).getRuntimeConfigFromCache();
+    if (runtime != null) {
+      findViewById(R.id.splash).postDelayed(new Runnable() {
+        @Override
+        public void run() {
+          onSplashTimedOut();
+        }
+      }, minimumDisplayTime);
+    }
+
     Kolibri.getInstance(this).loadRuntimeConfiguration(this);
   }
 
@@ -54,10 +59,23 @@ public abstract class KolibriSplashActivity extends AestheticActivity implements
   @Override
   public void onLoaded(RuntimeConfig runtime, boolean isFresh) {
     Kolibri.getInstance(this).applyRuntimeTheme(false);
+    findViewById(R.id.splash).postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        onSplashTimedOut();
+      }
+    }, minimumDisplayTime);
   }
 
   @Override
   public boolean onFailed(Exception e) {
-    return false;
+    findViewById(R.id.splash).postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        onSplashTimedOut();
+      }
+    }, minimumDisplayTime);
+
+    return true;
   }
 }
