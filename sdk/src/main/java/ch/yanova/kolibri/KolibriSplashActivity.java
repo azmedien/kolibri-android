@@ -16,23 +16,27 @@ import com.afollestad.aesthetic.AestheticActivity;
 public abstract class KolibriSplashActivity extends AestheticActivity implements RuntimeListener {
 
   private long minimumDisplayTime;
+  private volatile boolean splashedTimeOut;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     hideSystemUI();
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_splash);
+    splashedTimeOut = false;
     minimumDisplayTime = 2000;
 
-    final RuntimeConfig runtime = Kolibri.getInstance(this).getRuntimeConfigFromCache();
-    if (runtime != null) {
       findViewById(R.id.splash).postDelayed(new Runnable() {
         @Override
         public void run() {
-          onSplashTimedOut();
+          final RuntimeConfig runtime = Kolibri.getInstance(KolibriSplashActivity.this).getRuntimeConfigFromCache();
+
+          if (runtime != null && !splashedTimeOut) {
+            splashedTimeOut = true;
+            onSplashTimedOut();
+          }
         }
       }, minimumDisplayTime);
-    }
 
     Kolibri.getInstance(this).loadRuntimeConfiguration(this);
   }
@@ -62,7 +66,11 @@ public abstract class KolibriSplashActivity extends AestheticActivity implements
     findViewById(R.id.splash).postDelayed(new Runnable() {
       @Override
       public void run() {
-        onSplashTimedOut();
+
+        if (!splashedTimeOut) {
+          splashedTimeOut = true;
+          onSplashTimedOut();
+        }
       }
     }, minimumDisplayTime);
   }
@@ -72,7 +80,10 @@ public abstract class KolibriSplashActivity extends AestheticActivity implements
     findViewById(R.id.splash).postDelayed(new Runnable() {
       @Override
       public void run() {
-        onSplashTimedOut();
+        if (!splashedTimeOut) {
+          splashedTimeOut = true;
+          onSplashTimedOut();
+        }
       }
     }, minimumDisplayTime);
 
