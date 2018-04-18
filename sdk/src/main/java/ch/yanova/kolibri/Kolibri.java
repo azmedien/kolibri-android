@@ -303,6 +303,7 @@ public class Kolibri {
 
   @AnyThread
   public synchronized RuntimeConfig getRuntime() {
+    final RuntimeConfig config = runtime != null ? runtime : getRuntimeConfigFromCache();
     return runtime;
   }
 
@@ -363,8 +364,10 @@ public class Kolibri {
   public RuntimeConfig getRuntimeConfigFromCache() {
     RuntimeConfig config = null;
     try {
-      config = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")),
-              getRuntimeUrl());
+      if (preferences.contains("runtime")) {
+        config = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")),
+                getRuntimeUrl());
+      }
     } catch (KolibriException e) {
       Log.e(TAG, "No runtime cache exists: " + e.getMessage());
     } catch (JSONException e) {
