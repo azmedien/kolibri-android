@@ -29,16 +29,20 @@ public abstract class KolibriSplashActivity extends AestheticActivity implements
       findViewById(R.id.splash).postDelayed(new Runnable() {
         @Override
         public void run() {
-          final RuntimeConfig runtime = Kolibri.getInstance(KolibriSplashActivity.this).getRuntimeConfigFromCache();
-
-          if (runtime != null && !splashedTimeOut) {
-            splashedTimeOut = true;
-            onSplashTimedOut();
-          }
+          tryDismiss();
         }
       }, minimumDisplayTime);
 
     Kolibri.getInstance(this).loadRuntimeConfiguration(this);
+  }
+
+  private void tryDismiss() {
+    final RuntimeConfig runtime = Kolibri.getInstance(KolibriSplashActivity.this).getRuntime();
+
+    if (runtime != null && !splashedTimeOut) {
+      splashedTimeOut = true;
+      onSplashTimedOut();
+    }
   }
 
   private void hideSystemUI() {
@@ -66,11 +70,7 @@ public abstract class KolibriSplashActivity extends AestheticActivity implements
     findViewById(R.id.splash).postDelayed(new Runnable() {
       @Override
       public void run() {
-
-        if (!splashedTimeOut) {
-          splashedTimeOut = true;
-          onSplashTimedOut();
-        }
+        tryDismiss();
       }
     }, minimumDisplayTime);
   }
@@ -80,10 +80,7 @@ public abstract class KolibriSplashActivity extends AestheticActivity implements
     findViewById(R.id.splash).postDelayed(new Runnable() {
       @Override
       public void run() {
-        if (!splashedTimeOut) {
-          splashedTimeOut = true;
-          onSplashTimedOut();
-        }
+        tryDismiss();
       }
     }, minimumDisplayTime);
 
