@@ -303,8 +303,7 @@ public class Kolibri {
 
   @AnyThread
   public synchronized RuntimeConfig getRuntime() {
-    final RuntimeConfig config = runtime != null ? runtime : getRuntimeConfigFromCache();
-    return runtime;
+    return runtime != null ? runtime : getRuntimeConfigFromCache();
   }
 
   public void subscribeForPushNotifications() {
