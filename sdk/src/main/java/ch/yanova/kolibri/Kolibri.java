@@ -209,7 +209,10 @@ public class Kolibri {
       public void onResponse(Call call, Response response) throws IOException {
 
         final String json = response.body().string();
-        final boolean isFresh = response.cacheResponse() == null;
+
+        final boolean isFresh = response.networkResponse() != null
+            && response.networkResponse().code() == 200;
+
         Exception exception = null;
 
         try {
