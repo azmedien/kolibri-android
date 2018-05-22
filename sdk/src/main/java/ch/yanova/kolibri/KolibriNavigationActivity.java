@@ -274,7 +274,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     Kolibri kolibri = Kolibri.getInstance(this);
 
     if (getIntent() == null || !getIntent().hasCategory("notification")) {
-      final RuntimeConfig runtime = Kolibri.getInstance(this).getRuntimeConfigFromCache();
+      final RuntimeConfig runtime = Kolibri.getInstance(this).getRuntime();
 
       if (runtime != null) {
         final Navigation nav = runtime.getNavigation();

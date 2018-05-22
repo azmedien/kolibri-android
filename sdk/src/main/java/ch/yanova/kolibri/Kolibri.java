@@ -25,6 +25,7 @@ import com.afollestad.aesthetic.NavigationViewMode;
 import com.afollestad.aesthetic.TabLayoutBgMode;
 import com.afollestad.aesthetic.TabLayoutIndicatorMode;
 import java.io.IOException;
+import java.io.InputStream;
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -190,7 +191,7 @@ public class Kolibri {
           final boolean userDefined = runtimeListener.onFailed(e);
           if (!userDefined) {
             try { // Try to load saved one as a fallback configuratio
-              runtime = getRuntimeConfigFromCache();
+              runtime = getRuntime();
 
               if (runtime != null) {
                 runtimeListener.onLoaded(runtime, false);
@@ -208,7 +209,10 @@ public class Kolibri {
       public void onResponse(Call call, Response response) throws IOException {
 
         final String json = response.body().string();
-        final boolean isFresh = response.cacheResponse() == null;
+
+        final boolean isFresh = response.networkResponse() != null
+            && response.networkResponse().code() == 200;
+
         Exception exception = null;
 
         try {
@@ -303,8 +307,9 @@ public class Kolibri {
 
   @AnyThread
   public synchronized RuntimeConfig getRuntime() {
-    final RuntimeConfig config = runtime != null ? runtime : getRuntimeConfigFromCache();
-    return runtime;
+    RuntimeConfig config = runtime != null ? runtime : getRuntimeConfigFromCache();
+
+    return config != null ? config : getRuntimeConfigFromAssets();
   }
 
   public void subscribeForPushNotifications() {
@@ -368,6 +373,34 @@ public class Kolibri {
         config = new RuntimeConfig(new JSONObject(preferences.getString("runtime", "{}")),
                 getRuntimeUrl());
       }
+    } catch (KolibriException e) {
+      Log.e(TAG, "No runtime cache exists: " + e.getMessage());
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+
+    return config;
+  }
+
+  public RuntimeConfig getRuntimeConfigFromAssets() {
+    String json = null;
+    try {
+      InputStream is = fContext.getAssets().open("runtime.json");
+      int size = is.available();
+      byte[] buffer = new byte[size];
+      is.read(buffer);
+      is.close();
+      json = new String(buffer, "UTF-8");
+    } catch (IOException ex) {
+      Log.e(TAG, "No config in assets exists: " + ex.getMessage());
+      return null;
+    }
+
+    RuntimeConfig config = null;
+
+    try {
+      config = new RuntimeConfig(new JSONObject(json),
+          getRuntimeUrl());
     } catch (KolibriException e) {
       Log.e(TAG, "No runtime cache exists: " + e.getMessage());
     } catch (JSONException e) {
