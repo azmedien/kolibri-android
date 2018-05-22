@@ -52,8 +52,8 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.afollestad:aesthetic:0.5.1'
 
-    compileOnly 'com.google.firebase:firebase-core:12.0.1'
-    compileOnly 'com.google.firebase:firebase-messaging:12.0.1'
+    compileOnly 'com.google.firebase:firebase-core:15.0.2'
+    compileOnly 'com.google.firebase:firebase-messaging:15.0.2'
 
     compileOnly('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
         transitive = true;
@@ -63,8 +63,8 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation "org.assertj:assertj-core:3.9.0"
     testImplementation 'org.robolectric:robolectric:3.8'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
 
 publishing {
