@@ -392,7 +392,7 @@ public class Kolibri {
       is.close();
       json = new String(buffer, "UTF-8");
     } catch (IOException ex) {
-      ex.printStackTrace();
+      Log.e(TAG, "No config in assets exists: " + ex.getMessage());
       return null;
     }
 
