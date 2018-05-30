@@ -16,6 +16,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -28,21 +29,31 @@ import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriException;
+import ch.yanova.kolibri.RuntimeConfig;
 import com.crashlytics.android.Crashlytics;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-/**
- * Created by mmironov on 2/26/17.
- */
-
+/** Created by mmironov on 2/26/17. */
 public class KolibriWebView extends WebView {
 
   public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
-  private static final String GET_HTML_STRING = "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
+  private static final String GET_HTML_STRING =
+      "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
 
   private List<KolibriWebViewClient> webClients;
   private List<KolibriWebChromeClient> webChromeClients;
+  private RuntimeConfig config;
 
   private Intent intent;
 
@@ -104,6 +115,8 @@ public class KolibriWebView extends WebView {
       }
 
       clearHistory = false;
+
+      config = Kolibri.getInstance(getContext()).getRuntime();
     }
   }
 
@@ -171,10 +184,12 @@ public class KolibriWebView extends WebView {
 
         final String appScheme = Kolibri.getInstance(context).getRuntime().getScheme();
 
-        Intent linkIntent = target.equals(TARGET_INTERNAL) ?
-            new Intent(Intent.ACTION_VIEW, Uri.parse(
-                String.format("%s://internal/webview?url=%s", appScheme, link))) :
-            new Intent(Intent.ACTION_VIEW, link);
+        Intent linkIntent =
+            target.equals(TARGET_INTERNAL)
+                ? new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(String.format("%s://internal/webview?url=%s", appScheme, link)))
+                : new Intent(Intent.ACTION_VIEW, link);
 
         final Intent kolibriIntent = getIntent();
 
@@ -182,12 +197,10 @@ public class KolibriWebView extends WebView {
           linkIntent.putExtras(kolibriIntent);
         }
 
-
         final PackageManager packageManager = context.getPackageManager();
         if (linkIntent.resolveActivity(packageManager) != null) {
           context.startActivity(linkIntent);
         } else {
-
           final String scheme = link.getScheme();
 
           if (scheme.equals(appScheme)) {
@@ -195,9 +208,83 @@ public class KolibriWebView extends WebView {
           }
         }
       }
+    } else {
+      // If in proxy mode, load from proxy and tell the webview, actually we handle it
+      if (config.inProxyMode()) {
+        try {
+          loadFromProxy(link.toString());
+          return true;
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
     }
 
     return handleInNewView;
+  }
+
+  @Override
+  public void loadUrl(final String url) {
+
+    if (!config.inProxyMode() || GET_HTML_STRING.equals(url)) {
+      super.loadUrl(url);
+      return;
+    }
+
+    try {
+      loadFromProxy(url);
+    } catch (Exception ex) {
+      Log.e("KolibriWebView", "Cannot load from proxy, fallback to normal load: ", ex);
+      super.loadUrl(url);
+    }
+  }
+
+  private void loadFromProxy(final String url) throws JSONException {
+    final String proxyUrl = config.getProxy();
+    final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+    final JSONObject json = new JSONObject();
+    final JSONObject data = new JSONObject();
+    data.put("url", url);
+    json.put("data", data);
+
+    final OkHttpClient client = new OkHttpClient();
+    final RequestBody body = RequestBody.create(JSON, json.toString());
+    final Request request = new Request.Builder().url(proxyUrl).post(body).build();
+
+    for (KolibriWebViewClient webClient : webClients) {
+      webClient.onPageStarted(this, url, null);
+    }
+
+    client
+        .newCall(request)
+        .enqueue(
+            new Callback() {
+              @Override
+              public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                post(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        loadUrl(url);
+                      }
+                    });
+              }
+
+              @Override
+              public void onResponse(@NonNull Call call, @NonNull final Response response)
+                  throws IOException {
+
+                final String html = response.body().string();
+                post(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        loadDataWithBaseURL(url, html, "text/html", "UTF-8", null);
+                      }
+                    });
+              }
+            });
   }
 
   public boolean shouldHandleInternal() {
@@ -218,7 +305,6 @@ public class KolibriWebView extends WebView {
 
   private class InternalChromeClient extends WebChromeClient {
 
-
     @Override
     public void onProgressChanged(WebView view, int newProgress) {
       super.onProgressChanged(view, newProgress);
@@ -237,7 +323,6 @@ public class KolibriWebView extends WebView {
       for (KolibriWebChromeClient webChromeClient : webChromeClients) {
         webChromeClient.onProgressChanged(view, newProgress);
       }
-
     }
 
     @Override
@@ -283,7 +368,9 @@ public class KolibriWebView extends WebView {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
-    public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
+    public boolean onShowFileChooser(
+        WebView webView,
+        ValueCallback<Uri[]> filePathCallback,
         FileChooserParams fileChooserParams) {
 
       for (KolibriWebChromeClient webChromeClient : webChromeClients) {
@@ -293,7 +380,6 @@ public class KolibriWebView extends WebView {
       }
 
       return super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
-
     }
   }
 
@@ -364,7 +450,9 @@ public class KolibriWebView extends WebView {
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
       super.onReceivedError(view, request, error);
-      Crashlytics.log(5, "KolibriWebView",
+      Crashlytics.log(
+          5,
+          "KolibriWebView",
           "onReceivedError() called with: request = [" + request + "], error = [" + error + "]");
 
       // We ignore errors regarding assets loading,
@@ -377,12 +465,19 @@ public class KolibriWebView extends WebView {
     }
 
     @Override
-    public void onReceivedError(WebView view, int errorCode, String description,
-        String failingUrl) {
+    public void onReceivedError(
+        WebView view, int errorCode, String description, String failingUrl) {
       super.onReceivedError(view, errorCode, description, failingUrl);
-      Crashlytics.log(5, "KolibriWebView",
-          "onReceivedError() called with: errorCode = [" + errorCode + "], description = ["
-              + description + "], failingUrl = [" + failingUrl + "]");
+      Crashlytics.log(
+          5,
+          "KolibriWebView",
+          "onReceivedError() called with: errorCode = ["
+              + errorCode
+              + "], description = ["
+              + description
+              + "], failingUrl = ["
+              + failingUrl
+              + "]");
 
       for (KolibriWebViewClient webClient : webClients) {
         webClient.onReceivedError(view, errorCode, description, failingUrl);

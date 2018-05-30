@@ -206,7 +206,7 @@ public class Kolibri {
       }
 
       @Override
-      public void onResponse(Call call, Response response) throws IOException {
+      public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
 
         final String json = response.body().string();
 
@@ -237,6 +237,7 @@ public class Kolibri {
           if (runtimeListener != null) {
             if (exception == null) {
               runtimeListener.onLoaded(runtime, isFresh);
+              Log.i(TAG, "Runtime configuration loaded! Proxy mode = " + runtime.inProxyMode());
             } else {
               runtimeListener.onFailed(exception);
             }
