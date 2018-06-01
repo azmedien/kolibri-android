@@ -69,20 +69,20 @@ public class KolibriTest {
     assertTrue(shadowKolibri.isLoadedConfigFromCache());
   }
 
-  @Test
-  public void configShouldBeFromServerInsteadOfCache() {
-    kolibri.loadRuntimeConfiguration(new RuntimeListener() {
-      @Override
-      public void onLoaded(RuntimeConfig runtime, boolean isFresh) {
-
-      }
-
-      @Override
-      public boolean onFailed(Exception e) {
-        return false;
-      }
-    });
-    assertNotNull(kolibri.getRuntime());
-    assertFalse(shadowKolibri.isLoadedConfigFromCache());
-  }
+//  @Test
+//  public void configShouldBeFromServerInsteadOfCache() {
+//    kolibri.loadRuntimeConfiguration(new RuntimeListener() {
+//      @Override
+//      public void onLoaded(RuntimeConfig runtime, boolean isFresh) {
+//
+//      }
+//
+//      @Override
+//      public boolean onFailed(Exception e) {
+//        return false;
+//      }
+//    });
+//    assertNotNull(kolibri.getRuntime());
+//    assertFalse(shadowKolibri.isLoadedConfigFromCache());
+//  }
 }
