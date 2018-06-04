@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.webkit.URLUtil;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -139,7 +140,10 @@ public class RuntimeConfig {
           styling = new Styling(runtime.optJSONObject(current));
           break;
         case PROXY:
-          proxy = runtime.optString(current);
+          final String url = runtime.optString(current);
+          if (URLUtil.isHttpUrl(url) || URLUtil.isHttpsUrl(url)) {
+            proxy = url;
+          }
           break;
         default:
           components.put(current, new Component(runtime.optJSONObject(current)));

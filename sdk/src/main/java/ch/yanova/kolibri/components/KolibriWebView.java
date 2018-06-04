@@ -276,11 +276,16 @@ public class KolibriWebView extends WebView {
                   throws IOException {
 
                 final String html = response.body().string();
+
                 post(
                     new Runnable() {
                       @Override
                       public void run() {
-                        loadDataWithBaseURL(url, html, "text/html", "UTF-8", null);
+                        if (response.isSuccessful()) {
+                          loadDataWithBaseURL(url, html, "text/html", "UTF-8", null);
+                        } else {
+                          loadUrl(url);
+                        }
                       }
                     });
               }
