@@ -21,7 +21,6 @@ import org.robolectric.shadow.api.Shadow;
 @RunWith(RobolectricTestRunner.class)
 @Config(
   sdk = 27,
-  manifest = Config.NONE,
   shadows = {ShadowKolibri.class}
 )
 public class KolibriTest {
@@ -68,21 +67,4 @@ public class KolibriTest {
     assertNotNull(kolibri.getRuntime());
     assertTrue(shadowKolibri.isLoadedConfigFromCache());
   }
-
-//  @Test
-//  public void configShouldBeFromServerInsteadOfCache() {
-//    kolibri.loadRuntimeConfiguration(new RuntimeListener() {
-//      @Override
-//      public void onLoaded(RuntimeConfig runtime, boolean isFresh) {
-//
-//      }
-//
-//      @Override
-//      public boolean onFailed(Exception e) {
-//        return false;
-//      }
-//    });
-//    assertNotNull(kolibri.getRuntime());
-//    assertFalse(shadowKolibri.isLoadedConfigFromCache());
-//  }
 }

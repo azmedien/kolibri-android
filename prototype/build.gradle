@@ -22,8 +22,8 @@ android {
         applicationId "ch.yanova.kolibri.prototype"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 103
-        versionName "0.9.13-SNAPSHOT"
+        versionCode 104
+        versionName "0.10.0-SNAPSHOT"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -66,15 +66,15 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.3@aar') {
         transitive = true;
     }
 
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.afollestad:aesthetic:0.5.1'
 
-    implementation 'com.google.firebase:firebase-core:12.0.1'
-    implementation 'com.google.firebase:firebase-messaging:12.0.1'
+    implementation 'com.google.firebase:firebase-core:16.0.0'
+    implementation 'com.google.firebase:firebase-messaging:17.0.0'
     implementation 'com.google.vr:sdk-videowidget:1.100.0'
 }
 

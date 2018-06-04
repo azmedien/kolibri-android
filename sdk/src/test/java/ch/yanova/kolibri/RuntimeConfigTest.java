@@ -1,5 +1,7 @@
 package ch.yanova.kolibri;
 
+import static ch.yanova.kolibri.Constants.APP_URL;
+import static ch.yanova.kolibri.Constants.TEST_CONFIG_RES;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,12 +26,11 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 27)
 public class RuntimeConfigTest {
 
-  public static final String APP_URL = "https://kolibri.herokuapp.com/apps/7yaaRbHQx2NvYTori9EWqazJ";
   private RuntimeConfig config;
 
   @Before
   public void setUp() throws Exception {
-    InputStream is = this.getClass().getClassLoader().getResourceAsStream("config.json");
+    InputStream is = this.getClass().getClassLoader().getResourceAsStream(TEST_CONFIG_RES);
     config = new RuntimeConfig(streamToJson(is), String.format("%s/runtime", APP_URL));
   }
 
@@ -41,8 +42,7 @@ public class RuntimeConfigTest {
 
   @Test(expected = KolibriException.class)
   public void testCannotCreateEmptyConfig() throws JSONException {
-    new RuntimeConfig(new JSONObject("{}"),
-        "https://kolibri.herokuapp.com/apps/7yaaRbHQx2NvYTori9EWqazJ");
+    new RuntimeConfig(new JSONObject("{}"), APP_URL);
   }
 
   @Test(expected = KolibriException.class)
@@ -75,8 +75,7 @@ public class RuntimeConfigTest {
             + "    }"
             + "}"
             + "}";
-    new RuntimeConfig(new JSONObject(invalid),
-        "https://kolibri.herokuapp.com/apps/7yaaRbHQx2NvYTori9EWqazJ");
+    new RuntimeConfig(new JSONObject(invalid), APP_URL);
   }
 
   @Test

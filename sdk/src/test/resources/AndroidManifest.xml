@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="ch.yanova.kolibri.prototype">
+
+  <uses-permission android:name="android.permission.INTERNET"/>
+
+  <application
+    android:allowBackup="true"
+    android:label="@string/app_name"
+    android:supportsRtl="true">
+    <meta-data
+      android:name="io.fabric.ApiKey"
+      android:value="5b0e4ca8fe72e1ad97ccbd82e18f18ba4cacd219"/>
+    <meta-data
+      android:name="kolibri_navigation_url"
+      android:value="https://kolibri.herokuapp.com/apps/hFxsFLsMXZyvAddBGXWCcxQf/runtime"/>
+  </application>
+
+</manifest>

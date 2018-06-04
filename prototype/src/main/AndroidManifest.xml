@@ -64,7 +64,7 @@
         <data
           android:host="internal"
           android:path="/webview"
-          android:scheme="aargauerzeitung"/>
+          android:scheme="hrtoday"/>
       </intent-filter>
     </activity>
   </application>

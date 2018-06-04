@@ -59,6 +59,7 @@ public class Kolibri {
   private static final String META_NOTIFICATION_ICON = "kolibri_notification_icon";
   private static final String PREF_NAME = "ch.yanova.kolibri.RUNTIME_CONFIG";
   private static final String TAG = "Kolibri";
+  public static final String RUNTIME_JSON = "runtime.json";
   private static Kolibri mInstance;
   private static Context fContext;
   private SharedPreferences preferences;
@@ -206,7 +207,7 @@ public class Kolibri {
       }
 
       @Override
-      public void onResponse(Call call, Response response) throws IOException {
+      public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
 
         final String json = response.body().string();
 
@@ -237,6 +238,7 @@ public class Kolibri {
           if (runtimeListener != null) {
             if (exception == null) {
               runtimeListener.onLoaded(runtime, isFresh);
+              Log.i(TAG, "Runtime configuration loaded! Proxy mode = " + runtime.inProxyMode());
             } else {
               runtimeListener.onFailed(exception);
             }
@@ -383,9 +385,9 @@ public class Kolibri {
   }
 
   public RuntimeConfig getRuntimeConfigFromAssets() {
-    String json = null;
+    String json;
     try {
-      InputStream is = fContext.getAssets().open("runtime.json");
+      InputStream is = fContext.getAssets().open(RUNTIME_JSON);
       int size = is.available();
       byte[] buffer = new byte[size];
       is.read(buffer);

@@ -1,5 +1,8 @@
 package ch.yanova.kolibri;
 
+import static ch.yanova.kolibri.Constants.APP_URL;
+import static ch.yanova.kolibri.Constants.TEST_CONFIG_RES;
+
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import java.io.IOException;
@@ -10,14 +13,12 @@ import org.json.JSONObject;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.RealObject;
 import org.robolectric.util.ReflectionHelpers;
 
 /** Created by lekov on 24.03.18. */
 @Implements(Kolibri.class)
 public class ShadowKolibri {
 
-  public static final String APP_URL = "https://kolibri.herokuapp.com/apps/7yaaRbHQx2NvYTori9EWqazJ";
   private boolean cacheDisabled;
   private boolean isLoadedConfigFromCache;
 
@@ -61,7 +62,7 @@ public class ShadowKolibri {
   }
 
   public void loadCachedVersion() throws JSONException, IOException {
-    final InputStream is = this.getClass().getClassLoader().getResourceAsStream("config.json");
+    final InputStream is = this.getClass().getClassLoader().getResourceAsStream(TEST_CONFIG_RES);
     SharedPreferences preferences =
         PreferenceManager.getDefaultSharedPreferences(RuntimeEnvironment.application);
     preferences.edit().putString("runtime", streamToJson(is).toString()).apply();

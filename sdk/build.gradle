@@ -4,7 +4,7 @@ apply plugin: "com.jfrog.artifactory"
 apply plugin: 'maven-publish'
 
 group = 'ch.yanova.kolibri'
-version = "0.9.13-SNAPSHOT"
+version = "0.10.0-SNAPSHOT"
 
 android {
     compileSdkVersion 27
@@ -13,7 +13,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 103
+        versionCode 104
         versionName project.version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -52,10 +52,10 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.afollestad:aesthetic:0.5.1'
 
-    compileOnly 'com.google.firebase:firebase-core:15.0.2'
-    compileOnly 'com.google.firebase:firebase-messaging:15.0.2'
+    compileOnly 'com.google.firebase:firebase-core:16.0.0'
+    compileOnly 'com.google.firebase:firebase-messaging:17.0.0'
 
-    compileOnly('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
+    compileOnly('com.crashlytics.sdk.android:crashlytics:2.9.3@aar') {
         transitive = true;
     }
 

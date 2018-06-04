@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.webkit.URLUtil;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,18 +30,24 @@ public class RuntimeConfig {
   public static final String DOMAIN = "domain";
   public static final String SCHEME = "scheme";
   public static final String STYLING = "styling";
+  public static final String PROXY = "proxy";
   public static final String COLOR_PALETTE = "color-palette";
   public static final String ICON = "icon";
+
   public static final int THEME_COLOR_PRIMARY = 5;
   public static final int THEME_COLOR_PRIMARY_LIGHT = 1;
   public static final int THEME_COLOR_PRIMARY_DARK = 7;
   public static final int THEME_COLOR_ACCENT = 11;
+
   private final JSONObject runtime;
   private final String formattedAssetUrl;
+
   private Styling styling;
   private String version;
   private String scheme;
   private String domain;
+  private String proxy;
+
   private Map<String, Component> components;
   private Navigation navigation;
 
@@ -130,11 +138,38 @@ public class RuntimeConfig {
           break;
         case STYLING:
           styling = new Styling(runtime.optJSONObject(current));
+          break;
+        case PROXY:
+          final String url = runtime.optString(current);
+          if (URLUtil.isHttpUrl(url) || URLUtil.isHttpsUrl(url)) {
+            proxy = url;
+          }
+          break;
         default:
           components.put(current, new Component(runtime.optJSONObject(current)));
           break;
       }
     }
+  }
+
+  /**
+   * Check if proxy is specified in the configuration
+   *
+   * @return Retruns if runtime configuration is configured for proxy mode
+   */
+  public boolean inProxyMode() {
+    return proxy != null;
+  }
+
+  /**
+   *
+   * Get Proxy URL
+   *
+   * @return Returns the proxy URL if proxy is specified, null otherwise
+   */
+  @Nullable
+  public String getProxy() {
+    return proxy;
   }
 
   @NonNull

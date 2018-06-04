@@ -4,12 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.net.Uri;
+import java.io.IOException;
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowApplication;
 
 /**
@@ -21,15 +24,18 @@ import org.robolectric.shadows.ShadowApplication;
 public class KolibriTargetTest {
 
   private Kolibri kolibri;
+  private ShadowKolibri shadowKolibri;
 
   @Before
-  public void setup() {
+  public void setup() throws IOException, JSONException {
     kolibri = Kolibri.getInstance(RuntimeEnvironment.application);
+    shadowKolibri = Shadow.extract(kolibri);
+    shadowKolibri.loadCachedVersion();
   }
 
   @Test
   public void kolibriShouldNotBeNull() {
-    assertNotNull(kolibri);
+    assertNotNull(shadowKolibri);
   }
 
   @Test
