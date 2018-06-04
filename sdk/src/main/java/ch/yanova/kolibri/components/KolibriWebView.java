@@ -223,6 +223,19 @@ public class KolibriWebView extends WebView {
     return handleInNewView;
   }
 
+  /**
+   *
+   * Load url
+   *
+   * <p>
+   *   Unless we are in proxy mode we delegate the loading to the webivew.
+   *   In case we are using proxy we try to load the HTML from there
+   * </p>
+   *
+   * @see #loadFromProxy(String)
+   *
+   * @param url URL to be loaded on the webview
+   */
   @Override
   public void loadUrl(final String url) {
 
@@ -239,6 +252,18 @@ public class KolibriWebView extends WebView {
     }
   }
 
+  /**
+   *
+   * Load URL trough the proxy.
+   *
+   * <p>
+   *   Loading an URL trough the proxy will return a HTML with stripped
+   *   navigation, header and footer elements of the page.
+   * </p>
+   *
+   * @param url URL to be loaded trough the proxy
+   * @throws JSONException when there's error with the JSON parsing
+   */
   private void loadFromProxy(final String url) throws JSONException {
     final String proxyUrl = config.getProxy();
     final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
