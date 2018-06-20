@@ -59,11 +59,14 @@ public class Kolibri {
   private static final String META_NOTIFICATION_ICON = "kolibri_notification_icon";
   private static final String PREF_NAME = "ch.yanova.kolibri.RUNTIME_CONFIG";
   private static final String TAG = "Kolibri";
-  public static final String RUNTIME_JSON = "runtime.json";
+  private static final String RUNTIME_JSON = "runtime.json";
+
   private static Kolibri mInstance;
+
   private static Context fContext;
   private SharedPreferences preferences;
   private RuntimeConfig runtime;
+
 
   private Kolibri(Context context) {
     // There's no memory leak when we get the application context.
@@ -352,7 +355,7 @@ public class Kolibri {
           host = host.substring(4);
         }
 
-        if (host.equals(domain)) {
+        if (host.endsWith(domain)) {
           target = TARGET_INTERNAL;
         } else {
           target = TARGET_EXTERNAL;
