@@ -52,15 +52,6 @@ public class KolibriWebViewTest {
     assertNotNull(shadowWebView);
   }
 
-  @Test
-  public void testLoadPage() {
-    loadPage();
-    assertEquals("https://example.com", shadowWebView.getLastLoadedUrl());
-    assertThat(client.getPageStartedCount()).isEqualTo(1);
-    assertThat(client.getPageCommitVisible()).isEqualTo(1);
-    assertThat(client.getPageFinishedCount()).isEqualTo(2);
-  }
-
   /**w
    * Mimic loading of a Webpage. This can be moved to shadow.
    */
