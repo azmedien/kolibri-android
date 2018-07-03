@@ -26,11 +26,11 @@ public class UriUtils {
     final Uri.Builder builder = uri.buildUpon();
 
     if (uri.getQueryParameter(KEY_UTM_MEDIUM) == null) {
-      builder.appendQueryParameter(KEY_UTM_MEDIUM, UTM_ANDROID_APP);
+      builder.appendQueryParameter(KEY_UTM_MEDIUM, UTM_PUSH);
     }
 
     if (uri.getQueryParameter(KEY_UTM_SOURCE) == null) {
-      builder.appendQueryParameter(KEY_UTM_SOURCE, UTM_PUSH);
+      builder.appendQueryParameter(KEY_UTM_SOURCE, UTM_ANDROID_APP);
     }
 
     return builder.build().toString();
