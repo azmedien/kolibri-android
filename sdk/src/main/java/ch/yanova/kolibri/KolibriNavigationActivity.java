@@ -443,11 +443,13 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
       return;
     }
 
-    final String notificationUrl = getIntent().getStringExtra("url");
+    String notificationUrl = getIntent().getStringExtra("url");
     final Uri notificationUri = Uri.parse(notificationUrl);
 
     if (notificationUri.getScheme().startsWith("http")) {
       final Uri uri = Uri.parse(WebViewCoordinator.webViewUri);
+
+      notificationUrl = UriUtils.appendUtmParameters(notificationUrl);
 
       final Uri.Builder builder = uri.buildUpon();
       builder.appendQueryParameter("url", notificationUrl);
@@ -474,7 +476,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
           if (id.equals(idInMenu)) {
 
-            final String urlToLoad = notificationUri.getQueryParameter("url");
+            String urlToLoad = notificationUri.getQueryParameter("url");
             final Uri menuData = item.getIntent().getData();
 
             final Intent intent = Kolibri.createIntent(menuData);
@@ -482,7 +484,10 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
             //There is a specific url that was pushed to the app
             if (urlToLoad != null && !urlToLoad.isEmpty()) {
+              urlToLoad = UriUtils.appendUtmParameters(urlToLoad);
               intent.putExtra(Kolibri.EXTRA_DEEPLINK, urlToLoad);
+            } else {
+              UriUtils.appendUtmParameters(intent);
             }
 
             setIntent(null);

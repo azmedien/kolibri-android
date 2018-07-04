@@ -50,6 +50,7 @@ public class KolibriWebView extends WebView {
   public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
   private static final String GET_HTML_STRING =
       "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
+  public final String TAG = KolibriWebView.class.getSimpleName();
 
   private List<KolibriWebViewClient> webClients;
   private List<KolibriWebChromeClient> webChromeClients;
@@ -166,6 +167,9 @@ public class KolibriWebView extends WebView {
   }
 
   public boolean handleUri(Uri link) {
+
+    Log.d(TAG, link.toString());
+
     final Context context = getContext();
     final String target = Kolibri.getInstance(getContext()).getTarget(link);
 
