@@ -288,7 +288,10 @@ public class KolibriWebView extends WebView {
 
     final OkHttpClient client = new OkHttpClient();
     final RequestBody body = RequestBody.create(JSON, json.toString());
-    final Request request = new Request.Builder().url(proxyUrl).post(body).build();
+    final Request request = new Request.Builder()
+        .url(proxyUrl)
+        .header("User-Agent", getSettings().getUserAgentString())
+        .post(body).build();
 
     for (KolibriWebViewClient webClient : webClients) {
       webClient.onPageStarted(this, url, null);
