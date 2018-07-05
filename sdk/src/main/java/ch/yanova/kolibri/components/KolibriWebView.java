@@ -284,7 +284,6 @@ public class KolibriWebView extends WebView {
     final JSONObject json = new JSONObject();
     final JSONObject data = new JSONObject();
     data.put("url", url);
-    data.put("type", "mobile");
     json.put("data", data);
 
     final OkHttpClient client = new OkHttpClient();
