@@ -50,10 +50,12 @@ public class KolibriWebView extends WebView {
   public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
   private static final String GET_HTML_STRING =
       "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
+  public final String TAG = KolibriWebView.class.getSimpleName();
 
   private List<KolibriWebViewClient> webClients;
   private List<KolibriWebChromeClient> webChromeClients;
   private RuntimeConfig config;
+  private boolean proxyFailure;
 
   private Intent intent;
 
@@ -165,6 +167,9 @@ public class KolibriWebView extends WebView {
   }
 
   public boolean handleUri(Uri link) {
+
+    Log.d(TAG, link.toString());
+
     final Context context = getContext();
     final String target = Kolibri.getInstance(getContext()).getTarget(link);
 
@@ -244,10 +249,18 @@ public class KolibriWebView extends WebView {
       return;
     }
 
+    // Prevents flood the proxy and recursively load once page was failed
+    if (proxyFailure) {
+      Log.w("KolibriWebView", String.format("Once failed to be processed trough the proxy, falling back to default load [url = %s]", url));
+      proxyFailure = false;
+      super.loadUrl(url);
+      return;
+    }
+
     try {
       loadFromProxy(url);
     } catch (Exception ex) {
-      Log.e("KolibriWebView", "Cannot load from proxy, fallback to normal load: ", ex);
+      Log.e("KolibriWebView", String.format("Cannot load from proxy, fallback to normal load [url = %s]: ", url), ex);
       super.loadUrl(url);
     }
   }
@@ -275,7 +288,10 @@ public class KolibriWebView extends WebView {
 
     final OkHttpClient client = new OkHttpClient();
     final RequestBody body = RequestBody.create(JSON, json.toString());
-    final Request request = new Request.Builder().url(proxyUrl).post(body).build();
+    final Request request = new Request.Builder()
+        .url(proxyUrl)
+        .header("User-Agent", getSettings().getUserAgentString())
+        .post(body).build();
 
     for (KolibriWebViewClient webClient : webClients) {
       webClient.onPageStarted(this, url, null);
@@ -291,6 +307,7 @@ public class KolibriWebView extends WebView {
                     new Runnable() {
                       @Override
                       public void run() {
+                        proxyFailure = true;
                         loadUrl(url);
                       }
                     });
@@ -309,6 +326,7 @@ public class KolibriWebView extends WebView {
                         if (response.isSuccessful()) {
                           loadDataWithBaseURL(url, html, "text/html", "UTF-8", null);
                         } else {
+                          proxyFailure = true;
                           loadUrl(url);
                         }
                       }
