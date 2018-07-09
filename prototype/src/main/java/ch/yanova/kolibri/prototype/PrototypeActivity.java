@@ -1,8 +1,6 @@
 package ch.yanova.kolibri.prototype;
 
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;

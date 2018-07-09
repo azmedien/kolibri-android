@@ -182,7 +182,13 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
               }
             } else {
               progress.setProgress(100);
-              progress.setVisibility(View.GONE);
+              progress.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                  progress.setVisibility(View.GONE);
+                }
+              }, 500);
+
             }
           }
         });

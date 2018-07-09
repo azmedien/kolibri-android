@@ -6,16 +6,21 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
+import android.widget.ProgressBar;
 import ch.yanova.kolibri.components.KolibriLoadingView;
+import ch.yanova.kolibri.components.KolibriWebChromeClient;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
@@ -41,6 +46,7 @@ public class InternalActivity extends AestheticActivity {
   private boolean pageHasError;
 
   private Intent shareIntent;
+  private ProgressBar progress;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,6 +57,7 @@ public class InternalActivity extends AestheticActivity {
     floatingActionButton = findViewById(R.id.kolibri_fab);
     webView = findViewById(R.id.webview);
     webviewOverlay = findViewById(R.id.overlay);
+    progress = findViewById(R.id.progress);
 
     final Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
@@ -58,6 +65,31 @@ public class InternalActivity extends AestheticActivity {
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     restarted = false;
+
+    webView.addKolibriWebChromeClient(
+        new KolibriWebChromeClient() {
+          @Override
+          public void onProgressChanged(WebView view, int newProgress) {
+            super.onProgressChanged(view, newProgress);
+            if (newProgress < 100) {
+              if (VERSION.SDK_INT >= VERSION_CODES.N) {
+                progress.setProgress(newProgress, true);
+              } else {
+                progress.setProgress(newProgress);
+              }
+            } else {
+              progress.setProgress(100);
+              progress.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                  progress.setVisibility(View.GONE);
+                }
+              }, 500);
+
+            }
+          }
+        });
+
 
     webView.addKolibriWebViewClient(new KolibriWebViewClient() {
 
@@ -69,16 +101,9 @@ public class InternalActivity extends AestheticActivity {
 
         invalidateOptionsMenu();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-          if (!pageHasError) {
-            // On old devices without commitVisible we delay preventing flickering.
-            webviewOverlay.postDelayed(new Runnable() {
-              @Override
-              public void run() {
-                webviewOverlay.showLoading();
-              }
-            }, 250);
-          }
+        if (!pageHasError) {
+          progress.setProgress(0);
+          progress.setVisibility(View.VISIBLE);
         }
       }
 
@@ -116,6 +141,9 @@ public class InternalActivity extends AestheticActivity {
           webviewOverlay.showError(
               String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
         }
+
+        progress.setVisibility(View.GONE);
+        progress.setProgress(0);
       }
     });
 

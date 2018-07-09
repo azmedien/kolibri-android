@@ -64,7 +64,7 @@
         <data
           android:host="internal"
           android:path="/webview"
-          android:scheme="hrtoday"/>
+          android:scheme="wireltern"/>
       </intent-filter>
     </activity>
   </application>
