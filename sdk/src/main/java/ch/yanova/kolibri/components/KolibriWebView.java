@@ -1,9 +1,5 @@
 package ch.yanova.kolibri.components;
 
-import static ch.yanova.kolibri.Kolibri.TARGET_EXTERNAL;
-import static ch.yanova.kolibri.Kolibri.TARGET_INTERNAL;
-import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.webkit.HttpAuthHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -25,15 +22,21 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import com.crashlytics.android.Crashlytics;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriException;
 import ch.yanova.kolibri.RuntimeConfig;
-import com.crashlytics.android.Crashlytics;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -41,8 +44,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import static ch.yanova.kolibri.Kolibri.TARGET_EXTERNAL;
+import static ch.yanova.kolibri.Kolibri.TARGET_INTERNAL;
+import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
 
 /** Created by mmironov on 2/26/17. */
 public class KolibriWebView extends WebView {
@@ -530,6 +535,11 @@ public class KolibriWebView extends WebView {
       for (KolibriWebViewClient webClient : webClients) {
         webClient.onReceivedError(view, errorCode, description, failingUrl);
       }
+    }
+
+    @Override
+    public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+      handler.proceed("aargau", "Bazknjr");
     }
   }
 }

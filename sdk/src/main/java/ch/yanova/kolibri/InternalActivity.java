@@ -19,259 +19,343 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
+
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.AestheticActivity;
+import com.afollestad.aesthetic.NavigationViewMode;
+
+import java.util.Locale;
+import java.util.Map;
+
 import ch.yanova.kolibri.components.KolibriLoadingView;
 import ch.yanova.kolibri.components.KolibriWebChromeClient;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 import ch.yanova.kolibri.network.NetworkUtils;
-import com.afollestad.aesthetic.Aesthetic;
-import com.afollestad.aesthetic.AestheticActivity;
-import com.afollestad.aesthetic.NavigationViewMode;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * Created by lekov on 26.10.17.
  */
 
-public class InternalActivity extends AestheticActivity {
+public class InternalActivity extends AestheticActivity implements RuntimeListener {
 
-  private FloatingActionButton floatingActionButton;
+    private FloatingActionButton floatingActionButton;
 
-  private KolibriWebView webView;
-  private KolibriLoadingView webviewOverlay;
+    private KolibriWebView webView;
+    private KolibriLoadingView webviewOverlay;
 
-  private boolean restarted;
-  private boolean pageHasError;
+    private boolean restarted;
+    private boolean pageHasError;
 
-  private Intent shareIntent;
-  private ProgressBar progress;
+    private Intent shareIntent;
+    private ProgressBar progress;
+    private RuntimeConfig configuration;
 
-  @Override
-  protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    setContentView(R.layout.navigation_drawer);
+        setContentView(R.layout.activity_internal);
 
-    floatingActionButton = findViewById(R.id.kolibri_fab);
-    webView = findViewById(R.id.webview);
-    webviewOverlay = findViewById(R.id.overlay);
-    progress = findViewById(R.id.progress);
+        floatingActionButton = findViewById(R.id.kolibri_fab);
+        webView = findViewById(R.id.webview);
+        webviewOverlay = findViewById(R.id.overlay);
+        progress = findViewById(R.id.progress);
 
-    final Toolbar toolbar = findViewById(R.id.toolbar);
-    setSupportActionBar(toolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        restarted = false;
 
-    restarted = false;
+        webView.addKolibriWebChromeClient(
+                new KolibriWebChromeClient() {
+                    @Override
+                    public void onProgressChanged(WebView view, int newProgress) {
+                        super.onProgressChanged(view, newProgress);
+                        if (newProgress < 100) {
+                            if (VERSION.SDK_INT >= VERSION_CODES.N) {
+                                progress.setProgress(newProgress, true);
+                            } else {
+                                progress.setProgress(newProgress);
+                            }
+                        } else {
+                            progress.setProgress(100);
+                            progress.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progress.setVisibility(View.GONE);
+                                }
+                            }, 500);
 
-    webView.addKolibriWebChromeClient(
-        new KolibriWebChromeClient() {
-          @Override
-          public void onProgressChanged(WebView view, int newProgress) {
-            super.onProgressChanged(view, newProgress);
-            if (newProgress < 100) {
-              if (VERSION.SDK_INT >= VERSION_CODES.N) {
-                progress.setProgress(newProgress, true);
-              } else {
-                progress.setProgress(newProgress);
-              }
-            } else {
-              progress.setProgress(100);
-              progress.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                  progress.setVisibility(View.GONE);
+                        }
+                    }
+                });
+
+
+        webView.addKolibriWebViewClient(new KolibriWebViewClient() {
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                shareIntent = null;
+                pageHasError = false;
+
+                invalidateOptionsMenu();
+
+                if (!pageHasError) {
+                    progress.setProgress(0);
+                    progress.setVisibility(View.VISIBLE);
                 }
-              }, 500);
-
             }
-          }
+
+            @Override
+            public void onPageCommitVisible(WebView view, String url) {
+                super.onPageCommitVisible(view, url);
+                if (!pageHasError) {
+                    webviewOverlay.showView();
+                }
+            }
+
+            @TargetApi(Build.VERSION_CODES.M)
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request,
+                                        WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                showPageError(error.getErrorCode(), error.getDescription());
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description,
+                                        String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+                showPageError(errorCode, description);
+            }
+
+            private void showPageError(int errorCode, CharSequence description) {
+                pageHasError = true;
+
+                Kolibri.getInstance(InternalActivity.this).applyRuntimeTheme(false);
+
+                if (errorCode == ERROR_CONNECT || errorCode == ERROR_HOST_LOOKUP) {
+                    webviewOverlay.showError(getResources().getString(R.string.internet_error_message));
+                } else {
+                    webviewOverlay.showError(
+                            String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
+                }
+
+                progress.setVisibility(View.GONE);
+                progress.setProgress(0);
+            }
         });
 
+        Kolibri.getInstance(this).applyRuntimeTheme(false);
 
-    webView.addKolibriWebViewClient(new KolibriWebViewClient() {
+        Intent linkIntent = getIntent();
 
-      @Override
-      public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        super.onPageStarted(view, url, favicon);
-        shareIntent = null;
-        pageHasError = false;
+        if (linkIntent != null && linkIntent.getData() != null) {
 
-        invalidateOptionsMenu();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        if (!pageHasError) {
-          progress.setProgress(0);
-          progress.setVisibility(View.VISIBLE);
-        }
-      }
+            if (linkIntent.hasExtra(Intent.EXTRA_TITLE)) {
+                getSupportActionBar().setTitle(linkIntent.getStringExtra(Intent.EXTRA_TITLE));
+            }
 
-      @Override
-      public void onPageCommitVisible(WebView view, String url) {
-        super.onPageCommitVisible(view, url);
-        if (!pageHasError) {
-          webviewOverlay.showView();
-        }
-      }
-
-      @TargetApi(Build.VERSION_CODES.M)
-      @Override
-      public void onReceivedError(WebView view, WebResourceRequest request,
-          WebResourceError error) {
-        super.onReceivedError(view, request, error);
-        showPageError(error.getErrorCode(), error.getDescription());
-      }
-
-      @Override
-      public void onReceivedError(WebView view, int errorCode, String description,
-          String failingUrl) {
-        super.onReceivedError(view, errorCode, description, failingUrl);
-        showPageError(errorCode, description);
-      }
-
-      private void showPageError(int errorCode, CharSequence description) {
-        pageHasError = true;
-
-        Kolibri.getInstance(InternalActivity.this).applyRuntimeTheme(false);
-
-        if (errorCode == ERROR_CONNECT || errorCode == ERROR_HOST_LOOKUP) {
-          webviewOverlay.showError(getResources().getString(R.string.internet_error_message));
+            if (NetworkUtils.isConnectedToInternet(this)) {
+                final Uri url = linkIntent.getData();
+                webView.loadUrl(url.getQueryParameter("url"));
+            } else {
+                webviewOverlay.showError();
+            }
         } else {
-          webviewOverlay.showError(
-              String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
+            Kolibri.getInstance(this).loadRuntimeConfiguration(this);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        webView.onPause();
+        webView.pauseTimers();
+        super.onPause();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        restarted = true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        webView.resumeTimers();
+        webView.onResume();
+
+        if (restarted) {
+            // In case we are returning from other activity which is with runtime theme
+            // We want to be sure that if the there was theme-meta, we apply it again
+            final Integer lastPrimary = (Integer) webView.getTag(R.id.primaryColor);
+            final Integer lastAccent = (Integer) webView.getTag(R.id.accentColor);
+
+            if (lastPrimary != null) {
+                Aesthetic.get()
+                        .colorPrimary(lastPrimary)
+                        .colorAccent(lastAccent)
+                        .colorStatusBarAuto()
+                        .colorNavigationBarAuto()
+                        .textColorPrimary(Color.BLACK)
+                        .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                        .apply();
+            } else {
+                Kolibri.getInstance(this).applyRuntimeTheme(true);
+            }
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else if (id == R.id.action_share) {
+            startActivity(Intent.createChooser(shareIntent, "Share link!"));
+            return true;
         }
 
-        progress.setVisibility(View.GONE);
-        progress.setProgress(0);
-      }
-    });
-
-    Kolibri.getInstance(this).applyRuntimeTheme(false);
-
-    Intent linkIntent = getIntent();
-
-    if (linkIntent != null) {
-
-      if (linkIntent.hasExtra(Intent.EXTRA_TITLE)) {
-        getSupportActionBar().setTitle(linkIntent.getStringExtra(Intent.EXTRA_TITLE));
-      }
-
-      if (NetworkUtils.isConnectedToInternet(this)) {
-        final Uri url = linkIntent.getData();
-        webView.loadUrl(url.getQueryParameter("url"));
-      } else {
-        webviewOverlay.showError();
-      }
-    }
-  }
-
-  @Override
-  protected void onPause() {
-    webView.onPause();
-    webView.pauseTimers();
-    super.onPause();
-  }
-
-  @Override
-  protected void onRestart() {
-    super.onRestart();
-    restarted = true;
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-
-    webView.resumeTimers();
-    webView.onResume();
-
-    if (restarted) {
-      // In case we are returning from other activity which is with runtime theme
-      // We want to be sure that if the there was theme-meta, we apply it again
-      final Integer lastPrimary = (Integer) webView.getTag(R.id.primaryColor);
-      final Integer lastAccent = (Integer) webView.getTag(R.id.accentColor);
-
-      if (lastPrimary != null) {
-        Aesthetic.get()
-            .colorPrimary(lastPrimary)
-            .colorAccent(lastAccent)
-            .colorStatusBarAuto()
-            .colorNavigationBarAuto()
-            .textColorPrimary(Color.BLACK)
-            .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
-            .apply();
-      } else {
-        Kolibri.getInstance(this).applyRuntimeTheme(true);
-      }
-    }
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    int id = item.getItemId();
-
-    if (id == android.R.id.home) {
-      onBackPressed();
-      return true;
-    } else if (id == R.id.action_share) {
-      startActivity(Intent.createChooser(shareIntent, "Share link!"));
-      return true;
+        return super.onOptionsItemSelected(item);
     }
 
-    return super.onOptionsItemSelected(item);
-  }
-
-  @Override
-  public void onBackPressed() {
-    if (webView.canGoBack()) {
-      webView.goBack();
-    } else {
-      super.onBackPressed();
+    @Override
+    public void onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
-  }
 
-  public KolibriWebView getWebView() {
-    return webView;
-  }
-
-  protected void handleAmpData(Map<String, String> data) {
-    if (data.size() > 0 && data.containsKey(WebViewCoordinator.META_SHAREABLE)) {
-
-      final String url = data.containsKey(WebViewCoordinator.META_CANONICAL)
-          ? data.get(WebViewCoordinator.META_CANONICAL)
-          : data.get(WebViewCoordinator.META_URL);
-
-      if (url != null) {
-        shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, data.get(WebViewCoordinator.META_TITLE));
-        shareIntent.putExtra(Intent.EXTRA_TEXT, url);
-      } else {
-        shareIntent = null;
-      }
-
-      invalidateOptionsMenu();
+    public KolibriWebView getWebView() {
+        return webView;
     }
-  }
 
-  protected FloatingActionButton getFloatingActionButton() {
-    return floatingActionButton;
-  }
+    protected void handleAmpData(Map<String, String> data) {
+        if (data.size() > 0 && data.containsKey(WebViewCoordinator.META_SHAREABLE)) {
 
-  @Override
-  public boolean onPrepareOptionsMenu(Menu menu) {
-    final MenuItem share = menu.findItem(R.id.action_share);
+            final String url = data.containsKey(WebViewCoordinator.META_CANONICAL)
+                    ? data.get(WebViewCoordinator.META_CANONICAL)
+                    : data.get(WebViewCoordinator.META_URL);
 
-    share.setVisible(shareIntent != null);
+            if (url != null) {
+                shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, data.get(WebViewCoordinator.META_TITLE));
+                shareIntent.putExtra(Intent.EXTRA_TEXT, url);
+            } else {
+                shareIntent = null;
+            }
 
-    return super.onPrepareOptionsMenu(menu);
-  }
+            invalidateOptionsMenu();
+        }
+    }
 
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_webview, menu);
-    return super.onCreateOptionsMenu(menu);
-  }
+    protected FloatingActionButton getFloatingActionButton() {
+        return floatingActionButton;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        final MenuItem share = menu.findItem(R.id.action_share);
+
+        share.setVisible(shareIntent != null);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_webview, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onLoaded(final RuntimeConfig runtime, final boolean isFresh) {
+        this.configuration = runtime;
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                loadDefaultItem();
+
+                if (Boolean.FALSE.toString().equals(runtime.getString("native-navigation").toLowerCase().trim())) {
+                    getSupportActionBar().hide();
+                }
+
+                // We may skip setup styling if we are coming from background or loading same configuration
+                if (!restarted || isFresh) {
+                    Kolibri.getInstance(getApplicationContext()).applyRuntimeTheme(true);
+                } else {
+                    onNavigationInitialize();
+                }
+            }
+        });
+    }
+
+    public void onNavigationInitialize() {
+
+        if (getIntent() == null || !getIntent().hasCategory("notification")) {
+            return;
+        }
+
+        String notificationUrl = getIntent().getStringExtra("url");
+        final Uri notificationUri = Uri.parse(notificationUrl);
+
+        if (notificationUri.getScheme().startsWith("http")) {
+            final Uri uri = Uri.parse(WebViewCoordinator.webViewUri);
+
+            notificationUrl = UriUtils.appendUtmParameters(notificationUrl);
+
+            final Uri.Builder builder = uri.buildUpon();
+            builder.appendQueryParameter("url", notificationUrl);
+
+            final Intent intent = Kolibri.createIntent(builder.build());
+            Kolibri.notifyComponents(this, intent);
+            setIntent(null);
+            return;
+        }
+
+        //If the host is not navigation
+        final Intent intent = Kolibri.createIntent(notificationUri);
+        Kolibri.HandlerType type = Kolibri.notifyComponents(this, intent);
+
+        if (type == Kolibri.HandlerType.NONE) {
+            final String title = getIntent().hasExtra(Kolibri.EXTRA_TITLE) ? getIntent().getStringExtra(
+                    Kolibri.EXTRA_TITLE) : getIntent().getStringExtra(Intent.EXTRA_TITLE);
+            final Intent errorIntent = Kolibri
+                    .getErrorIntent(this, title, getString(R.string.text_update_app));
+            Kolibri.notifyComponents(InternalActivity.this, errorIntent);
+            setIntent(null);
+        }
+    }
+
+    protected RuntimeConfig.NavigationItem getDefaultItem() {
+        final int defaultItemIndex = configuration == null ?
+                0 : configuration.getNavigation().getSettings().getInt("default-item");
+
+        return (RuntimeConfig.NavigationItem) configuration.getNavigation().getItems().values().toArray()[defaultItemIndex];
+    }
+
+    protected void loadDefaultItem() {
+        RuntimeConfig.NavigationItem defaultItem = getDefaultItem();
+        Kolibri.notifyComponents(this, Kolibri.createIntent(defaultItem.getUri()));
+    }
+
+    @Override
+    public boolean onFailed(Exception e) {
+        return false;
+    }
 }

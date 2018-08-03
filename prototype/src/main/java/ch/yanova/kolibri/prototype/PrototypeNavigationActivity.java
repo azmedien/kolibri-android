@@ -13,16 +13,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import ch.yanova.kolibri.InternalActivity;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriCoordinator;
+import ch.yanova.kolibri.KolibriNavigationActivity;
 import ch.yanova.kolibri.KolibriProvider;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.ActionButtonCoordinator;
 import ch.yanova.kolibri.coordinators.SearchWebviewCoordinator;
 
-public class PrototypeActivity extends InternalActivity {
+public class PrototypeNavigationActivity extends KolibriNavigationActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +33,7 @@ public class PrototypeActivity extends InternalActivity {
       protected boolean onCustomTarget(Uri link, String target) {
 
         if ("360player".equals(target)) {
-          startActivity(CardboardActivity.createIntent(PrototypeActivity.this, link));
+          startActivity(CardboardActivity.createIntent(PrototypeNavigationActivity.this, link));
           return true;
         }
 
