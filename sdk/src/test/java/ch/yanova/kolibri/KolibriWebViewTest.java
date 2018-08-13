@@ -1,7 +1,5 @@
 package ch.yanova.kolibri;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import ch.yanova.kolibri.components.KolibriWebView;

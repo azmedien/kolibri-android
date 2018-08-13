@@ -9,13 +9,6 @@
   android:visibility="gone"
   tools:visibility="visible">
 
-  <ProgressBar
-    android:id="@+id/progress"
-    style="@style/Widget.AppCompat.ProgressBar"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"/>
-
   <LinearLayout
     android:id="@+id/error"
     android:layout_width="match_parent"

@@ -20,6 +20,8 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -40,8 +42,10 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import ch.yanova.kolibri.components.KolibriLoadingView;
+import ch.yanova.kolibri.components.KolibriWebChromeClient;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
@@ -83,6 +87,8 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
   private FloatingActionButton floatingActionButton;
   private KolibriWebView webView;
   private KolibriLoadingView webviewOverlay;
+  private ProgressBar progress;
+
   private boolean restarted;
   private boolean pageHasError;
   private Intent shareIntent;
@@ -122,6 +128,7 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
     floatingActionButton = findViewById(R.id.kolibri_fab);
     webView = findViewById(R.id.webview);
     webviewOverlay = findViewById(R.id.overlay);
+    progress = findViewById(R.id.progress);
 
     toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
@@ -162,6 +169,30 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
     receiver = new NetworkChangeReceiver(webView);
 
+    webView.addKolibriWebChromeClient(
+        new KolibriWebChromeClient() {
+          @Override
+          public void onProgressChanged(WebView view, int newProgress) {
+            super.onProgressChanged(view, newProgress);
+            if (newProgress < 100) {
+              if (VERSION.SDK_INT >= VERSION_CODES.N) {
+                progress.setProgress(newProgress, true);
+              } else {
+                progress.setProgress(newProgress);
+              }
+            } else {
+              progress.setProgress(100);
+              progress.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                  progress.setVisibility(View.GONE);
+                }
+              }, 500);
+
+            }
+          }
+        });
+
     webView.addKolibriWebViewClient(new KolibriWebViewClient() {
 
       @Override
@@ -172,11 +203,10 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
 
         invalidateOptionsMenu();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
           if (!pageHasError) {
-            getWebviewOverlay().showLoading();
+            progress.setProgress(0);
+            progress.setVisibility(View.VISIBLE);
           }
-        }
       }
 
       @Override
@@ -213,6 +243,9 @@ public abstract class KolibriNavigationActivity extends AestheticActivity implem
           getWebviewOverlay().showError(
               String.format(Locale.getDefault(), "Error %d: %s", errorCode, description));
         }
+
+        progress.setVisibility(View.GONE);
+        progress.setProgress(0);
       }
     });
   }
