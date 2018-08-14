@@ -266,6 +266,10 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
         return floatingActionButton;
     }
 
+    protected KolibriLoadingView getWebviewOverlay() {
+        return webviewOverlay;
+    }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         final MenuItem share = menu.findItem(R.id.action_share);

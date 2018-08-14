@@ -55,7 +55,6 @@ public class PrototypeActivity extends InternalActivity {
 
         return params;
       }
-    });
 
     });
 
