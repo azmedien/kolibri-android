@@ -30,7 +30,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
@@ -539,7 +541,14 @@ public class KolibriWebView extends WebView {
 
     @Override
     public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
-      handler.proceed("aargau", "Bazknjr");
+
+      Map<String, String> params = new HashMap<>();
+
+      for (KolibriWebViewClient webClient : webClients) {
+        params.putAll(webClient.onRequestExtraParams());
+      }
+
+      handler.proceed(params.get("username"), params.get("password"));
     }
   }
 }

@@ -9,14 +9,20 @@ import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebChromeClient;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import ch.yanova.kolibri.InternalActivity;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriCoordinator;
 import ch.yanova.kolibri.KolibriProvider;
+import ch.yanova.kolibri.components.KolibriWebChromeClient;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.ActionButtonCoordinator;
@@ -39,6 +45,18 @@ public class PrototypeActivity extends InternalActivity {
 
         return super.onCustomTarget(link, target);
       }
+
+      @Override
+      protected Map<String, String> onRequestExtraParams() {
+
+        Map<String, String> params = new HashMap<>();
+        params.put("username", "aargau");
+        params.put("password", "Bazknjr");
+
+        return params;
+      }
+    });
+
     });
 
     Kolibri.bind(getWebView(), new KolibriProvider() {
