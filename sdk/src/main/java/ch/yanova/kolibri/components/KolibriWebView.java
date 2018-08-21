@@ -175,8 +175,6 @@ public class KolibriWebView extends WebView {
 
   public boolean handleUri(Uri link) {
 
-    Log.d(TAG, link.toString());
-
     final Context context = getContext();
     final String target = Kolibri.getInstance(getContext()).getTarget(link);
 

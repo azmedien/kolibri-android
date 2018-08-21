@@ -293,6 +293,9 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
             @Override
             public void run() {
 
+                // FIXME: Now on push notification, this will be loaded first. This cause double loading
+                // Maybe we should consider moving this to onNavigationInitialize if there's no
+                // valid push notification into the intent
                 loadDefaultItem();
 
                 if (Boolean.FALSE.toString().equals(runtime.getString("native-navigation").toLowerCase().trim())) {
@@ -302,9 +305,9 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
                 // We may skip setup styling if we are coming from background or loading same configuration
                 if (!restarted || isFresh) {
                     Kolibri.getInstance(getApplicationContext()).applyRuntimeTheme(true);
-                } else {
-                    onNavigationInitialize();
                 }
+
+                onNavigationInitialize();
             }
         });
     }

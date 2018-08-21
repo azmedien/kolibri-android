@@ -93,7 +93,7 @@ public class PrototypeActivity extends InternalActivity {
       }
     });
 
-    getWebView().setHandleInternal(true);
+    getWebView().setHandleInternal(false);
   }
 
   @Override
