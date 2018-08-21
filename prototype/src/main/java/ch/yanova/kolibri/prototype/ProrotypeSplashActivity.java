@@ -24,13 +24,17 @@ public final class ProrotypeSplashActivity extends KolibriSplashActivity {
   protected void onSplashTimedOut() {
 
     final RuntimeConfig config = Kolibri.getInstance(this).getRuntime();
+    final Class activity = Boolean.TRUE.toString().equals(config.getString("native-navigation").toLowerCase().trim()) ? PrototypeNavigationActivity.class : PrototypeActivity.class;
+    Intent i = new Intent(ProrotypeSplashActivity.this, activity);
 
-    if (Boolean.TRUE.toString().equals(config.getString("native-navigation").toLowerCase().trim())) {
-      startActivity(new Intent(this, PrototypeNavigationActivity.class));
-    } else {
-      startActivity(new Intent(this, PrototypeActivity.class));
+    final Intent intent = getIntent();
+
+    if (intent != null && intent.hasExtra("url")) {
+      i.addCategory("notification");
+      i.putExtras(intent);
     }
 
+    startActivity(i);
     finish();
   }
 }
