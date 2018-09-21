@@ -52,8 +52,8 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.afollestad:aesthetic:0.5.2'
 
-    compileOnly 'com.google.firebase:firebase-core:16.0.1'
-    compileOnly 'com.google.firebase:firebase-messaging:17.1.0'
+    compileOnly 'com.google.firebase:firebase-core:16.0.3'
+    compileOnly 'com.google.firebase:firebase-messaging:17.3.2'
 
     compileOnly('com.crashlytics.sdk.android:crashlytics:2.9.4@aar') {
         transitive = true;
