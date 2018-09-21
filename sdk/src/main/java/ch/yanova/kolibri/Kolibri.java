@@ -252,7 +252,7 @@ public class Kolibri {
   }
 
   public void applyRuntimeTheme(boolean applyOverrides) {
-    final RuntimeConfig.Styling styling = runtime.getStyling();
+    final RuntimeConfig.Styling styling = getRuntime().getStyling();
     int primaryColor = styling.getPrimary();
     int accentColor = styling.getAccent();
     int primaryDarkColor = styling.getPrimaryDark();
