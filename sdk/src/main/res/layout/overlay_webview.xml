@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ch.yanova.kolibri.components.KolibriLoadingView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   android:id="@+id/webviewOverlay"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
+
+  <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+    android:id="@+id/progress"
+    style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal.NoPadding"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top"
+    app:mpb_showProgressBackground="false"
+    app:mpb_progressStyle="horizontal"
+    app:mpb_useIntrinsicPadding="false"
+    android:elevation="8dp"/>
 
   <ch.yanova.kolibri.components.KolibriWebView
     android:id="@+id/webview"

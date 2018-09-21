@@ -13,16 +13,20 @@ import android.support.annotation.UiThread;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
+import android.webkit.URLUtil;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+
 import com.franmontiel.persistentcookiejar.ClearableCookieJar;
 import com.franmontiel.persistentcookiejar.PersistentCookieJar;
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
 import com.google.firebase.analytics.FirebaseAnalytics;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -138,7 +142,7 @@ public class KolibriApp extends Application {
     final String netmetrix = Kolibri.getInstance(this).getRuntime().getString("netmetrix");
 
     // Netmetrix not configured, skipping
-    if (netmetrix == null || "".equals(netmetrix)) {
+    if (netmetrix == null || "".equals(netmetrix) || !URLUtil.isValidUrl(netmetrix)) {
       return;
     }
 

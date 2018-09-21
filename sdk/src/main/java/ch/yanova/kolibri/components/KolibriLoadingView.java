@@ -9,14 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import ch.yanova.kolibri.R;
 
 public class KolibriLoadingView extends FrameLayout {
 
   private View mLayoutOverlay;
-  private View mLayoutLoading;
   private View mLayoutError;
 
   private View mainContentView;
@@ -64,7 +62,6 @@ public class KolibriLoadingView extends FrameLayout {
     }
 
     mLayoutOverlay = LayoutInflater.from(getContext()).inflate(R.layout.overlay, this, false);
-    mLayoutLoading = mLayoutOverlay.findViewById(R.id.progress);
     mLayoutError = mLayoutOverlay.findViewById(R.id.error);
 
     if (errorMessage != null) {
@@ -83,16 +80,8 @@ public class KolibriLoadingView extends FrameLayout {
     addView(mLayoutOverlay);
   }
 
-  public void showLoading() {
-    mLayoutOverlay.setVisibility(View.VISIBLE);
-    mLayoutError.setVisibility(View.GONE);
-    mainContentView.setVisibility(View.GONE);
-    mLayoutLoading.setVisibility(View.VISIBLE);
-  }
-
   public void showError(String text, String buttonText, @DrawableRes Integer resDrawable) {
     mLayoutOverlay.setVisibility(View.VISIBLE);
-    mLayoutLoading.setVisibility(View.GONE);
     mainContentView.setVisibility(View.GONE);
 
     if (text != null) {
@@ -120,15 +109,8 @@ public class KolibriLoadingView extends FrameLayout {
   }
 
   public void showView() {
-    mLayoutLoading.setVisibility(View.GONE);
     mLayoutError.setVisibility(View.GONE);
     mLayoutOverlay.setVisibility(View.GONE);
     mainContentView.setVisibility(View.VISIBLE);
-  }
-
-  public void setProgressColor(int color) {
-    ProgressBar v = (ProgressBar) mLayoutLoading;
-    v.getIndeterminateDrawable().setColorFilter(color,
-        android.graphics.PorterDuff.Mode.MULTIPLY);
   }
 }

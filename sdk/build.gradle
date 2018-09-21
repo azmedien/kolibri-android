@@ -4,7 +4,7 @@ apply plugin: "com.jfrog.artifactory"
 apply plugin: 'maven-publish'
 
 group = 'ch.yanova.kolibri'
-version = "0.10.0-SNAPSHOT"
+version = "0.11.2-SNAPSHOT"
 
 android {
     compileSdkVersion 27
@@ -13,7 +13,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 104
+        versionCode 112
         versionName project.version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
