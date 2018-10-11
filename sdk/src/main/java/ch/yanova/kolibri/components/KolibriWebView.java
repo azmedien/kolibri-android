@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.webkit.HttpAuthHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -99,6 +100,10 @@ public class KolibriWebView extends WebView {
 
       setVerticalScrollBarEnabled(false);
       setHorizontalScrollBarEnabled(false);
+
+      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+        CookieManager.getInstance().setAcceptThirdPartyCookies(this, true);
+      }
 
       getSettings().setJavaScriptEnabled(true);
       getSettings().setAppCacheEnabled(true);
