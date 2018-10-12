@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ch.yanova.kolibri.BuildConfig;
 import ch.yanova.kolibri.Kolibri;
 import ch.yanova.kolibri.KolibriApp;
 import ch.yanova.kolibri.KolibriException;
@@ -55,7 +54,7 @@ import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
 /** Created by mmironov on 2/26/17. */
 public class KolibriWebView extends WebView {
 
-  public static final String UA_STRING_PREFIX = "Kolibri/" + BuildConfig.VERSION_NAME;
+  public static String UAStringPrefix;
   private static final String GET_HTML_STRING =
       "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
   public final String TAG = KolibriWebView.class.getSimpleName();
@@ -108,7 +107,6 @@ public class KolibriWebView extends WebView {
       getSettings().setJavaScriptEnabled(true);
       getSettings().setAppCacheEnabled(true);
       getSettings().setDomStorageEnabled(true);
-      getSettings().setUserAgentString(UA_STRING_PREFIX + " " + getSettings().getUserAgentString());
       getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
 
       // Load http thumbnails and assets over a secure https webpages
@@ -131,6 +129,9 @@ public class KolibriWebView extends WebView {
       clearHistory = false;
 
       config = Kolibri.getInstance(getContext()).getRuntime();
+
+      UAStringPrefix = config.getScheme() + " / Kolibri / Android-universal /";
+      getSettings().setUserAgentString(UAStringPrefix + " " + getSettings().getUserAgentString());
     }
   }
 
