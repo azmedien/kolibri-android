@@ -54,7 +54,7 @@ import static ch.yanova.kolibri.Kolibri.TARGET_SELF;
 /** Created by mmironov on 2/26/17. */
 public class KolibriWebView extends WebView {
 
-  public static String UAStringPrefix;
+  public static String UAStringPrefix = "";
   private static final String GET_HTML_STRING =
       "javascript:window.GetHtml.processHTML('<head>'+document.getElementsByTagName('head')[0].innerHTML+'</head>');";
   public final String TAG = KolibriWebView.class.getSimpleName();
@@ -128,9 +128,16 @@ public class KolibriWebView extends WebView {
 
       clearHistory = false;
 
-      config = Kolibri.getInstance(getContext()).getRuntime();
+      try {
+        config = Kolibri.getInstance(getContext()).getRuntime();
+      } catch (KolibriException e) {
+        e.printStackTrace();
+      }
 
-      UAStringPrefix = config.getScheme() + " / Kolibri / Android-universal /";
+      if (config != null) {
+        UAStringPrefix = config.getScheme() + " / ";
+      }
+      UAStringPrefix += "Kolibri / Android-universal /";
       getSettings().setUserAgentString(UAStringPrefix + " " + getSettings().getUserAgentString());
     }
   }
