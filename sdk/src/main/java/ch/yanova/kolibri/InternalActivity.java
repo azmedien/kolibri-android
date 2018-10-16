@@ -19,20 +19,17 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
-
-import com.afollestad.aesthetic.Aesthetic;
-import com.afollestad.aesthetic.AestheticActivity;
-import com.afollestad.aesthetic.NavigationViewMode;
-
-import java.util.Locale;
-import java.util.Map;
-
 import ch.yanova.kolibri.components.KolibriLoadingView;
 import ch.yanova.kolibri.components.KolibriWebChromeClient;
 import ch.yanova.kolibri.components.KolibriWebView;
 import ch.yanova.kolibri.components.KolibriWebViewClient;
 import ch.yanova.kolibri.coordinators.WebViewCoordinator;
 import ch.yanova.kolibri.network.NetworkUtils;
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.AestheticActivity;
+import com.afollestad.aesthetic.NavigationViewMode;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by lekov on 26.10.17.
@@ -189,6 +186,9 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
     protected void onResume() {
         super.onResume();
 
+        Kolibri kolibri = Kolibri.getInstance(this);
+        kolibri.loadRuntimeConfiguration(this);
+
         webView.resumeTimers();
         webView.onResume();
 
@@ -211,6 +211,11 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
                 Kolibri.getInstance(this).applyRuntimeTheme(true);
             }
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
     }
 
     @Override
@@ -293,17 +298,13 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
             @Override
             public void run() {
 
-                // FIXME: Now on push notification, this will be loaded first. This cause double loading
-                // Maybe we should consider moving this to onNavigationInitialize if there's no
-                // valid push notification into the intent
-                loadDefaultItem();
-
                 if (Boolean.FALSE.toString().equals(runtime.getString("native-navigation").toLowerCase().trim())) {
                     getSupportActionBar().hide();
                 }
 
                 // We may skip setup styling if we are coming from background or loading same configuration
                 if (!restarted || isFresh) {
+                    loadDefaultItem();
                     Kolibri.getInstance(getApplicationContext()).applyRuntimeTheme(true);
                 }
 
