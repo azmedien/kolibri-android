@@ -164,8 +164,6 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
             } else {
                 webviewOverlay.showError();
             }
-        } else {
-            Kolibri.getInstance(this).loadRuntimeConfiguration(this);
         }
     }
 
@@ -302,18 +300,19 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
                     getSupportActionBar().hide();
                 }
 
-                // We may skip setup styling if we are coming from background or loading same configuration
-                if (!restarted || isFresh) {
+
+                if (getIntent() != null && getIntent().hasCategory("notification")) {
+                    loadNotificationItem();
+                } else if (!restarted || isFresh) {
                     loadDefaultItem();
                     Kolibri.getInstance(getApplicationContext()).applyRuntimeTheme(true);
                 }
 
-                onNavigationInitialize();
             }
         });
     }
 
-    public void onNavigationInitialize() {
+    public void loadNotificationItem() {
 
         if (getIntent() == null || !getIntent().hasCategory("notification")) {
             return;

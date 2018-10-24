@@ -37,7 +37,10 @@ public final class KolibriFirebaseMessagingService extends FirebaseMessagingServ
 
     final String scheme = runtime.getScheme();
 
-    final Uri uri = Uri.parse(scheme + "://navigation");
+    final String host = Boolean.TRUE.toString().equals(runtime.getString("native-navigation").toLowerCase().trim()) ?
+        "navigation" : "internal";
+
+    final Uri uri = Uri.parse(scheme + "://" + host);
 
     Intent result = Kolibri.createIntent(uri);
     result.addCategory("notification");
