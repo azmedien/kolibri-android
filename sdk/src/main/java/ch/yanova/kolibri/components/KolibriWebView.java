@@ -135,7 +135,7 @@ public class KolibriWebView extends WebView {
       }
 
       if (config != null) {
-        UAStringPrefix = config.getScheme() + " / ";
+        UAStringPrefix = config.getScheme() + "-android / ";
       }
       UAStringPrefix += "Kolibri / Android-universal /";
       getSettings().setUserAgentString(UAStringPrefix + " " + getSettings().getUserAgentString());
