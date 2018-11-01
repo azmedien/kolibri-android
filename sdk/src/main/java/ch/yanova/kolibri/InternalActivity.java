@@ -358,7 +358,7 @@ public class InternalActivity extends AestheticActivity implements RuntimeListen
 
     protected void loadDefaultItem() {
 
-        final String defaultHome = configuration.getString("default-url");
+        final String defaultHome = configuration.getString("default-url").replace("&", Kolibri.AMP_UTF8);
         if (defaultHome.isEmpty()) {
             RuntimeConfig.NavigationItem defaultItem = getDefaultItem();
             Kolibri.notifyComponents(this, Kolibri.createIntent(defaultItem.getUri()));

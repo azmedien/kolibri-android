@@ -206,12 +206,13 @@ public class KolibriWebView extends WebView {
       if (!handleCustomTarget) {
 
         final String appScheme = Kolibri.getInstance(context).getRuntime().getScheme();
+        final String linkString = link.toString().replace("&", Kolibri.AMP_UTF8);
 
         Intent linkIntent =
             target.equals(TARGET_INTERNAL)
                 ? new Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse(String.format("%s://internal/webview?url=%s", appScheme, link)))
+                    Uri.parse(String.format("%s://internal/webview?url=%s", appScheme, linkString)))
                 : new Intent(Intent.ACTION_VIEW, link);
 
         final Intent kolibriIntent = getIntent();

@@ -60,6 +60,7 @@ public class Kolibri {
   private static final String PREF_NAME = "ch.yanova.kolibri.RUNTIME_CONFIG";
   private static final String TAG = "Kolibri";
   private static final String RUNTIME_JSON = "runtime.json";
+  public static final String AMP_UTF8 = "%26";
 
   private static Kolibri mInstance;
 

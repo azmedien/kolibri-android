@@ -94,7 +94,7 @@ public class WebViewCoordinator extends KolibriCoordinator<KolibriWebView> imple
         ActionButtonCoordinator.URI_SHOW :
         ActionButtonCoordinator.URI_HIDE;
 
-    uriString += "?url=" + url;
+    uriString += "?url=" + url.replace("&", Kolibri.AMP_UTF8);
 
     final Intent intent = Kolibri.createIntent(Uri.parse(uriString));
 
